@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>🌍 Ülke Fethet</title>
+<title>🌍 Dünya Benim!</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -17,182 +17,263 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 /* ── TOP BAR ── */
 #topbar{
   position:sticky;top:0;z-index:100;
-  background:rgba(7,7,26,0.95);backdrop-filter:blur(12px);
+  background:rgba(7,7,26,0.97);backdrop-filter:blur(12px);
   border-bottom:1px solid var(--border);
-  padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
 }
-#topbar h1{font-size:16px;font-weight:800;background:linear-gradient(135deg,#a78bfa,#60a5fa);
+#topbar h1{font-size:15px;font-weight:900;background:linear-gradient(135deg,#f59e0b,#ef4444,#a78bfa);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;flex-shrink:0;}
 .stat{display:flex;align-items:center;gap:5px;background:var(--bg3);border:1px solid var(--border);
-  border-radius:20px;padding:5px 12px;font-size:13px;font-weight:600;}
-.stat-icon{font-size:15px;}
-#progress-text{margin-left:auto;font-size:12px;color:var(--text2);}
+  border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;}
+#approval-wrap{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;}
+#approval-bar-wrap{width:80px;height:8px;background:rgba(0,0,0,.4);border-radius:4px;overflow:hidden;}
+#approval-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,#22c55e,#86efac);transition:width .4s;}
 
-/* ── MAIN LAYOUT ── */
-#main{display:grid;grid-template-columns:1fr 280px;gap:12px;padding:12px;max-width:1100px;margin:0 auto;}
-@media(max-width:700px){#main{grid-template-columns:1fr;}}
+/* ── MAIN ── */
+#main{display:grid;grid-template-columns:1fr 290px;gap:10px;padding:10px;max-width:1120px;margin:0 auto;}
+@media(max-width:720px){#main{grid-template-columns:1fr;}}
 
-/* ── COUNTRY MAP ── */
-#map{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+/* ── MAP ── */
+#map{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
 @media(max-width:500px){#map{grid-template-columns:repeat(3,1fr);}}
 
 .country-card{
-  background:var(--bg2);border:2px solid var(--border);border-radius:14px;
-  padding:10px 8px;cursor:pointer;transition:all .2s;text-align:center;
-  position:relative;overflow:hidden;
+  background:var(--bg2);border:2px solid var(--border);border-radius:13px;
+  padding:9px 7px;cursor:pointer;transition:all .18s;text-align:center;position:relative;overflow:hidden;
 }
-.country-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 20px rgba(99,102,241,.3);}
-.country-card.selected{border-color:var(--accent2);background:rgba(99,102,241,.15);
-  box-shadow:0 0 20px rgba(167,139,250,.4);}
-.country-card.conquered{border-color:#22c55e;background:rgba(34,197,94,.08);}
-.country-card.conquered::after{content:'✓';position:absolute;top:4px;right:6px;color:#22c55e;font-weight:900;font-size:12px;}
-.country-card.enemy{border-color:#ef4444;background:rgba(239,68,68,.08);}
+.country-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 18px rgba(99,102,241,.25);}
+.country-card.selected{border-color:#f59e0b;background:rgba(245,158,11,.08);box-shadow:0 0 18px rgba(245,158,11,.3);}
+.country-card.conquered{border-color:#22c55e;background:rgba(34,197,94,.07);}
+.country-card.conquered::after{content:'✓';position:absolute;top:4px;right:6px;color:#22c55e;font-weight:900;font-size:11px;}
+.c-flag{font-size:24px;display:block;margin-bottom:3px;}
+.c-name{font-size:10px;font-weight:800;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.c-leader{font-size:9px;color:var(--text2);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bar-wrap{background:rgba(0,0,0,.3);border-radius:3px;height:4px;margin-bottom:2px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;transition:width .4s;}
+.bar-lbl{font-size:8px;color:var(--text2);text-align:left;}
 
-.c-flag{font-size:26px;display:block;margin-bottom:4px;}
-.c-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.c-pop{font-size:10px;color:var(--text2);margin-bottom:5px;}
+/* ── SIDE ── */
+#side{display:flex;flex-direction:column;gap:8px;}
 
-.bar-wrap{background:rgba(0,0,0,.3);border-radius:4px;height:5px;margin-bottom:3px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:4px;transition:width .4s ease;}
-.bar-love .bar-fill{background:linear-gradient(90deg,#f43f5e,#ec4899);}
-.bar-def .bar-fill{background:linear-gradient(90deg,#3b82f6,#6366f1);}
-.bar-label{font-size:9px;color:var(--text2);text-align:left;margin-bottom:1px;}
+.box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:13px;}
+.box h3{font-size:12px;color:var(--text2);margin-bottom:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
 
-/* ── SIDE PANEL ── */
-#side{display:flex;flex-direction:column;gap:10px;}
+#sel-flag{font-size:44px;text-align:center;display:block;margin-bottom:4px;}
+#sel-name{font-size:17px;font-weight:900;text-align:center;margin-bottom:2px;}
+#sel-leader{font-size:11px;color:var(--text2);text-align:center;margin-bottom:10px;}
+.info-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-bottom:6px;}
+.info-val{font-weight:800;color:var(--accent2);}
+.big-bar{background:rgba(0,0,0,.3);border-radius:5px;height:8px;overflow:hidden;margin-bottom:10px;}
+.big-bar-fill{height:100%;border-radius:5px;transition:width .4s;}
+#sel-quote{font-size:10px;color:#f59e0b;font-style:italic;text-align:center;
+  background:rgba(245,158,11,.08);border-radius:8px;padding:6px 8px;margin-bottom:10px;min-height:32px;}
 
-#info-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px;}
-#info-box h3{font-size:13px;color:var(--text2);margin-bottom:12px;}
-#sel-flag{font-size:48px;text-align:center;display:block;margin-bottom:6px;}
-#sel-name{font-size:18px;font-weight:800;text-align:center;margin-bottom:12px;}
-.info-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:8px;}
-.info-val{font-weight:700;color:var(--accent2);}
-.big-bar{background:rgba(0,0,0,.3);border-radius:6px;height:10px;overflow:hidden;margin-bottom:12px;}
-.big-bar-fill{height:100%;border-radius:6px;transition:width .5s ease;}
-
-#btn-bomb{
-  width:100%;padding:11px;border-radius:11px;
-  background:linear-gradient(135deg,#ef4444,#dc2626);
-  border:none;color:#fff;font-size:14px;font-weight:700;font-family:inherit;
-  cursor:pointer;transition:all .15s;margin-bottom:8px;
+/* Bomb buttons */
+#bomb-btns{display:flex;flex-direction:column;gap:6px;margin-bottom:6px;}
+.bomb-btn{
+  width:100%;padding:8px 10px;border-radius:9px;border:1px solid;
+  color:#fff;font-size:12px;font-weight:700;font-family:inherit;
+  cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:space-between;
 }
-#btn-bomb:hover{opacity:.85;transform:scale(1.02);}
-#btn-bomb:disabled{opacity:.35;cursor:not-allowed;transform:none;}
-#btn-love{
-  width:100%;padding:9px;border-radius:11px;
-  background:linear-gradient(135deg,#ec4899,#be185d);
-  border:none;color:#fff;font-size:13px;font-weight:600;font-family:inherit;
-  cursor:pointer;transition:all .15s;
-}
-#btn-love:hover{opacity:.85;}
-#btn-love:disabled{opacity:.35;cursor:not-allowed;}
-#action-msg{font-size:11px;color:var(--text2);text-align:center;margin-top:8px;min-height:16px;}
+.bomb-btn:hover:not(:disabled){filter:brightness(1.15);transform:translateX(2px);}
+.bomb-btn:disabled{opacity:.3;cursor:not-allowed;transform:none;}
+.bomb-btn .b-count{background:rgba(0,0,0,.3);border-radius:6px;padding:1px 6px;font-size:10px;}
+#btn-love{width:100%;padding:8px;border-radius:9px;background:linear-gradient(135deg,#ec4899,#be185d);
+  border:none;color:#fff;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .15s;}
+#btn-love:hover:not(:disabled){opacity:.85;}
+#btn-love:disabled{opacity:.3;cursor:not-allowed;}
+#action-msg{font-size:10px;color:var(--text2);text-align:center;margin-top:6px;min-height:14px;}
 
 /* Shop */
-#shop-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:14px;}
-#shop-box h3{font-size:13px;color:var(--text2);margin-bottom:10px;}
-#btn-buy{
-  width:100%;padding:10px;border-radius:11px;
-  background:linear-gradient(135deg,var(--gold),#d97706);
-  border:none;color:#1a1a00;font-size:13px;font-weight:800;font-family:inherit;
-  cursor:pointer;transition:all .15s;
+.shop-item{
+  display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:9px;padding:7px 10px;margin-bottom:5px;cursor:pointer;transition:all .15s;
 }
-#btn-buy:hover{opacity:.85;}
-#btn-buy:disabled{opacity:.35;cursor:not-allowed;}
-.shop-info{font-size:11px;color:var(--text2);margin-top:8px;text-align:center;}
+.shop-item:hover:not(.cant){border-color:var(--gold);background:rgba(245,158,11,.07);}
+.shop-item.cant{opacity:.4;cursor:not-allowed;}
+.shop-icon{font-size:18px;flex-shrink:0;}
+.shop-info{flex:1;}
+.shop-name{font-size:12px;font-weight:700;}
+.shop-desc{font-size:10px;color:var(--text2);}
+.shop-price{font-size:12px;font-weight:800;color:var(--gold);flex-shrink:0;}
 
-/* ── QUESTION PANEL ── */
+/* ── QUESTION ── */
+#q-section{padding:10px 10px 0;max-width:1120px;margin:0 auto;}
 #q-panel{
-  background:var(--bg2);border:1px solid var(--border);border-radius:16px;
-  padding:16px;margin:0 12px 12px;max-width:1100px;margin-left:auto;margin-right:auto;
-  position:relative; overflow:hidden;
+  background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+  padding:14px;margin-bottom:10px;position:relative;overflow:hidden;
 }
-#q-panel::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--accent),var(--accent2),#60a5fa);
-}
-#q-label{font-size:11px;color:var(--accent2);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
-#q-text{font-size:15px;font-weight:600;color:var(--text);margin-bottom:14px;line-height:1.5;}
-#q-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+#q-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,#f59e0b,#ef4444,#a78bfa,#60a5fa);}
+#q-category{font-size:10px;color:var(--accent2);font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+#q-text{font-size:14px;font-weight:700;line-height:1.5;margin-bottom:12px;}
+#q-opts{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
 @media(max-width:500px){#q-opts{grid-template-columns:1fr;}}
 .opt-btn{
   background:var(--bg3);border:1px solid var(--border);color:var(--text);
-  padding:10px 14px;border-radius:11px;cursor:pointer;text-align:left;
-  font-size:13px;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:8px;
+  padding:9px 12px;border-radius:10px;cursor:pointer;text-align:left;
+  font-size:12px;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:7px;
 }
 .opt-btn:hover:not(:disabled){background:var(--border);border-color:var(--accent);}
-.opt-btn.correct{background:rgba(34,197,94,.2);border-color:#22c55e;color:#86efac;}
-.opt-btn.wrong{background:rgba(239,68,68,.2);border-color:#ef4444;color:#fca5a5;}
+.opt-btn.correct{background:rgba(34,197,94,.18);border-color:#22c55e;color:#86efac;}
+.opt-btn.wrong{background:rgba(239,68,68,.18);border-color:#ef4444;color:#fca5a5;}
 .opt-btn:disabled{cursor:not-allowed;}
-.opt-key{background:var(--accent);color:#fff;width:22px;height:22px;border-radius:6px;
-  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;}
+.opt-key{background:var(--accent);color:#fff;width:20px;height:20px;border-radius:5px;
+  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;flex-shrink:0;}
 .opt-btn.correct .opt-key{background:#22c55e;}
 .opt-btn.wrong .opt-key{background:#ef4444;}
-#q-result{font-size:13px;font-weight:600;margin-top:10px;min-height:20px;text-align:center;}
+#q-result{font-size:12px;font-weight:700;margin-top:8px;min-height:18px;text-align:center;}
 
 /* ── TOAST ── */
-#toast{
-  position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);
+#toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-20px);
   background:var(--bg3);border:1px solid var(--border);border-radius:20px;
-  padding:8px 20px;font-size:13px;font-weight:600;
-  opacity:0;transition:all .3s;pointer-events:none;z-index:200;white-space:nowrap;
-}
+  padding:7px 18px;font-size:13px;font-weight:700;
+  opacity:0;transition:all .3s;pointer-events:none;z-index:200;white-space:nowrap;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
 /* ── OVERLAY ── */
-#overlay{
-  display:none;position:fixed;inset:0;background:rgba(7,7,26,.96);
-  z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center;padding:20px;
-}
+#overlay{display:none;position:fixed;inset:0;background:rgba(7,7,26,.96);
+  z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;padding:20px;}
 #overlay.show{display:flex;}
-#ov-emoji{font-size:64px;}
-#ov-title{font-size:32px;font-weight:900;}
-#ov-sub{font-size:15px;color:var(--text2);max-width:360px;}
-#btn-restart{
-  background:linear-gradient(135deg,var(--accent),#818cf8);
-  border:none;color:#fff;padding:13px 36px;border-radius:28px;
-  font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px;
-}
+#ov-emoji{font-size:60px;}
+#ov-title{font-size:30px;font-weight:900;}
+#ov-sub{font-size:13px;color:var(--text2);max-width:360px;line-height:1.6;}
+#btn-restart{background:linear-gradient(135deg,#f59e0b,#ef4444);border:none;color:#fff;padding:12px 32px;
+  border-radius:26px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:6px;}
+
+/* Title screen */
+#title-screen{position:fixed;inset:0;background:radial-gradient(ellipse at center,#0d0d2b 0%,#050510 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:300;padding:20px;text-align:center;}
+#title-screen h1{font-size:36px;font-weight:900;background:linear-gradient(135deg,#f59e0b,#ef4444,#a78bfa);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2;}
+#title-screen .sub{font-size:14px;color:var(--text2);max-width:340px;line-height:1.7;}
+.rules-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;padding:14px 18px;max-width:340px;font-size:12px;color:rgba(255,255,255,.65);line-height:2;}
+.rules-box strong{color:rgba(255,255,255,.9);}
+#btn-start{background:linear-gradient(135deg,#f59e0b,#ef4444);border:none;color:#fff;padding:13px 36px;
+  border-radius:28px;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit;
+  box-shadow:0 0 40px rgba(245,158,11,.4);transition:transform .15s;}
+#btn-start:hover{transform:scale(1.05);}
 </style>
 </head>
 <body>
 
+<div id="title-screen">
+  <h1>🌍 DÜNYA BENİM!<br><span style="font-size:20px">Başkanın Dünya Fetih Simülatörü</span></h1>
+  <p class="sub">Seçimler bitti, sıra bombalarda! Soruları cevapla, bomba al, dünyayı fethet. Komşun ne diyecek umurumuzda mı? 😏</p>
+  <div class="rules-box">
+    <strong>Nasıl Oynanır?</strong><br>
+    ❓ Soruyu cevapla → 💰 Altın kazan<br>
+    🛒 Marketten bomba satın al<br>
+    🗺 Ülke seç → Bomba at → Fethet<br>
+    ❤️ Halk sevgisi yüksekse daha kolay!<br>
+    🏆 Tüm ülkeleri fethedince kazan!
+  </div>
+  <button id="btn-start" onclick="startGame()">FETHE BAŞLA 🚀</button>
+</div>
+
 <!-- Top bar -->
 <div id="topbar">
-  <h1>🌍 Ülke Fethet</h1>
-  <div class="stat"><span class="stat-icon">💰</span><span id="s-gold">0</span> Altın</div>
-  <div class="stat"><span class="stat-icon">💣</span><span id="s-bomb">0</span> Bomba</div>
-  <div class="stat"><span class="stat-icon">🏳</span><span id="s-count">0</span>/15</div>
-  <div id="progress-text">Doğru: <span id="s-correct">0</span></div>
+  <h1>🌍 DÜNYA BENİM!</h1>
+  <div class="stat">💰 <span id="s-gold">0</span></div>
+  <div class="stat">🏳 <span id="s-count">0</span>/15</div>
+  <div class="stat">✅ <span id="s-correct">0</span> doğru</div>
+  <div id="approval-wrap">
+    <span style="font-size:11px;color:var(--text2)">Başkanlık Onayı:</span>
+    <div id="approval-bar-wrap"><div id="approval-bar" style="width:50%"></div></div>
+    <span id="s-approval" style="font-size:11px;font-weight:800;color:#22c55e">50%</span>
+  </div>
 </div>
 
 <!-- Main -->
 <div id="main">
   <div id="map"></div>
   <div id="side">
-    <div id="info-box">
-      <h3>📍 Seçili Ülke</h3>
+
+    <!-- Selected country -->
+    <div class="box" id="info-box">
+      <h3>🎯 Hedef Ülke</h3>
       <span id="sel-flag">🌐</span>
       <div id="sel-name" style="color:var(--text2)">Haritadan ülke seç</div>
+      <div id="sel-leader"></div>
+      <div id="sel-quote">Bir ülke seçince liderinin komik lafı burada çıkar 😄</div>
       <div id="sel-stats"></div>
-      <button id="btn-bomb" disabled>💣 Bomba At (1 bomba)</button>
-      <button id="btn-love" disabled>❤️ Halk Sevgisi Kazan (30 altın)</button>
+      <div id="bomb-btns">
+        <button class="bomb-btn" id="bb-klasik" style="background:linear-gradient(135deg,#374151,#1f2937);border-color:#6b7280" disabled onclick="useBomb('klasik')">
+          💣 Klasik Bomba <span class="b-count" id="bc-klasik">0</span>
+        </button>
+        <button class="bomb-btn" id="bb-atesh" style="background:linear-gradient(135deg,#7c2d12,#b45309);border-color:#f97316" disabled onclick="useBomb('atesh')">
+          🔥 Ateş Bombası <span class="b-count" id="bc-atesh">0</span>
+        </button>
+        <button class="bomb-btn" id="bb-nukleer" style="background:linear-gradient(135deg,#14532d,#166534);border-color:#22c55e" disabled onclick="useBomb('nukleer')">
+          ☢️ Nükleer Bomba <span class="b-count" id="bc-nukleer">0</span>
+        </button>
+        <button class="bomb-btn" id="bb-bok" style="background:linear-gradient(135deg,#3b1f00,#5a2d00);border-color:#92400e" disabled onclick="useBomb('bok')">
+          💩 Bok Fırlatıcı <span class="b-count" id="bc-bok">0</span>
+        </button>
+        <button class="bomb-btn" id="bb-sirk" style="background:linear-gradient(135deg,#4a044e,#701a75);border-color:#d946ef" disabled onclick="useBomb('sirk')">
+          🎪 Sirk Topu <span class="b-count" id="bc-sirk">0</span>
+        </button>
+      </div>
+      <button id="btn-love" disabled onclick="sendLove()">❤️ Halk Sevgisi Kazan (30 altın)</button>
       <div id="action-msg"></div>
     </div>
-    <div id="shop-box">
-      <h3>🛒 Market</h3>
-      <button id="btn-buy">💣 Bomba Satın Al (50 altın)</button>
-      <div class="shop-info">Soruları doğru cevapla → altın kazan → bomba al → ülkeleri fethet!</div>
+
+    <!-- Shop -->
+    <div class="box">
+      <h3>🛒 Silah Marketi</h3>
+      <div class="shop-item" id="sh-klasik" onclick="buyBomb('klasik')">
+        <span class="shop-icon">💣</span>
+        <div class="shop-info">
+          <div class="shop-name">Klasik Bomba</div>
+          <div class="shop-desc">15-25 hasar. Güvenilir, sıkıcı.</div>
+        </div>
+        <span class="shop-price">40💰</span>
+      </div>
+      <div class="shop-item" id="sh-atesh" onclick="buyBomb('atesh')">
+        <span class="shop-icon">🔥</span>
+        <div class="shop-info">
+          <div class="shop-name">Ateş Bombası</div>
+          <div class="shop-desc">25-45 hasar. Sıcak sıcak!</div>
+        </div>
+        <span class="shop-price">70💰</span>
+      </div>
+      <div class="shop-item" id="sh-nukleer" onclick="buyBomb('nukleer')">
+        <span class="shop-icon">☢️</span>
+        <div class="shop-info">
+          <div class="shop-name">Nükleer Bomba</div>
+          <div class="shop-desc">60-100 hasar. BM kızacak!</div>
+        </div>
+        <span class="shop-price">150💰</span>
+      </div>
+      <div class="shop-item" id="sh-bok" onclick="buyBomb('bok')">
+        <span class="shop-icon">💩</span>
+        <div class="shop-info">
+          <div class="shop-name">Bok Fırlatıcı</div>
+          <div class="shop-desc">5-12 hasar ama moralleri çöker!</div>
+        </div>
+        <span class="shop-price">20💰</span>
+      </div>
+      <div class="shop-item" id="sh-sirk" onclick="buyBomb('sirk')">
+        <span class="shop-icon">🎪</span>
+        <div class="shop-info">
+          <div class="shop-name">Sirk Topu</div>
+          <div class="shop-desc">1-80 hasar. Kumar gibi!</div>
+        </div>
+        <span class="shop-price">35💰</span>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- Question -->
-<div id="q-panel">
-  <div id="q-label">❓ SORU — Doğru cevapla altın kazan!</div>
-  <div id="q-text">Yükleniyor...</div>
-  <div id="q-opts"></div>
-  <div id="q-result"></div>
+<div id="q-section">
+  <div id="q-panel">
+    <div id="q-category">❓ SORU</div>
+    <div id="q-text">Yükleniyor...</div>
+    <div id="q-opts"></div>
+    <div id="q-result"></div>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -206,84 +287,284 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <script>
 // ── ÜLKELER ────────────────────────────────────────────────────────────
 const COUNTRY_DATA = [
-  { id:'turkey',    name:'Türkiye',     flag:'🇹🇷', pop:85,  baseDefense:60, baseLove:80 },
-  { id:'germany',   name:'Almanya',     flag:'🇩🇪', pop:84,  baseDefense:70, baseLove:50 },
-  { id:'france',    name:'Fransa',      flag:'🇫🇷', pop:68,  baseDefense:65, baseLove:55 },
-  { id:'uk',        name:'İngiltere',   flag:'🇬🇧', pop:67,  baseDefense:65, baseLove:50 },
-  { id:'russia',    name:'Rusya',       flag:'🇷🇺', pop:145, baseDefense:90, baseLove:30 },
-  { id:'usa',       name:'Amerika',     flag:'🇺🇸', pop:335, baseDefense:100,baseLove:35 },
-  { id:'china',     name:'Çin',         flag:'🇨🇳', pop:1400,baseDefense:95, baseLove:25 },
-  { id:'japan',     name:'Japonya',     flag:'🇯🇵', pop:125, baseDefense:70, baseLove:60 },
-  { id:'india',     name:'Hindistan',   flag:'🇮🇳', pop:1400,baseDefense:80, baseLove:45 },
-  { id:'brazil',    name:'Brezilya',    flag:'🇧🇷', pop:215, baseDefense:65, baseLove:65 },
-  { id:'australia', name:'Avustralya',  flag:'🇦🇺', pop:26,  baseDefense:50, baseLove:70 },
-  { id:'egypt',     name:'Mısır',       flag:'🇪🇬', pop:104, baseDefense:55, baseLove:55 },
-  { id:'mexico',    name:'Meksika',     flag:'🇲🇽', pop:130, baseDefense:55, baseLove:60 },
-  { id:'canada',    name:'Kanada',      flag:'🇨🇦', pop:38,  baseDefense:50, baseLove:75 },
-  { id:'safrica',   name:'G. Afrika',   flag:'🇿🇦', pop:60,  baseDefense:45, baseLove:65 },
+  { id:'turkey',    name:'Türkiye',    flag:'🇹🇷', pop:85,   baseD:60,  baseLove:80, leader:'Lider Mehmet Bey', quotes:['Bize bomba atarsan çay ısmarlarım!','Toprak bütünlüğümüz masada değil!','Biraz bekle, çay demliyor...'] },
+  { id:'germany',   name:'Almanya',    flag:'🇩🇪', pop:84,   baseD:75,  baseLove:45, leader:'Kanzler Hans Müller', quotes:['Verimliliğimizi küçümseme!','Dakikası dakikasına savaşırız.','Effizienz ist alles!'] },
+  { id:'france',    name:'Fransa',     flag:'🇫🇷', pop:68,   baseD:65,  baseLove:55, leader:'Başkan Pierre Baguette', quotes:['Mon dieu! Croissant atarım!','Şarabımıza dokunma!','Romantizmi bombalayanı affetmem.'] },
+  { id:'uk',        name:'İngiltere',  flag:'🇬🇧', pop:67,   baseD:65,  baseLove:50, leader:'Lord Teacup III', quotes:['This is not cricket!','Çayımı soğuttun, savaş bu!','Brexit yetmedi mi yaa?'] },
+  { id:'russia',    name:'Rusya',      flag:'🇷🇺', pop:145,  baseD:95,  baseLove:25, leader:'Putin-ski Vladimirof', quotes:['Bana bomba mı? Güldüm.','Sibirya\'ya tatile gidin.','Gas pipeline açık, dikkat et!'] },
+  { id:'usa',       name:'Amerika',    flag:'🇺🇸', pop:335,  baseD:100, baseLove:30, leader:'Başkan Chad McBurger', quotes:['Freedom fries\'ı dokunma!','Demokrasi ihraç ederim sana!','McDonald\'s\'ı mı bombaladın?!'] },
+  { id:'china',     name:'Çin',        flag:'🇨🇳', pop:1400, baseD:100, baseLove:20, leader:'Komiser Xiao Ping-Pong', quotes:['1.4 milyar insanız, dene bakalım.','Biz üretiyoruz sen bombalıyorsun?','Bombandan daha ucuzu var bizde.'] },
+  { id:'japan',     name:'Japonya',    flag:'🇯🇵', pop:125,  baseD:70,  baseLove:65, leader:'Başbakan Tanaka Sushi', quotes:['Anime karakterlerime zarar verme!','Teknoloji üstünlüğümüz var!','Çok şirin görünüyorsun, yine de hayır.'] },
+  { id:'india',     name:'Hindistan',  flag:'🇮🇳', pop:1400, baseD:80,  baseLove:50, leader:'Maharaja Curry Dev', quotes:['1.4 milyar destansı karşı koyuş!','Baharatlarımı almaya mı geldin?','Yoga ile savunuyoruz!'] },
+  { id:'brazil',    name:'Brezilya',   flag:'🇧🇷', pop:215,  baseD:60,  baseLove:70, leader:'Başkan Samba Santos', quotes:['Karnavalı durdurmaya mı geldin?','Futbol oynayalım, kazan ülkeyi al!','Capoeira ile savunuyoruz!'] },
+  { id:'australia', name:'Avustralya', flag:'🇦🇺', pop:26,   baseD:45,  baseLove:75, leader:'Steve Kangaroo PM', quotes:['Mate, cidden mi?','Kangurularım var, dikkat et!','Kriket sopasıyla savaşırız!'] },
+  { id:'egypt',     name:'Mısır',      flag:'🇪🇬', pop:104,  baseD:55,  baseLove:55, leader:'Firavun Hamdi II', quotes:['3000 yıllık piramit bombaya gülür!','Mumyalar çok sinirli olur sakın!','Nil\'imi kirletme!'] },
+  { id:'mexico',    name:'Meksika',    flag:'🇲🇽', pop:130,  baseD:55,  baseLove:60, leader:'El Presidente Taco Grande', quotes:['Tacos üzerine savaşmam!','Mariachi ile moral bozamam!','¡Ay caramba! Durun bir dakika!'] },
+  { id:'canada',    name:'Kanada',     flag:'🇨🇦', pop:38,   baseD:50,  baseLove:80, leader:'Başbakan Justin Maple', quotes:['Sorry eh, ama hayır!','Akçaağaç şurubumu bombalayanı affetmem.','Sakin ol, çay içelim.'] },
+  { id:'safrica',   name:'G. Afrika',  flag:'🇿🇦', pop:60,   baseD:45,  baseLove:65, leader:'Başkan Ubuntu Dlamini', quotes:['Ubuntu diyor ki: paylaş!','Elmaslarımı bombalamaya mı geldin?','Savana aslanları uyanıyor!'] },
 ];
+
+// ── BOMBA TİPLERİ ──────────────────────────────────────────────────────
+const BOMBS = {
+  klasik:  { name:'Klasik Bomba',  icon:'💣', price:40,  minDmg:15, maxDmg:25, loveHit:5,  msg:'BOOM! Klasik ama işe yarar.' },
+  atesh:   { name:'Ateş Bombası',  icon:'🔥', price:70,  minDmg:25, maxDmg:45, loveHit:10, msg:'YANGIN VAR! İtfaiye yolda!' },
+  nukleer: { name:'Nükleer Bomba', icon:'☢️', price:150, minDmg:60, maxDmg:100,loveHit:20, msg:'☢️ BM acil toplantıya çağrıldı!' },
+  bok:     { name:'Bok Fırlatıcı', icon:'💩', price:20,  minDmg:5,  maxDmg:12, loveHit:25, msg:'💩 İğrenç! Moralleri çöktü!' },
+  sirk:    { name:'Sirk Topu',     icon:'🎪', price:35,  minDmg:1,  maxDmg:80, loveHit:8,  msg:'🎪 Kumar gibiydi... ne çıktı?' },
+};
 
 // ── SORULAR ────────────────────────────────────────────────────────────
 const QUESTIONS = [
-  { q:"Türkiye'nin başkenti neresidir?",          opts:["İstanbul","Ankara","İzmir","Bursa"],             ans:1, reward:25 },
-  { q:"Dünyanın en büyük okyanusu hangisidir?",   opts:["Atlantik","Hint","Arktik","Pasifik"],            ans:3, reward:25 },
-  { q:"Güneş sistemimizdeki en büyük gezegen?",   opts:["Satürn","Mars","Jüpiter","Neptün"],              ans:2, reward:25 },
-  { q:"Su kaç derecede kaynar?",                  opts:["80°C","90°C","100°C","110°C"],                  ans:2, reward:20 },
-  { q:"Dünyanın en uzun nehri hangisidir?",        opts:["Amazon","Nil","Yangtze","Mississippi"],         ans:1, reward:30 },
-  { q:"Türk lirasının sembolü nedir?",            opts:["€","$","₺","£"],                                ans:2, reward:20 },
-  { q:"Bir yılda kaç ay vardır?",                 opts:["10","11","12","13"],                             ans:2, reward:15 },
-  { q:"Japonya'nın başkenti hangisidir?",         opts:["Osaka","Kyoto","Tokyo","Hiroshima"],             ans:2, reward:25 },
-  { q:"Dünyanın en büyük çölü hangisidir?",       opts:["Gobi","Arabistan","Sahra","Antarktika"],        ans:3, reward:35 },
-  { q:"Hızın birimi nedir?",                      opts:["Newton","Joule","m/s","Pascal"],                 ans:2, reward:20 },
-  { q:"Hangi element H sembolüyle gösterilir?",   opts:["Helyum","Hidrojen","Hafniyum","Holmiyum"],      ans:1, reward:25 },
-  { q:"Osmanlı İmparatorluğu hangi yıl kuruldu?", opts:["1299","1453","1071","1326"],                    ans:0, reward:30 },
-  { q:"Ekvator hangi kıtayı tam ortadan böler?",  opts:["Asya","Afrika","Avrupa","Antarktika"],           ans:1, reward:30 },
-  { q:"DNA'nın açılımı nedir?",                   opts:["Deoksiribonükleik Asit","Dinükleik Asit","Diribonükleik Asit","Dinitrojen Asit"], ans:0, reward:35 },
-  { q:"Ayın Dünya'ya uzaklığı yaklaşık kaçtır?", opts:["38.000 km","384.000 km","3.840.000 km","38.400 km"], ans:1, reward:35 },
-  { q:"İtalya'nın başkenti neresidir?",           opts:["Milano","Venedik","Floransa","Roma"],            ans:3, reward:20 },
-  { q:"Hangi ülke piramitleriyle ünlüdür?",       opts:["İran","Irak","Mısır","Suriye"],                 ans:2, reward:20 },
-  { q:"Dünya'nın en yüksek dağı hangisidir?",     opts:["K2","Everest","Kangchenjunga","Makalu"],        ans:1, reward:25 },
-  { q:"Işık hızı saniyede yaklaşık kaçtır?",      opts:["300 km","3.000 km","300.000 km","3.000.000 km"],ans:2, reward:30 },
-  { q:"Hangi renk tehlike anlamında kullanılır?", opts:["Mavi","Yeşil","Sarı","Kırmızı"],                ans:3, reward:15 },
-  { q:"Bir üçgenin iç açıları toplamı kaçtır?",   opts:["90°","180°","270°","360°"],                    ans:1, reward:25 },
-  { q:"Brezilya'nın resmi dili hangisidir?",      opts:["İspanyolca","Portekizce","Fransızca","İngilizce"], ans:1, reward:30 },
-  { q:"Hangi hayvan 'ormanın kralı' olarak bilinir?", opts:["Kaplan","Leopar","Çita","Aslan"],           ans:3, reward:20 },
-  { q:"Türkiye'nin yüzölçümü yaklaşık kaçtır?",  opts:["581.000 km²","781.000 km²","681.000 km²","481.000 km²"], ans:1, reward:30 },
-  { q:"Hangi gezegen Güneş'e en yakındır?",       opts:["Venüs","Mars","Merkür","Dünya"],                ans:2, reward:30 },
-  { q:"Bir dikdörtgenin alanı nasıl hesaplanır?", opts:["Çevre×2","Kenar³","Uzunluk×Genişlik","Kenar²"], ans:2, reward:25 },
-  { q:"İnsan vücudunda kaç kemik vardır?",        opts:["106","206","306","406"],                         ans:1, reward:30 },
-  { q:"Hangi ülkenin bayrağında ay ve yıldız var?",opts:["Yunanistan","Türkiye","Portekiz","İsveç"],     ans:1, reward:20 },
-  { q:"Avustralya hangi okyanus üzerindedir?",    opts:["Atlantik","Hint","Arktik","Pasifik"],            ans:3, reward:25 },
-  { q:"Kanada'nın başkenti neresidir?",           opts:["Toronto","Vancouver","Ottawa","Montreal"],       ans:2, reward:30 },
-  { q:"Fotosentez sırasında bitkiler ne üretir?", opts:["CO₂","Azot","Oksijen","Hidrojen"],              ans:2, reward:25 },
-  { q:"Hangi yıl Türkiye Cumhuriyeti kuruldu?",   opts:["1919","1920","1922","1923"],                    ans:3, reward:25 },
-  { q:"Dünyanın en küçük ülkesi hangisidir?",     opts:["Monako","San Marino","Vatikan","Liechtenstein"], ans:2, reward:35 },
-  { q:"Renk körü bireyler hangi renkleri karıştırır?", opts:["Mavi-Sarı","Kırmızı-Yeşil","Mor-Turuncu","Beyaz-Siyah"], ans:1, reward:30 },
-  { q:"Su molekülünün kimyasal formülü nedir?",   opts:["CO₂","H₂O","NaCl","O₂"],                       ans:1, reward:20 },
+  // 😂 SAÇMA SORULAR
+  { cat:'😂 Absürt', q:"Kafes dövüşünde kimi dövmek isterdin?", opts:["Putin'i","Biden'ı","Kendi patronumu","Hiçbirini, barışçılım"], ans:2, reward:25 },
+  { cat:'😂 Absürt', q:"Sabah uyanınca ilk ne yaparsın?", opts:["Ülke bomblayım","Twitter aç","Kahvaltı yap","Tekrar uyu"], ans:3, reward:15 },
+  { cat:'😂 Absürt', q:"Hangi ülkeyi fethetmek en zor?", opts:["Amerika","Rusya","Kendi nüfus müdürlüğü","Çin"], ans:2, reward:20 },
+  { cat:'😂 Absürt', q:"Dünya kaça kaça dönüyor?", opts:["Çok hızlı","Yavaşça","Bilmiyorum","Ben döndürüyorum zaten"], ans:3, reward:25 },
+  { cat:'😂 Absürt', q:"En iyi başkan özelliği nedir?", opts:["Bomba atacak cesareti","Saçını düzgün taramak","Konuşurken uyutmamak","Hepsini birden"], ans:2, reward:20 },
+  { cat:'😂 Absürt', q:"Bir ülkeyi fethedince ne yaparsın?", opts:["Vergi koyarım","Tatile giderim","İsim değiştiririm","Hepsini birden"], ans:3, reward:20 },
+  { cat:'😂 Absürt', q:"BM seni aradığında ne yaparsın?", opts:["Telefonu açmam","Meşgul gösteririm","Konuşurum ama dinlemem","Bloke ederim"], ans:3, reward:25 },
+  { cat:'😂 Absürt', q:"Dünya liderleriyle toplantıda ne yersin?", opts:["Kuru ekmek","Havyar","Sandviç","Getirdiklerini"], ans:1, reward:15 },
+  { cat:'😂 Absürt', q:"Savaş açmak için en iyi bahane nedir?", opts:["Özgürlük","Demokrasi","Petrol","Hepsinin üçü de petrol"], ans:3, reward:30 },
+  { cat:'😂 Absürt', q:"Ülkeni nasıl savunursun?", opts:["Ordu ile","Dikenli tel ile","Komşuyu öne atarım","Tweet atarım"], ans:3, reward:25 },
+  { cat:'😂 Absürt', q:"Başkan olunca ilk kanun ne olur?", opts:["Çalışma saatleri azalır","Tatil günleri artar","Çay zorunlu olur","Hepsi"], ans:3, reward:20 },
+  { cat:'😂 Absürt', q:"Rusya'dan bomba gelince ne yaparsın?", opts:["Saklarım","Karşılık veririm","Diplomatik kriz çıkarırım","İade ederim"], ans:3, reward:30 },
+  { cat:'😂 Absürt', q:"Dünya barışı nasıl sağlanır?", opts:["Konuşarak","Anlaşarak","Herkesi ben fethedince","İnterneti kapatınca"], ans:2, reward:25 },
+  { cat:'😂 Absürt', q:"Hangi silah en güçlüdür?", opts:["Nükleer","Kimyasal","Kötü komşuluk","Sosyal medya"], ans:3, reward:25 },
+  { cat:'😂 Absürt', q:"Komşu ülke çok gürültü yapıyor, ne yaparsın?", opts:["Gidip konuşurum","Şikayet ederim","Fethedip sustururum","Kulaklık takarım"], ans:2, reward:20 },
+
+  // 🌍 COĞRAFYA
+  { cat:'🌍 Coğrafya', q:"Türkiye'nin başkenti neresidir?", opts:["İstanbul","Ankara","İzmir","Bursa"], ans:1, reward:20 },
+  { cat:'🌍 Coğrafya', q:"Dünyanın en büyük okyanusu hangisidir?", opts:["Atlantik","Hint","Arktik","Pasifik"], ans:3, reward:20 },
+  { cat:'🌍 Coğrafya', q:"Dünyanın en uzun nehri hangisidir?", opts:["Amazon","Nil","Yangtze","Mississippi"], ans:1, reward:25 },
+  { cat:'🌍 Coğrafya', q:"Dünyanın en büyük çölü hangisidir?", opts:["Gobi","Arabistan","Sahra","Antarktika"], ans:3, reward:30 },
+  { cat:'🌍 Coğrafya', q:"Japonya'nın başkenti neresidir?", opts:["Osaka","Kyoto","Tokyo","Hiroshima"], ans:2, reward:20 },
+  { cat:'🌍 Coğrafya', q:"Kanada'nın başkenti neresidir?", opts:["Toronto","Vancouver","Ottawa","Montreal"], ans:2, reward:25 },
+  { cat:'🌍 Coğrafya', q:"Avustralya hangi kıtada yer alır?", opts:["Asya","Afrika","Okyanusya","Avrupa"], ans:2, reward:20 },
+  { cat:'🌍 Coğrafya', q:"Brezilya'nın resmi dili hangisidir?", opts:["İspanyolca","Portekizce","Fransızca","Brezilce"], ans:1, reward:25 },
+  { cat:'🌍 Coğrafya', q:"Ekvator hangi kıtayı tam ortadan böler?", opts:["Asya","Afrika","Avrupa","Antarktika"], ans:1, reward:25 },
+  { cat:'🌍 Coğrafya', q:"Dünyanın en yüksek dağı hangisidir?", opts:["K2","Everest","Kangchenjunga","Makalu"], ans:1, reward:20 },
+  { cat:'🌍 Coğrafya', q:"İtalya'nın başkenti neresidir?", opts:["Milano","Venedik","Floransa","Roma"], ans:3, reward:20 },
+  { cat:'🌍 Coğrafya', q:"Hangi ülke piramitleriyle ünlüdür?", opts:["İran","Irak","Mısır","Suriye"], ans:2, reward:15 },
+  { cat:'🌍 Coğrafya', q:"Türkiye'nin yüzölçümü yaklaşık kaçtır?", opts:["581.000 km²","781.000 km²","681.000 km²","481.000 km²"], ans:1, reward:30 },
+  { cat:'🌍 Coğrafya', q:"Dünyanın en küçük ülkesi hangisidir?", opts:["Monako","San Marino","Vatikan","Liechtenstein"], ans:2, reward:30 },
+  { cat:'🌍 Coğrafya', q:"Nil nehri hangi okyanusa dökülür?", opts:["Atlantik","Hint","Akdeniz","Kızıldeniz"], ans:2, reward:25 },
+  { cat:'🌍 Coğrafya', q:"Hangi ülke hem Avrupa'da hem Asya'dadır?", opts:["Rusya","Kazakistan","Her ikisi de","Türkiye"], ans:3, reward:25 },
+  { cat:'🌍 Coğrafya', q:"Amazon nehri hangi kıtada akar?", opts:["Afrika","Asya","Güney Amerika","Kuzey Amerika"], ans:2, reward:20 },
+  { cat:'🌍 Coğrafya', q:"Hindistan'ın başkenti neresidir?", opts:["Mumbai","Kolkata","Yeni Delhi","Chennai"], ans:2, reward:25 },
+  { cat:'🌍 Coğrafya', q:"Meksika'nın başkenti neresidir?", opts:["Guadalajara","Cancún","Monterrey","Meksiko"], ans:3, reward:20 },
+  { cat:'🌍 Coğrafya', q:"Güney Amerika'nın en büyük ülkesi hangisidir?", opts:["Arjantin","Peru","Kolombiya","Brezilya"], ans:3, reward:25 },
+  { cat:'🌍 Coğrafya', q:"Afrika'nın en büyük ülkesi hangisidir?", opts:["Nijerya","Kongo","Etiyopya","Cezayir"], ans:3, reward:30 },
+  { cat:'🌍 Coğrafya', q:"Çin'in başkenti neresidir?", opts:["Şangay","Pekin","Guangzhou","Shenzhen"], ans:1, reward:20 },
+  { cat:'🌍 Coğrafya', q:"Rusya'nın başkenti neresidir?", opts:["St. Petersburg","Moskova","Novosibirsk","Kazan"], ans:1, reward:15 },
+  { cat:'🌍 Coğrafya', q:"Amerika'nın başkenti neresidir?", opts:["New York","Los Angeles","Washington D.C.","Chicago"], ans:2, reward:20 },
+  { cat:'🌍 Coğrafya', q:"İngiltere'nin başkenti neresidir?", opts:["Manchester","Birmingham","Edinburgh","Londra"], ans:3, reward:15 },
+  { cat:'🌍 Coğrafya', q:"Fransa'nın başkenti neresidir?", opts:["Lyon","Marsilya","Bordeaux","Paris"], ans:3, reward:15 },
+  { cat:'🌍 Coğrafya', q:"Almanya'nın başkenti neresidir?", opts:["Hamburg","Münih","Frankfurt","Berlin"], ans:3, reward:15 },
+  { cat:'🌍 Coğrafya', q:"Hangi ülkede en fazla insan yaşar?", opts:["Hindistan","Amerika","Çin","Endonezya"], ans:0, reward:20 },
+  { cat:'🌍 Coğrafya', q:"En uzun kara sınırına sahip ülke hangisidir?", opts:["Çin","Rusya","Amerika","Brezilya"], ans:1, reward:30 },
+  { cat:'🌍 Coğrafya', q:"Hangi kıtada ülke yoktur?", opts:["Arktika","Antarktika","Okyanusya","Hiçbiri"], ans:1, reward:25 },
+
+  // 🔬 FEN BİLİMLERİ
+  { cat:'🔬 Bilim', q:"Su kaç derecede kaynar?", opts:["80°C","90°C","100°C","110°C"], ans:2, reward:15 },
+  { cat:'🔬 Bilim', q:"Güneş sistemimizdeki en büyük gezegen?", opts:["Satürn","Mars","Jüpiter","Neptün"], ans:2, reward:20 },
+  { cat:'🔬 Bilim', q:"Hangi element H sembolüyle gösterilir?", opts:["Helyum","Hidrojen","Hafniyum","Holmiyum"], ans:1, reward:20 },
+  { cat:'🔬 Bilim', q:"DNA'nın açılımı nedir?", opts:["Deoksiribonükleik Asit","Dinükleik Asit","Diribonükleik Asit","Diazonik Asit"], ans:0, reward:30 },
+  { cat:'🔬 Bilim', q:"Fotosentez sırasında bitkiler ne üretir?", opts:["CO₂","Azot","Oksijen","Hidrojen"], ans:2, reward:20 },
+  { cat:'🔬 Bilim', q:"Işık hızı saniyede yaklaşık kaçtır?", opts:["300 km","3.000 km","300.000 km","3 milyon km"], ans:2, reward:25 },
+  { cat:'🔬 Bilim', q:"Su molekülünün kimyasal formülü nedir?", opts:["CO₂","H₂O","NaCl","O₂"], ans:1, reward:15 },
+  { cat:'🔬 Bilim', q:"İnsan vücudunda kaç kemik vardır?", opts:["106","206","306","406"], ans:1, reward:25 },
+  { cat:'🔬 Bilim', q:"Ayın Dünya'ya uzaklığı yaklaşık kaçtır?", opts:["38.000 km","384.000 km","3.840.000 km","38.400 km"], ans:1, reward:30 },
+  { cat:'🔬 Bilim', q:"Hangi gezegen Güneş'e en yakındır?", opts:["Venüs","Mars","Merkür","Dünya"], ans:2, reward:25 },
+  { cat:'🔬 Bilim', q:"Bir üçgenin iç açıları toplamı kaçtır?", opts:["90°","180°","270°","360°"], ans:1, reward:20 },
+  { cat:'🔬 Bilim', q:"Renk körü bireyler hangi renkleri karıştırır?", opts:["Mavi-Sarı","Kırmızı-Yeşil","Mor-Turuncu","Beyaz-Siyah"], ans:1, reward:25 },
+  { cat:'🔬 Bilim', q:"Ses hangi ortamda daha hızlı yayılır?", opts:["Hava","Su","Vakum","Katı cisimler"], ans:3, reward:30 },
+  { cat:'🔬 Bilim', q:"Hangi vitaminler yağda çözünür?", opts:["B ve C","A, D, E, K","Sadece A","C ve D"], ans:1, reward:30 },
+  { cat:'🔬 Bilim', q:"Periyodik tablonun 1. elementi hangisidir?", opts:["Oksijen","Karbon","Helyum","Hidrojen"], ans:3, reward:20 },
+  { cat:'🔬 Bilim', q:"Newton'un kaçıncı yasası F=ma formülüdür?", opts:["1. Yasa","2. Yasa","3. Yasa","Hiçbiri"], ans:1, reward:25 },
+  { cat:'🔬 Bilim', q:"Hangi kan grubu 'evrensel verici'dir?", opts:["A+","B+","AB+","O-"], ans:3, reward:25 },
+  { cat:'🔬 Bilim', q:"İnsan beyninin ağırlığı yaklaşık kaçtır?", opts:["0.5 kg","1.4 kg","2.5 kg","3 kg"], ans:1, reward:25 },
+  { cat:'🔬 Bilim', q:"Hangi element en iyi elektrik iletkendir?", opts:["Altın","Bakır","Alüminyum","Gümüş"], ans:3, reward:30 },
+  { cat:'🔬 Bilim', q:"Yerçekimi ivmesi yaklaşık kaçtır?", opts:["8.5 m/s²","9.8 m/s²","10.5 m/s²","11 m/s²"], ans:1, reward:20 },
+  { cat:'🔬 Bilim', q:"Hangi organ kan üretir?", opts:["Karaciğer","Böbrek","Kemik iliği","Dalak"], ans:2, reward:30 },
+  { cat:'🔬 Bilim', q:"Atmosferde en çok hangi gaz bulunur?", opts:["Oksijen","Karbondioksit","Azot","Helyum"], ans:2, reward:25 },
+  { cat:'🔬 Bilim', q:"Hangi hayvanın kalbi 3 odacıklıdır?", opts:["Kuş","Memeli","Sürüngen","Balık"], ans:2, reward:35 },
+  { cat:'🔬 Bilim', q:"E=mc² formülü kime aittir?", opts:["Newton","Galileo","Einstein","Tesla"], ans:2, reward:20 },
+  { cat:'🔬 Bilim', q:"Hangi vitamin güneş ışığından üretilir?", opts:["Vitamin A","Vitamin B","Vitamin C","Vitamin D"], ans:3, reward:20 },
+  { cat:'🔬 Bilim', q:"Güneş sistemimizde kaç gezegen vardır?", opts:["7","8","9","10"], ans:1, reward:15 },
+  { cat:'🔬 Bilim', q:"Atom çekirdeğinde hangi parçacıklar bulunur?", opts:["Elektron ve proton","Proton ve nötron","Nötron ve elektron","Sadece proton"], ans:1, reward:25 },
+  { cat:'🔬 Bilim', q:"İnsanda kaç kromozom çifti vardır?", opts:["21","22","23","24"], ans:2, reward:30 },
+  { cat:'🔬 Bilim', q:"Hangi gaz asit yağmuruna neden olur?", opts:["CO₂","SO₂","N₂","O₃"], ans:1, reward:30 },
+  { cat:'🔬 Bilim', q:"Dünya'nın uydusu nedir?", opts:["Phobos","Europa","Ay","Titan"], ans:2, reward:15 },
+
+  // 🏛️ TARİH
+  { cat:'🏛️ Tarih', q:"Osmanlı İmparatorluğu hangi yıl kuruldu?", opts:["1299","1453","1071","1326"], ans:0, reward:25 },
+  { cat:'🏛️ Tarih', q:"Hangi yıl Türkiye Cumhuriyeti kuruldu?", opts:["1919","1920","1922","1923"], ans:3, reward:20 },
+  { cat:'🏛️ Tarih', q:"İstanbul hangi yıl fethedildi?", opts:["1071","1299","1453","1683"], ans:2, reward:20 },
+  { cat:'🏛️ Tarih', q:"Atatürk hangi yıl vefat etti?", opts:["1935","1936","1937","1938"], ans:3, reward:20 },
+  { cat:'🏛️ Tarih', q:"1. Dünya Savaşı hangi yılda başladı?", opts:["1912","1914","1916","1918"], ans:1, reward:20 },
+  { cat:'🏛️ Tarih', q:"2. Dünya Savaşı hangi yılda sona erdi?", opts:["1943","1944","1945","1946"], ans:2, reward:20 },
+  { cat:'🏛️ Tarih', q:"Roma İmparatorluğu'nun başkenti neresidir?", opts:["Atina","İstanbul","Kartaca","Roma"], ans:3, reward:20 },
+  { cat:'🏛️ Tarih', q:"Hangi ülke atom bombası kullanan tek ülkedir?", opts:["Rusya","Amerika","İngiltere","Japonya"], ans:1, reward:25 },
+  { cat:'🏛️ Tarih', q:"Berlin Duvarı hangi yıl yıkıldı?", opts:["1987","1988","1989","1990"], ans:2, reward:25 },
+  { cat:'🏛️ Tarih', q:"Fransız Devrimi hangi yılda başladı?", opts:["1776","1789","1804","1815"], ans:1, reward:25 },
+  { cat:'🏛️ Tarih', q:"Atatürk'ün soyadı kanunu hangi yılda çıktı?", opts:["1930","1932","1934","1936"], ans:2, reward:25 },
+  { cat:'🏛️ Tarih', q:"Çanakkale Savaşı hangi yılda yaşandı?", opts:["1912","1913","1914","1915"], ans:3, reward:25 },
+  { cat:'🏛️ Tarih', q:"Kurtuluş Savaşı hangi yılda başladı?", opts:["1918","1919","1920","1921"], ans:1, reward:20 },
+  { cat:'🏛️ Tarih', q:"Napoleon hangi ülkenin imparatoruydu?", opts:["İtalya","Fransa","İspanya","Belçika"], ans:1, reward:20 },
+  { cat:'🏛️ Tarih', q:"Hangi imparatorluk 'Üzerinde güneş batmayan' olarak anılır?", opts:["Osmanlı","Roma","Fransız","İngiliz"], ans:3, reward:25 },
+  { cat:'🏛️ Tarih', q:"Süveyş Kanalı hangi yılda açıldı?", opts:["1859","1869","1879","1889"], ans:1, reward:30 },
+  { cat:'🏛️ Tarih', q:"Magna Carta hangi ülkede imzalandı?", opts:["Fransa","Almanya","İngiltere","İtalya"], ans:2, reward:25 },
+  { cat:'🏛️ Tarih', q:"Birinci Dünya Savaşı'nda hangi ülke Osmanlı'nın yanındaydı?", opts:["İngiltere","Fransa","Almanya","Rusya"], ans:2, reward:25 },
+  { cat:'🏛️ Tarih', q:"Mısır medeniyetindeki ünlü yazı sistemi nedir?", opts:["Latin","Kiril","Hiyeroglif","Çivi yazısı"], ans:2, reward:25 },
+  { cat:'🏛️ Tarih', q:"Soğuk Savaş hangi ülkeler arasındaydı?", opts:["ABD-Çin","SSCB-ABD","Almanya-Fransa","İngiltere-Rusya"], ans:1, reward:20 },
+
+  // 🇹🇷 TÜRKİYE
+  { cat:'🇹🇷 Türkiye', q:"Türkiye'nin en büyük şehri hangisidir?", opts:["Ankara","İzmir","Bursa","İstanbul"], ans:3, reward:15 },
+  { cat:'🇹🇷 Türkiye', q:"Türkiye'nin para birimi nedir?", opts:["Euro","Dolar","Türk Lirası","Pound"], ans:2, reward:15 },
+  { cat:'🇹🇷 Türkiye', q:"Türkiye kaç ilden oluşmaktadır?", opts:["72","79","81","84"], ans:2, reward:20 },
+  { cat:'🇹🇷 Türkiye', q:"Türkiye'de en uzun kıyı şeridine sahip deniz hangisidir?", opts:["Karadeniz","Ege","Marmara","Akdeniz"], ans:3, reward:25 },
+  { cat:'🇹🇷 Türkiye', q:"Türkiye'nin en yüksek dağı hangisidir?", opts:["Erciyes","Süphan","Ararat (Ağrı)","Uludağ"], ans:2, reward:20 },
+  { cat:'🇹🇷 Türkiye', q:"Türkiye hangi yılda NATO'ya katıldı?", opts:["1949","1952","1955","1961"], ans:1, reward:30 },
+  { cat:'🇹🇷 Türkiye', q:"Türkiye'nin milli bayramı hangi gündür?", opts:["29 Ekim","23 Nisan","19 Mayıs","30 Ağustos"], ans:0, reward:15 },
+  { cat:'🇹🇷 Türkiye', q:"Boğaziçi Köprüsü hangi iki şehir parçasını bağlar?", opts:["Anadolu-Rumeli","Kadıköy-Beşiktaş","Üsküdar-Eminönü","Bakırköy-Maltepe"], ans:0, reward:20 },
+  { cat:'🇹🇷 Türkiye', q:"Türk alfabesi kaç harften oluşur?", opts:["26","28","29","30"], ans:2, reward:20 },
+  { cat:'🇹🇷 Türkiye', q:"Türkiye'nin en uzun nehri hangisidir?", opts:["Sakarya","Kızılırmak","Fırat","Dicle"], ans:1, reward:25 },
+  { cat:'🇹🇷 Türkiye', q:"Atatürk hangi şehirde doğdu?", opts:["Ankara","İstanbul","Selanik","İzmir"], ans:2, reward:20 },
+  { cat:'🇹🇷 Türkiye', q:"Türkiye'nin sembolü olan hayvan hangisidir?", opts:["Aslan","Kurt","Kartal","Geyik"], ans:1, reward:20 },
+  { cat:'🇹🇷 Türkiye', q:"TBMM hangi yılda açıldı?", opts:["1919","1920","1921","1923"], ans:1, reward:25 },
+  { cat:'🇹🇷 Türkiye', q:"Türkiye hangi kıtalara yayılır?", opts:["Asya-Avrupa","Afrika-Asya","Avrupa-Afrika","Asya-Okyanusya"], ans:0, reward:20 },
+  { cat:'🇹🇷 Türkiye', q:"İstanbul'un tarihi yarımadası nerede?", opts:["Beşiktaş","Avrupa yakası","Anadolu yakası","Kadıköy"], ans:1, reward:25 },
+
+  // ⚽ SPOR
+  { cat:'⚽ Spor', q:"FIFA Dünya Kupası kaç yılda bir düzenlenir?", opts:["2 yılda bir","3 yılda bir","4 yılda bir","5 yılda bir"], ans:2, reward:15 },
+  { cat:'⚽ Spor', q:"Basketbolda bir sayı kaç puan değerindedir?", opts:["1","2","3","4"], ans:1, reward:15 },
+  { cat:'⚽ Spor', q:"Olimpiyat Oyunları kaç yılda bir düzenlenir?", opts:["2","3","4","5"], ans:2, reward:15 },
+  { cat:'⚽ Spor', q:"Voleybolda bir takımda kaç oyuncu bulunur?", opts:["5","6","7","8"], ans:1, reward:15 },
+  { cat:'⚽ Spor', q:"Hangi ülke en çok FIFA Dünya Kupası kazanmıştır?", opts:["Almanya","Arjantin","Brezilya","Fransa"], ans:2, reward:20 },
+  { cat:'⚽ Spor', q:"Tenis kortunda orta çizginin adı nedir?", opts:["Servis","Net","Bant","Hat"], ans:1, reward:20 },
+  { cat:'⚽ Spor', q:"Hangi sporda 'grand slam' terimi kullanılır?", opts:["Futbol","Tenis","Basketbol","Yüzme"], ans:1, reward:20 },
+  { cat:'⚽ Spor', q:"Türkiye'nin en başarılı futbol kulübü hangisidir?", opts:["Fenerbahçe","Galatasaray","Beşiktaş","Trabzonspor"], ans:1, reward:20 },
+  { cat:'⚽ Spor', q:"Formula 1'de en çok şampiyonluk kazanan pilot kimdir?", opts:["Schumacher","Hamilton","Senna","Vettel"], ans:1, reward:25 },
+  { cat:'⚽ Spor', q:"Boks maçlarında bir raund kaç dakikadır?", opts:["2","3","4","5"], ans:1, reward:20 },
+  { cat:'⚽ Spor', q:"Hangi ülke 2022 FIFA Dünya Kupası'nı kazandı?", opts:["Fransa","Brezilya","Arjantin","İngiltere"], ans:2, reward:20 },
+  { cat:'⚽ Spor', q:"Yüzmede 'kelebek' stilinde kaç kol hareketi vardır?", opts:["Biri tek tek","İkisi birlikte","Sırayla","Dönüşümlü"], ans:1, reward:25 },
+  { cat:'⚽ Spor', q:"NBA hangi ülkede oynanır?", opts:["Kanada","Amerika","Her ikisinde de","İngiltere"], ans:2, reward:20 },
+  { cat:'⚽ Spor', q:"Kriket hangi ülkenin milli sporu sayılır?", opts:["Avustralya","Amerika","İngiltere","Güney Afrika"], ans:2, reward:25 },
+  { cat:'⚽ Spor', q:"Atıcılıkta hedef kaç puana tam isabetle değerlenir?", opts:["5","8","10","12"], ans:2, reward:20 },
+
+  // 💻 TEKNOLOJİ
+  { cat:'💻 Teknoloji', q:"WWW'nin açılımı nedir?", opts:["World Wide Web","World Wireless Web","World Wide Wait","Wide World Web"], ans:0, reward:20 },
+  { cat:'💻 Teknoloji', q:"İlk iPhone hangi yılda tanıtıldı?", opts:["2005","2006","2007","2008"], ans:2, reward:20 },
+  { cat:'💻 Teknoloji', q:"Hangi şirket Windows işletim sistemini yapar?", opts:["Apple","Google","Microsoft","IBM"], ans:2, reward:15 },
+  { cat:'💻 Teknoloji', q:"1 GB kaç MB'tır?", opts:["512","1000","1024","2048"], ans:2, reward:20 },
+  { cat:'💻 Teknoloji', q:"Python nedir?", opts:["Yılan türü","Programlama dili","Yazılım","Oyun motoru"], ans:1, reward:15 },
+  { cat:'💻 Teknoloji', q:"İnternet'in öncülü olan ağ nedir?", opts:["BITNET","ARPANET","NSFNET","MILNET"], ans:1, reward:30 },
+  { cat:'💻 Teknoloji', q:"HTML ne anlama gelir?", opts:["Hyper Text Markup Language","High Tech Modern Language","Hyper Transfer Method Language","Home Tool Markup Language"], ans:0, reward:20 },
+  { cat:'💻 Teknoloji', q:"Hangi şirket Android işletim sistemini geliştirdi?", opts:["Apple","Samsung","Microsoft","Google"], ans:3, reward:15 },
+  { cat:'💻 Teknoloji', q:"CPU ne anlama gelir?", opts:["Central Processing Unit","Computer Power Unit","Core Program Unit","Central Program Unit"], ans:0, reward:20 },
+  { cat:'💻 Teknoloji', q:"Bitcoin hangi yılda icat edildi?", opts:["2007","2008","2009","2010"], ans:2, reward:25 },
+  { cat:'💻 Teknoloji', q:"Hangi şirket iPhone'u üretir?", opts:["Samsung","Sony","Apple","Google"], ans:2, reward:15 },
+  { cat:'💻 Teknoloji', q:"RAM ne anlama gelir?", opts:["Random Access Memory","Read All Memory","Run Access Mode","Root All Memory"], ans:0, reward:20 },
+  { cat:'💻 Teknoloji', q:"Yapay zeka alanında en çok kullanılan programlama dili?", opts:["Java","C++","Python","JavaScript"], ans:2, reward:25 },
+  { cat:'💻 Teknoloji', q:"Wi-Fi 'Kablosuz Sadakat' standardı hangi frekansları kullanır?", opts:["1-2 GHz","2.4 ve 5 GHz","6-8 GHz","10 GHz"], ans:1, reward:25 },
+  { cat:'💻 Teknoloji', q:"ChatGPT'yi kim geliştirdi?", opts:["Google","Microsoft","OpenAI","Meta"], ans:2, reward:20 },
+
+  // 🧮 MATEMATİK
+  { cat:'🧮 Matematik', q:"π (pi) sayısı yaklaşık kaçtır?", opts:["2.71","3.14","3.41","3.71"], ans:1, reward:15 },
+  { cat:'🧮 Matematik', q:"Bir dikdörtgenin alanı nasıl hesaplanır?", opts:["Çevre×2","Kenar³","Uzunluk×Genişlik","Kenar²"], ans:2, reward:15 },
+  { cat:'🧮 Matematik', q:"0'ın faktöriyeli kaçtır?", opts:["0","1","Tanımsız","Sonsuz"], ans:1, reward:25 },
+  { cat:'🧮 Matematik', q:"√144 kaçtır?", opts:["11","12","13","14"], ans:1, reward:20 },
+  { cat:'🧮 Matematik', q:"2³ kaçtır?", opts:["5","6","8","9"], ans:2, reward:15 },
+  { cat:'🧮 Matematik', q:"Bir dairenin alanı nasıl hesaplanır?", opts:["2πr","πr²","2πr²","πr"], ans:1, reward:20 },
+  { cat:'🧮 Matematik', q:"Fibonacci dizisinde 8'den sonra gelen sayı nedir?", opts:["11","12","13","14"], ans:2, reward:25 },
+  { cat:'🧮 Matematik', q:"Binom açılımında (a+b)² = ?", opts:["a²+b²","a²+2ab+b²","a²-2ab+b²","a²+ab+b²"], ans:1, reward:20 },
+  { cat:'🧮 Matematik', q:"1 km kaç metredir?", opts:["100 m","500 m","1000 m","10000 m"], ans:2, reward:15 },
+  { cat:'🧮 Matematik', q:"Bir üçgenin iç açıları toplamı kaçtır?", opts:["90°","180°","270°","360°"], ans:1, reward:15 },
+  { cat:'🧮 Matematik', q:"Asal sayı nedir?", opts:["1'e bölünen","Çift sayı","Sadece 1 ve kendine bölünen","3'e bölünen"], ans:2, reward:20 },
+  { cat:'🧮 Matematik', q:"10! (10 faktöriyel) kaçtır?", opts:["362.880","3.628.800","36.288","36.288.000"], ans:1, reward:35 },
+  { cat:'🧮 Matematik', q:"Bir küpün kaç yüzü vardır?", opts:["4","5","6","8"], ans:2, reward:15 },
+  { cat:'🧮 Matematik', q:"log₁₀(100) kaçtır?", opts:["1","2","10","100"], ans:1, reward:25 },
+  { cat:'🧮 Matematik', q:"Öklid algoritması ne için kullanılır?", opts:["Asal sayı bulmak","EBOB bulmak","Pi hesaplamak","Karekök bulmak"], ans:1, reward:30 },
+
+  // 🎬 GENEL KÜLTÜR
+  { cat:'🎬 Genel', q:"Harry Potter kitabının yazarı kimdir?", opts:["Stephenie Meyer","J.R.R Tolkien","J.K. Rowling","C.S Lewis"], ans:2, reward:15 },
+  { cat:'🎬 Genel', q:"Hangi renk tehlike anlamında kullanılır?", opts:["Mavi","Yeşil","Sarı","Kırmızı"], ans:3, reward:15 },
+  { cat:'🎬 Genel', q:"Gökkuşağında kaç renk vardır?", opts:["5","6","7","8"], ans:2, reward:15 },
+  { cat:'🎬 Genel', q:"Hangi hayvan 'ormanın kralı' olarak bilinir?", opts:["Kaplan","Leopar","Çita","Aslan"], ans:3, reward:15 },
+  { cat:'🎬 Genel', q:"Mona Lisa tablosu kimin eseridir?", opts:["Michelangelo","Raphael","Da Vinci","Picasso"], ans:2, reward:20 },
+  { cat:'🎬 Genel', q:"Olimpiyat oyunlarında kaç halka vardır?", opts:["4","5","6","7"], ans:1, reward:15 },
+  { cat:'🎬 Genel', q:"Bir yılda kaç hafta vardır?", opts:["48","50","52","54"], ans:2, reward:15 },
+  { cat:'🎬 Genel', q:"Romeo ve Juliet'in yazarı kimdir?", opts:["Molière","Dickens","Shakespeare","Goethe"], ans:2, reward:20 },
+  { cat:'🎬 Genel', q:"Hangi müzik aleti 'klavyeli' çalgılar grubundadır?", opts:["Keman","Gitar","Piyano","Flüt"], ans:2, reward:15 },
+  { cat:'🎬 Genel', q:"Nobel Barış Ödülü hangi şehirde verilir?", opts:["Stockholm","Oslo","Kopenhag","Helsinki"], ans:1, reward:25 },
+  { cat:'🎬 Genel', q:"Hangi yıl insanlar Ay'a ilk adım attı?", opts:["1967","1968","1969","1970"], ans:2, reward:20 },
+  { cat:'🎬 Genel', q:"En derin okyanus çukuru hangisidir?", opts:["Tonga Çukuru","Mariana Çukuru","Puerto Rico Çukuru","Java Çukuru"], ans:1, reward:25 },
+  { cat:'🎬 Genel', q:"Hangi ülkede sürücüler soldan gider?", opts:["Fransa","Almanya","İngiltere","İtalya"], ans:2, reward:20 },
+  { cat:'🎬 Genel', q:"Bir oktavda kaç nota vardır?", opts:["5","6","7","8"], ans:3, reward:20 },
+  { cat:'🎬 Genel', q:"Hangi hayvan en uzun süre uyur?", opts:["Ayı","Kedi","Koala","Yunus"], ans:2, reward:25 },
+  { cat:'🎬 Genel', q:"Dünyanın en pahalı baharatı nedir?", opts:["Tarçın","Safran","Karabiber","Vanilya"], ans:1, reward:25 },
+  { cat:'🎬 Genel', q:"Hangi ülke en fazla Oscar ödülü almıştır?", opts:["İngiltere","Fransa","Amerika","İtalya"], ans:2, reward:20 },
+  { cat:'🎬 Genel', q:"İnsan gözü kaç renge kadar ayırt edebilir?", opts:["100","1.000","10.000","10 milyon"], ans:3, reward:30 },
+  { cat:'🎬 Genel', q:"Hangi müzik türü Türkiye'ye özgüdür?", opts:["Flamenko","Tango","Arabesk","Samba"], ans:2, reward:20 },
+  { cat:'🎬 Genel', q:"Dünyanın en büyük demokrasisi hangi ülkedir?", opts:["Amerika","Hindistan","Brezilya","Almanya"], ans:1, reward:25 },
+
+  // 🦁 HAYVANLAR
+  { cat:'🦁 Hayvanlar', q:"Hangi hayvanın kalbi en büyüktür?", opts:["Fil","Mavi balina","Zürafa","Balinaköpekbalığı"], ans:1, reward:25 },
+  { cat:'🦁 Hayvanlar', q:"Yarasa nasıl yön bulur?", opts:["Görme","Koku","Ekolokasyon","Manyetik alan"], ans:2, reward:25 },
+  { cat:'🦁 Hayvanlar', q:"Hangi böcek dünyanın en tehlikelisidir?", opts:["Arı","Sivrisinek","Örümcek","Çıyan"], ans:1, reward:25 },
+  { cat:'🦁 Hayvanlar', q:"Okyanusun en büyük canlısı nedir?", opts:["Büyük Beyaz Köpekbalığı","Dev Kalamar","Mavi Balina","Narval"], ans:2, reward:20 },
+  { cat:'🦁 Hayvanlar', q:"Kaç yaşında fil olgunlaşır?", opts:["5","10","15","20"], ans:2, reward:25 },
+  { cat:'🦁 Hayvanlar', q:"Hangi hayvan en uzun yaşar?", opts:["Fil","Kaplumbağa","Papağan","Balina"], ans:1, reward:25 },
+  { cat:'🦁 Hayvanlar', q:"Kaç tane böcek türü keşfedilmiştir?", opts:["100.000","500.000","1 milyon","5 milyon"], ans:2, reward:30 },
+  { cat:'🦁 Hayvanlar', q:"Hangi hayvanın 360° görüş açısı vardır?", opts:["Baykuş","Kameleon","At","Karga"], ans:2, reward:30 },
+  { cat:'🦁 Hayvanlar', q:"Dünyanın en hızlı kara hayvanı hangisidir?", opts:["Aslan","Leopar","Çita","At"], ans:2, reward:20 },
+  { cat:'🦁 Hayvanlar', q:"Hangi hayvan hem karada hem suda yaşayabilir?", opts:["Yılan","Kaplumbağa","Kurbağa","Timsah"], ans:2, reward:20 },
+  { cat:'🦁 Hayvanlar', q:"Hangi kuş uçamaz?", opts:["Pelikan","Penguen","Martı","Atmaca"], ans:1, reward:15 },
+  { cat:'🦁 Hayvanlar', q:"Ahtapotun kaç kolu vardır?", opts:["6","7","8","10"], ans:2, reward:15 },
+  { cat:'🦁 Hayvanlar', q:"Hangi hayvan geceleri aktiftir?", opts:["Kartal","Baykuş","Güvercin","Turna"], ans:1, reward:15 },
+  { cat:'🦁 Hayvanlar', q:"Gergedan boynuzu neden yapılmıştır?", opts:["Kemik","Kıkırdak","Keratin","Dentin"], ans:2, reward:30 },
+  { cat:'🦁 Hayvanlar', q:"Hangi deniz canlısının beyni yoktur?", opts:["Ahtapot","Denizanası","Deniz atı","Yılan balığı"], ans:1, reward:25 },
+
+  // 🚀 UZAY
+  { cat:'🚀 Uzay', q:"Ay'ın Dünya'ya uzaklığı yaklaşık kaçtır?", opts:["38.000 km","384.000 km","3.840.000 km","38.400 km"], ans:1, reward:25 },
+  { cat:'🚀 Uzay', q:"Güneş'in çapı Dünya'nın kaç katıdır?", opts:["10","50","109","500"], ans:2, reward:30 },
+  { cat:'🚀 Uzay', q:"Uzayda ilk yürüyen insan kimdir?", opts:["Neil Armstrong","Buzz Aldrin","Yuri Gagarin","Alan Shepard"], ans:0, reward:25 },
+  { cat:'🚀 Uzay', q:"Samanyolu galaksisinin şekli nedir?", opts:["Eliptik","Spiral","Düzensiz","Yuvarlak"], ans:1, reward:25 },
+  { cat:'🚀 Uzay', q:"Kızıl Gezegen olarak bilinen gezegen hangisidir?", opts:["Jüpiter","Venüs","Mars","Satürn"], ans:2, reward:15 },
+  { cat:'🚀 Uzay', q:"Uzayda ilk giden hayvan nedir?", opts:["Maymun","Köpek","Fare","Kedi"], ans:1, reward:20 },
+  { cat:'🚀 Uzay', q:"Bir ışık yılı ne kadar uzunluğu ifade eder?", opts:["1 yılda gidilen mesafe","Işığın 1 yılda aldığı yol","1 milyar km","1 trilyon km"], ans:1, reward:25 },
+  { cat:'🚀 Uzay', q:"Satürn'ün halkaları neden yapılmıştır?", opts:["Gaz","Buz ve kaya parçaları","Toz","Metal"], ans:1, reward:25 },
+  { cat:'🚀 Uzay', q:"Jüpiter'in en büyük uydusu hangisidir?", opts:["Europa","Io","Ganimede","Callisto"], ans:2, reward:30 },
+  { cat:'🚀 Uzay', q:"Güneş'in yüzey sıcaklığı yaklaşık kaçtır?", opts:["1.000°C","5.500°C","15.000°C","100.000°C"], ans:1, reward:30 },
+  { cat:'🚀 Uzay', q:"Uzayda ses neden duyulmaz?", opts:["Hava çok soğuk","Madde yok, titreşim yok","Işık çok hızlı","Uzay boş değil"], ans:1, reward:25 },
+  { cat:'🚀 Uzay', q:"Hangi gezegen Güneş'e en uzaktır?", opts:["Satürn","Uranüs","Neptün","Plüton"], ans:2, reward:25 },
+  { cat:'🚀 Uzay', q:"ISS (Uzay İstasyonu) kaç ülkenin ortak projesidir?", opts:["5","10","15","20"], ans:2, reward:30 },
+  { cat:'🚀 Uzay', q:"Kara delikten kaçabilen tek şey nedir?", opts:["Işık","Ses","Hiçbir şey","Nötron"], ans:2, reward:25 },
+  { cat:'🚀 Uzay', q:"Mars'ta hangi gaz atmosferde çoğunluktadır?", opts:["Oksijen","Azot","Karbondioksit","Metan"], ans:2, reward:25 },
 ];
 
-// ── OYUN DURUMU ────────────────────────────────────────────────────────
-let countries=[], gold=0, bombs=0, selected=null, qIndex=0, correctCount=0, qAnswered=false;
+// ── ENVANTER ──────────────────────────────────────────────────────────
+let inv={klasik:0,atesh:0,nukleer:0,bok:0,sirk:0};
+let gold=0,selected=null,qIndex=0,correctCount=0,qAnswered=false,approval=50;
+let countries=[];
 
 function initGame(){
   document.getElementById('overlay').classList.remove('show');
-  gold=100; bombs=2; selected=null; correctCount=0;
+  gold=150; inv={klasik:2,atesh:0,nukleer:0,bok:1,sirk:0};
+  selected=null; correctCount=0; approval=50; qIndex=0; qAnswered=false;
 
-  countries = COUNTRY_DATA.map(d=>({
-    ...d,
-    defense: d.baseDefense,
-    love: d.baseLove,
-    conquered: false
+  countries=COUNTRY_DATA.map(d=>({
+    ...d, defense:d.baseD, love:d.baseLove, conquered:false
   }));
 
   shuffle(QUESTIONS);
-  qIndex=0; qAnswered=false;
-
-  renderMap();
-  showQuestion();
-  updateStats();
-  selectCountry(null);
+  renderMap(); showQuestion(); updateStats(); selectCountry(null);
   document.getElementById('action-msg').textContent='';
+}
+
+function startGame(){
+  document.getElementById('title-screen').style.display='none';
+  initGame();
 }
 
 // ── MAP ────────────────────────────────────────────────────────────────
@@ -298,11 +579,11 @@ function renderMap(){
     div.innerHTML=`
       <span class="c-flag">${c.flag}</span>
       <div class="c-name">${c.name}</div>
-      <div class="c-pop">👥 ${c.pop >= 1000 ? (c.pop/1000).toFixed(1)+'B' : c.pop+'M'}</div>
-      <div class="bar-label">❤️ Halk Sevgisi</div>
-      <div class="bar-wrap bar-love"><div class="bar-fill" style="width:${c.love}%;background:${loveColor(c.love)}"></div></div>
-      <div class="bar-label">🛡 Savunma</div>
-      <div class="bar-wrap bar-def"><div class="bar-fill" style="width:${(c.defense/c.baseDefense)*100}%"></div></div>
+      <div class="c-leader">${c.leader}</div>
+      <div class="bar-lbl">❤️ ${c.love}%</div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${c.love}%;background:${loveGrad(c.love)}"></div></div>
+      <div class="bar-lbl">🛡 ${c.defense}/${c.baseD}</div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${c.defense/c.baseD*100}%;background:linear-gradient(90deg,#3b82f6,#6366f1)"></div></div>
     `;
     map.appendChild(div);
   });
@@ -312,143 +593,161 @@ function updateCard(c){
   const div=document.getElementById('card-'+c.id);
   if(!div) return;
   div.className='country-card'+(c.conquered?' conquered':'')+(selected===c?' selected':'');
-  div.querySelector('.bar-wrap.bar-love .bar-fill').style.width=c.love+'%';
-  div.querySelector('.bar-wrap.bar-love .bar-fill').style.background=loveColor(c.love);
-  div.querySelector('.bar-wrap.bar-def .bar-fill').style.width=(c.defense/c.baseDefense*100)+'%';
+  div.innerHTML=`
+    <span class="c-flag">${c.flag}</span>
+    <div class="c-name">${c.name}</div>
+    <div class="c-leader">${c.leader}</div>
+    <div class="bar-lbl">❤️ ${c.love}%</div>
+    <div class="bar-wrap"><div class="bar-fill" style="width:${c.love}%;background:${loveGrad(c.love)}"></div></div>
+    <div class="bar-lbl">🛡 ${c.defense}/${c.baseD}</div>
+    <div class="bar-wrap"><div class="bar-fill" style="width:${c.defense/c.baseD*100}%;background:linear-gradient(90deg,#3b82f6,#6366f1)"></div></div>
+  `;
+  div.onclick=()=>selectCountry(c);
 }
 
-function loveColor(v){
-  if(v>=70) return 'linear-gradient(90deg,#ec4899,#f43f5e)';
-  if(v>=40) return 'linear-gradient(90deg,#f97316,#ef4444)';
-  return 'linear-gradient(90deg,#6b7280,#ef4444)';
+function loveGrad(v){
+  return v>=70?'linear-gradient(90deg,#ec4899,#f43f5e)':
+         v>=40?'linear-gradient(90deg,#f97316,#ef4444)':'linear-gradient(90deg,#6b7280,#9ca3af)';
 }
 
-// ── SELECT COUNTRY ─────────────────────────────────────────────────────
+// ── SELECT ─────────────────────────────────────────────────────────────
 function selectCountry(c){
-  if(selected){
-    const old=document.getElementById('card-'+selected.id);
-    if(old) old.classList.remove('selected');
-  }
+  if(selected){ const o=document.getElementById('card-'+selected.id); if(o) o.classList.remove('selected'); }
   selected=c;
-  if(c){
-    const el=document.getElementById('card-'+c.id);
-    if(el) el.classList.add('selected');
-  }
+  if(c){ const e=document.getElementById('card-'+c.id); if(e) e.classList.add('selected'); }
 
-  const bombBtn=document.getElementById('btn-bomb');
-  const loveBtn=document.getElementById('btn-love');
+  refreshBombBtns();
 
   if(!c){
     document.getElementById('sel-flag').textContent='🌐';
     document.getElementById('sel-name').textContent='Haritadan ülke seç';
     document.getElementById('sel-name').style.color='var(--text2)';
+    document.getElementById('sel-leader').textContent='';
+    document.getElementById('sel-quote').textContent='Bir ülke seçince liderinin komik lafı burada çıkar 😄';
     document.getElementById('sel-stats').innerHTML='';
-    bombBtn.disabled=true; loveBtn.disabled=true;
+    document.getElementById('btn-love').disabled=true;
     return;
   }
 
   document.getElementById('sel-flag').textContent=c.flag;
   document.getElementById('sel-name').textContent=c.name;
   document.getElementById('sel-name').style.color='var(--text)';
+  document.getElementById('sel-leader').textContent='👤 '+c.leader;
+  document.getElementById('sel-quote').textContent='"'+c.quotes[Math.floor(Math.random()*c.quotes.length)]+'"';
 
-  const defPct=Math.round(c.defense/c.baseDefense*100);
+  const defPct=Math.round(c.defense/c.baseD*100);
   document.getElementById('sel-stats').innerHTML=`
-    <div class="info-row"><span>👥 Nüfus</span><span class="info-val">${c.pop >= 1000 ? (c.pop/1000).toFixed(1)+'B' : c.pop+'M'}</span></div>
-    <div class="info-row"><span>❤️ Halk Sevgisi</span><span class="info-val" style="color:${c.love>=70?'#f43f5e':c.love>=40?'#f97316':'#6b7280'}">${c.love}%</span></div>
-    <div class="bar-label" style="font-size:11px;color:var(--text2);margin-bottom:4px;">🛡 Savunma: ${c.defense}/${c.baseDefense}</div>
-    <div class="big-bar" style="margin-bottom:12px">
+    <div class="info-row"><span>👥 Nüfus</span><span class="info-val">${c.pop>=1000?(c.pop/1000).toFixed(1)+'B':c.pop+'M'}</span></div>
+    <div class="info-row"><span>❤️ Halk Sevgisi</span><span class="info-val" style="color:${c.love>=70?'#f43f5e':c.love>=40?'#f97316':'#9ca3af'}">${c.love}%</span></div>
+    <div style="font-size:10px;color:var(--text2);margin-bottom:3px">🛡 Savunma: ${c.defense}/${c.baseD} (${defPct}%)</div>
+    <div class="big-bar" style="margin-bottom:10px">
       <div class="big-bar-fill" style="width:${defPct}%;background:linear-gradient(90deg,#3b82f6,#6366f1)"></div>
     </div>
-    ${c.conquered ? '<div style="color:#22c55e;font-weight:700;font-size:13px;text-align:center;margin-bottom:8px">✅ Bu ülke senin!</div>' : ''}
+    ${c.conquered?'<div style="color:#22c55e;font-weight:800;font-size:12px;text-align:center;margin-bottom:8px">✅ Bu ülke senindir!</div>':''}
   `;
 
-  bombBtn.disabled = c.conquered || bombs<=0;
-  loveBtn.disabled = c.conquered || gold<30;
+  document.getElementById('btn-love').disabled=c.conquered||gold<30;
   document.getElementById('action-msg').textContent=
-    c.conquered ? '✅ Fethedildi!' :
-    bombs<=0 ? '💣 Bomban yok — Market\'ten satın al!' : '';
+    c.conquered?'✅ Fethedildi! Başka ülke seç.':
+    Object.values(inv).every(v=>v===0)?'💣 Marketten bomba al!':'';
 }
 
-// ── ACTIONS ────────────────────────────────────────────────────────────
-document.getElementById('btn-bomb').onclick=function(){
-  if(!selected||selected.conquered||bombs<=0) return;
-  bombs--;
+function refreshBombBtns(){
+  const c=selected;
+  Object.keys(BOMBS).forEach(key=>{
+    const btn=document.getElementById('bb-'+key);
+    const span=document.getElementById('bc-'+key);
+    span.textContent=inv[key];
+    btn.disabled=!c||c.conquered||inv[key]<=0;
+  });
+}
 
-  // Damage based on love: yüksek sevgi = daha az direniş
-  let dmg;
-  if(selected.love>=70)      dmg=25+Math.floor(Math.random()*10); // 25-34
-  else if(selected.love>=40) dmg=15+Math.floor(Math.random()*10); // 15-24
-  else                       dmg=8+Math.floor(Math.random()*8);  // 8-15
+// ── USE BOMB ───────────────────────────────────────────────────────────
+function useBomb(type){
+  if(!selected||selected.conquered||inv[type]<=0) return;
+  const b=BOMBS[type];
+  inv[type]--;
+
+  // Hasar hesapla
+  let baseDmg=b.minDmg+Math.floor(Math.random()*(b.maxDmg-b.minDmg+1));
+  // Halk sevgisi bonusu
+  let loveMult = selected.love>=70?1.3 : selected.love>=40?1.0 : 0.7;
+  let dmg=Math.round(baseDmg*loveMult);
 
   selected.defense=Math.max(0,selected.defense-dmg);
-  selected.love=Math.max(0,selected.love-8);
+  selected.love=Math.max(0,selected.love-b.loveHit);
 
-  showMsg(`💥 ${dmg} hasar verdi! Savunma: ${selected.defense}`,'#f97316');
+  // Yeni lider lafı
+  document.getElementById('sel-quote').textContent='"'+selected.quotes[Math.floor(Math.random()*selected.quotes.length)]+'"';
 
-  if(selected.defense<=0){
-    conquer(selected);
-  } else {
-    updateCard(selected);
-    selectCountry(selected);
-    updateStats();
-  }
-};
+  const eff=loveMult>1?'🔥 Etkili!':loveMult<1?'😤 Direniyor!':'';
+  showMsg(`${b.msg} ${eff} ${dmg} hasar! Savunma: ${selected.defense}/${selected.baseD}`,'#f97316');
 
-document.getElementById('btn-love').onclick=function(){
+  if(selected.defense<=0) conquer(selected);
+  else { updateCard(selected); selectCountry(selected); }
+  updateStats(); refreshBombBtns();
+}
+
+// ── LOVE ───────────────────────────────────────────────────────────────
+function sendLove(){
   if(!selected||selected.conquered||gold<30) return;
   gold-=30;
-  const gain=10+Math.floor(Math.random()*11); // 10-20
+  const gain=10+Math.floor(Math.random()*16);
   selected.love=Math.min(100,selected.love+gain);
-  updateCard(selected);
-  selectCountry(selected);
-  updateStats();
-  showMsg(`❤️ Halk sevgisi +${gain}! Şimdi bombalar daha etkili!`,'#ec4899');
-};
+  approval=Math.min(100,approval+2);
+  updateCard(selected); selectCountry(selected); updateStats();
+  showMsg(`❤️ Halk sevgisi +${gain}! Bombalar daha etkili olacak.`,'#ec4899');
+  document.getElementById('btn-love').disabled=selected.conquered||gold<30;
+}
 
-document.getElementById('btn-buy').onclick=function(){
-  if(gold<50) return showMsg('💸 Yeterli altın yok!','#ef4444');
-  gold-=50; bombs++;
-  updateStats();
-  showMsg('💣 Bomba satın alındı!','#f59e0b');
-  if(selected) selectCountry(selected);
-};
-
+// ── CONQUER ────────────────────────────────────────────────────────────
 function conquer(c){
-  c.conquered=true;
-  c.defense=0;
-  const income=Math.max(20,Math.floor(c.pop/10));
+  c.conquered=true; c.defense=0;
+  const income=Math.max(25,Math.floor(c.pop/8));
   gold+=income;
-  updateCard(c);
-  selectCountry(c);
-  updateStats();
-  showMsg(`🎉 ${c.name} fethedildi! +${income} altın kazandın!`,'#22c55e');
+  approval=Math.min(100,approval+5);
+  updateCard(c); selectCountry(c); updateStats();
+  showMsg(`🎉 ${c.name} fethedildi! +${income} altın! Lider kaçtı!`,'#22c55e');
   toast(`🏳 ${c.name} artık senindir! 🎉`);
 
-  const conquered=countries.filter(x=>x.conquered).length;
-  if(conquered===countries.length){
+  if(countries.filter(x=>x.conquered).length===countries.length){
     setTimeout(()=>{
-      document.getElementById('ov-emoji').textContent='🏆';
-      document.getElementById('ov-title').textContent='Kazandınız!';
-      document.getElementById('ov-sub').textContent=`Tüm 15 ülkeyi fethettiniz! ${correctCount} soruyu doğru cevapladınız.`;
+      document.getElementById('ov-emoji').textContent='🌍';
+      document.getElementById('ov-title').textContent='DÜNYA SENİN!';
+      document.getElementById('ov-sub').textContent=`Tebrikler Başkan! Tüm 15 ülkeyi fethettiniz.\n${correctCount} soruyu doğru cevapladınız. Onay oranınız: %${approval}`;
       document.getElementById('overlay').classList.add('show');
     },800);
   }
+}
+
+// ── SHOP ───────────────────────────────────────────────────────────────
+['klasik','atesh','nukleer','bok','sirk'].forEach(key=>{
+  document.getElementById('sh-'+key).addEventListener('click',()=>buyBomb(key));
+});
+
+function buyBomb(type){
+  const b=BOMBS[type];
+  if(gold<b.price){ showMsg('💸 Yeterli altın yok!','#ef4444'); return; }
+  gold-=b.price; inv[type]++;
+  updateStats(); refreshBombBtns();
+  toast(`${b.icon} ${b.name} satın alındı!`);
+  if(selected) selectCountry(selected);
 }
 
 // ── QUESTION ───────────────────────────────────────────────────────────
 function showQuestion(){
   qAnswered=false;
   const q=QUESTIONS[qIndex%QUESTIONS.length];
+  document.getElementById('q-category').textContent='❓ '+q.cat;
   document.getElementById('q-text').textContent=q.q;
   document.getElementById('q-result').textContent='';
 
   const opts=document.getElementById('q-opts');
   opts.innerHTML='';
-  const keys=['A','B','C','D'];
-  q.opts.forEach((opt,i)=>{
+  ['A','B','C','D'].forEach((k,i)=>{
     const btn=document.createElement('button');
     btn.className='opt-btn';
-    btn.innerHTML=`<span class="opt-key">${keys[i]}</span>${opt}`;
+    btn.innerHTML=`<span class="opt-key">${k}</span>${q.opts[i]}`;
     btn.onclick=()=>answer(i);
     opts.appendChild(btn);
   });
@@ -459,58 +758,59 @@ function answer(idx){
   qAnswered=true;
   const q=QUESTIONS[qIndex%QUESTIONS.length];
   const btns=document.querySelectorAll('.opt-btn');
-
   btns.forEach((b,i)=>{
     b.disabled=true;
     if(i===q.ans) b.classList.add('correct');
-    else if(i===idx && idx!==q.ans) b.classList.add('wrong');
+    else if(i===idx&&idx!==q.ans) b.classList.add('wrong');
   });
-
   if(idx===q.ans){
-    gold+=q.reward;
-    correctCount++;
-    document.getElementById('q-result').textContent=`✅ Doğru! +${q.reward} altın kazandın!`;
+    gold+=q.reward; correctCount++;
+    approval=Math.min(100,approval+1);
+    document.getElementById('q-result').textContent=`✅ Doğru! +${q.reward} altın!`;
     document.getElementById('q-result').style.color='#86efac';
     toast(`+${q.reward} 💰 Doğru cevap!`);
   } else {
-    document.getElementById('q-result').textContent=`❌ Yanlış! Doğru cevap: ${q.opts[q.ans]}`;
+    document.getElementById('q-result').textContent=`❌ Yanlış! Doğru: ${q.opts[q.ans]}`;
     document.getElementById('q-result').style.color='#fca5a5';
   }
-
   updateStats();
-  if(selected) selectCountry(selected);
+  if(selected) { document.getElementById('btn-love').disabled=selected.conquered||gold<30; refreshBombBtns(); }
   qIndex++;
-  setTimeout(showQuestion, 1800);
+  setTimeout(showQuestion,1900);
 }
 
-// ── UI HELPERS ─────────────────────────────────────────────────────────
+// ── STATS ──────────────────────────────────────────────────────────────
 function updateStats(){
   document.getElementById('s-gold').textContent=gold;
-  document.getElementById('s-bomb').textContent=bombs;
   document.getElementById('s-count').textContent=countries.filter(c=>c.conquered).length;
   document.getElementById('s-correct').textContent=correctCount;
-  document.getElementById('btn-buy').disabled=gold<50;
+  document.getElementById('s-approval').textContent=approval+'%';
+  document.getElementById('approval-bar').style.width=approval+'%';
+  document.getElementById('approval-bar').style.background=
+    approval>=70?'linear-gradient(90deg,#22c55e,#86efac)':
+    approval>=40?'linear-gradient(90deg,#f59e0b,#fcd34d)':'linear-gradient(90deg,#ef4444,#fca5a5)';
+
+  // Market güncellemesi
+  ['klasik','atesh','nukleer','bok','sirk'].forEach(key=>{
+    const el=document.getElementById('sh-'+key);
+    if(el) el.classList.toggle('cant', gold<BOMBS[key].price);
+  });
 }
 
-function showMsg(msg, color){
+function showMsg(msg,color){
   const el=document.getElementById('action-msg');
-  el.textContent=msg;
-  el.style.color=color||'var(--text2)';
+  el.textContent=msg; el.style.color=color||'var(--text2)';
 }
 
 let toastTimer=null;
 function toast(msg){
   const el=document.getElementById('toast');
-  el.textContent=msg;
-  el.classList.add('show');
+  el.textContent=msg; el.classList.add('show');
   if(toastTimer) clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>el.classList.remove('show'),2200);
 }
 
-function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]; } }
-
-// Start
-initGame();
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
 </script>
 </body>
 </html>
