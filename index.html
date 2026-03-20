@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Ülke Fethet</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background:#050510;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      height:100vh; overflow:hidden;
+      font-family:'Segoe UI',system-ui,sans-serif;
+      user-select:none; -webkit-user-select:none;
+    }
+    canvas { display:block; cursor:pointer; }
+
+    #hud {
+      position:fixed; bottom:0; left:0; right:0;
+      background:linear-gradient(to top, rgba(5,5,20,0.98), rgba(5,5,20,0.85));
+      border-top:1px solid rgba(255,255,255,0.08);
+      padding:12px 20px calc(12px + env(safe-area-inset-bottom));
+      display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    }
+    .badge {
+      display:flex; align-items:center; gap:7px;
+      padding:6px 14px; border-radius:20px;
+      font-size:13px; font-weight:600; border:2px solid;
+      flex-shrink:0;
+    }
+    .dot { width:9px; height:9px; border-radius:50%; }
+    #phase-text {
+      flex:1; text-align:center;
+      font-size:13px; color:rgba(255,255,255,0.65);
+      min-width:120px;
+    }
+    #phase-text strong { color:#fff; }
+    #btn-end {
+      background:linear-gradient(135deg,#3b82f6,#6366f1);
+      border:none; color:#fff; padding:8px 22px;
+      border-radius:20px; font-size:13px; font-weight:700;
+      cursor:pointer; font-family:inherit; flex-shrink:0;
+      transition:opacity .2s, transform .1s;
+    }
+    #btn-end:hover { opacity:.85; }
+    #btn-end:active { transform:scale(.95); }
+    #btn-end:disabled { opacity:.35; cursor:not-allowed; }
+
+    #scoreboard {
+      pointer-events:none;
+      position:fixed; top:16px; right:16px;
+      background:rgba(5,5,20,0.92);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:14px; padding:12px 16px;
+      font-size:12px; display:flex; flex-direction:column; gap:5px;
+      min-width:150px;
+    }
+    .score-row { display:flex; align-items:center; gap:7px; }
+    .score-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .score-name { flex:1; color:rgba(255,255,255,0.8); }
+    .score-count { font-weight:700; }
+
+    #log-box {
+      pointer-events:none;
+      position:fixed; top:16px; left:16px;
+      background:rgba(5,5,20,0.92);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:14px; padding:10px 14px;
+      font-size:11.5px; max-width:190px;
+      display:flex; flex-direction:column; gap:3px;
+    }
+    .log-line { color:rgba(255,255,255,0.5); line-height:1.5; }
+    .log-line.fresh { color:rgba(255,255,255,0.85); }
+
+    #overlay {
+      display:none; position:fixed; inset:0;
+      background:rgba(5,5,20,0.96);
+      align-items:center; justify-content:center;
+      z-index:200; flex-direction:column; gap:18px;
+      text-align:center; padding:20px;
+    }
+    #overlay.show { display:flex; }
+    #overlay h1 { font-size:38px; font-weight:900; }
+    #overlay p  { font-size:15px; color:rgba(255,255,255,0.55); }
+    #btn-restart {
+      background:linear-gradient(135deg,#3b82f6,#6366f1);
+      border:none; color:#fff; padding:13px 36px;
+      border-radius:28px; font-size:16px; font-weight:700;
+      cursor:pointer; font-family:inherit; margin-top:6px;
+      transition:opacity .2s;
+    }
+    #btn-restart:hover { opacity:.85; }
+
+    #title-screen {
+      position:fixed; inset:0;
+      background:radial-gradient(ellipse at center, #0d0d2b 0%, #050510 100%);
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      gap:20px; z-index:300; padding:20px; text-align:center;
+    }
+    #title-screen h1 {
+      font-size:42px; font-weight:900;
+      background:linear-gradient(135deg,#60a5fa,#a78bfa,#34d399);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    #title-screen p { font-size:14px; color:rgba(255,255,255,0.5); max-width:340px; line-height:1.7; }
+    #btn-start {
+      background:linear-gradient(135deg,#3b82f6,#6366f1);
+      border:none; color:#fff; padding:14px 40px;
+      border-radius:30px; font-size:17px; font-weight:800;
+      cursor:pointer; font-family:inherit;
+      box-shadow:0 0 40px rgba(99,102,241,0.5);
+      transition:transform .15s, box-shadow .15s;
+    }
+    #btn-start:hover { transform:scale(1.05); box-shadow:0 0 60px rgba(99,102,241,0.7); }
+    .rules {
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:14px; padding:16px 20px;
+      text-align:left; max-width:340px;
+      font-size:12.5px; color:rgba(255,255,255,0.6);
+      line-height:1.9;
+    }
+    .rules strong { color:rgba(255,255,255,0.85); }
+  </style>
+</head>
+<body>
+
+<!-- Title Screen -->
+<div id="title-screen">
+  <h1>🌍 Ülke Fethet</h1>
+  <p>Tüm ülkeleri ele geçir, 2 yapay zeka rakibini yen!</p>
+  <div class="rules">
+    <strong>Nasıl Oynanır?</strong><br>
+    🔵 <strong>Takviye:</strong> Ülkelerine kuvvet yerleştir<br>
+    ⚔️ <strong>Saldırı:</strong> Ülke seç → komşuya saldır<br>
+    🏰 <strong>Güçlendir:</strong> Kuvvetleri taşı<br>
+    🏆 <strong>Kazanmak:</strong> Tüm ülkeleri fethet
+  </div>
+  <button id="btn-start" onclick="startGame()">Oyna ▶</button>
+</div>
+
+<canvas id="c"></canvas>
+
+<div id="hud">
+  <div id="player-badge" class="badge">
+    <div class="dot" id="badge-dot"></div>
+    <span id="badge-name"></span>
+  </div>
+  <div id="phase-text">Hazırlanıyor...</div>
+  <button id="btn-end" onclick="endPhase()">Geç →</button>
+</div>
+
+<div id="scoreboard"></div>
+<div id="log-box"></div>
+
+<div id="overlay">
+  <h1 id="ov-title"></h1>
+  <p id="ov-sub"></p>
+  <button id="btn-restart" onclick="initGame()">Tekrar Oyna ↺</button>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+let SCALE    = 1;
+
+// ── Territories ────────────────────────────────────────────────────────
+const TERR_DEF = [
+  { id:'canada',    name:'Kanada',     x:130, y:85,  adj:['usa','uk','russia'] },
+  { id:'usa',       name:'ABD',        x:148, y:172, adj:['canada','mexico','uk'] },
+  { id:'mexico',    name:'Meksika',    x:120, y:258, adj:['usa','brazil'] },
+  { id:'brazil',    name:'Brezilya',   x:228, y:338, adj:['mexico','argentina','nafrica'] },
+  { id:'argentina', name:'Arjantin',   x:212, y:438, adj:['brazil'] },
+  { id:'uk',        name:'İngiltere',  x:368, y:82,  adj:['canada','usa','france','germany'] },
+  { id:'france',    name:'Fransa',     x:388, y:152, adj:['uk','germany','spain','italy','nafrica'] },
+  { id:'germany',   name:'Almanya',    x:446, y:108, adj:['uk','france','italy','russia'] },
+  { id:'spain',     name:'İspanya',    x:344, y:192, adj:['france','nafrica'] },
+  { id:'italy',     name:'İtalya',     x:444, y:174, adj:['france','germany','nafrica'] },
+  { id:'russia',    name:'Rusya',      x:538, y:76,  adj:['canada','germany','mideast','china'] },
+  { id:'nafrica',   name:'K. Afrika',  x:402, y:278, adj:['spain','france','italy','brazil','cafrica','mideast'] },
+  { id:'cafrica',   name:'O. Afrika',  x:432, y:364, adj:['nafrica','safrica'] },
+  { id:'safrica',   name:'G. Afrika',  x:432, y:452, adj:['cafrica'] },
+  { id:'mideast',   name:'Ortadoğu',   x:534, y:204, adj:['russia','nafrica','india'] },
+  { id:'india',     name:'Hindistan',  x:608, y:246, adj:['mideast','china','seasia'] },
+  { id:'china',     name:'Çin',        x:666, y:146, adj:['russia','india','japan','seasia'] },
+  { id:'japan',     name:'Japonya',    x:750, y:122, adj:['china'] },
+  { id:'seasia',    name:'GD. Asya',   x:708, y:272, adj:['india','china','australia'] },
+  { id:'australia', name:'Avustralya', x:736, y:396, adj:['seasia'] },
+];
+
+const PLAYERS = [
+  { id:0, name:'Sen',    color:'#3b82f6', light:'#93c5fd', human:true  },
+  { id:1, name:'Kızıl', color:'#ef4444', light:'#fca5a5', human:false },
+  { id:2, name:'Yeşil', color:'#22c55e', light:'#86efac', human:false },
+];
+
+let T=[], G={}, particles=[], logLines=[], aiTimer=null;
+
+function getT(id){ return T.find(t=>t.id===id); }
+
+// ── Init ───────────────────────────────────────────────────────────────
+function startGame(){
+  document.getElementById('title-screen').style.display='none';
+  initGame();
+}
+
+function initGame(){
+  document.getElementById('overlay').classList.remove('show');
+  if(aiTimer){ clearTimeout(aiTimer); aiTimer=null; }
+  particles=[]; logLines=[];
+
+  T = TERR_DEF.map(d=>({...d, owner:-1, troops:0}));
+
+  // Shuffle & distribute
+  const ids=[...Array(T.length).keys()];
+  shuffle(ids);
+  ids.forEach((ti,i)=>{
+    T[ti].owner = i%3;
+    T[ti].troops = 3 + Math.floor(Math.random()*3);
+  });
+
+  G = { cur:0, phase:'reinforce', toPlace:calcR(0), sel:null, fromTerr:null };
+  updateHUD(); draw();
+  if(!PLAYERS[G.cur].human) aiTimer=setTimeout(aiTurn,700);
+}
+
+function calcR(pid){
+  return Math.max(3, Math.floor(T.filter(t=>t.owner===pid).length/3));
+}
+
+// ── Phase control ──────────────────────────────────────────────────────
+function endPhase(){
+  if(!PLAYERS[G.cur].human) return;
+  if(G.phase==='reinforce' && G.toPlace>0){ addLog('⚠️ Kuvvetleri yerleştir!'); return; }
+  if(G.phase==='reinforce')      { G.phase='attack'; G.sel=null; G.fromTerr=null; }
+  else if(G.phase==='attack')    { G.phase='fortify'; G.sel=null; G.fromTerr=null; }
+  else                           { nextTurn(); return; }
+  updateHUD(); draw();
+}
+
+function nextTurn(){
+  G.cur=(G.cur+1)%3;
+  // Skip eliminated
+  let tries=0;
+  while(T.filter(t=>t.owner===G.cur).length===0 && tries<3){ G.cur=(G.cur+1)%3; tries++; }
+  G.phase='reinforce'; G.toPlace=calcR(G.cur);
+  G.sel=null; G.fromTerr=null;
+  updateHUD(); draw();
+  if(!PLAYERS[G.cur].human) aiTimer=setTimeout(aiTurn,600);
+}
+
+// ── AI ─────────────────────────────────────────────────────────────────
+function aiTurn(){
+  const pid=G.cur;
+  const mine=T.filter(t=>t.owner===pid);
+  if(!mine.length){ nextTurn(); return; }
+
+  // Reinforce: most threatened territory
+  const target = mine.reduce((best,t)=>{
+    const e=t.adj.filter(id=>getT(id)?.owner!==pid).length;
+    const be=best.adj.filter(id=>getT(id)?.owner!==pid).length;
+    return e>be?t:best;
+  });
+  target.troops+=G.toPlace; G.toPlace=0;
+
+  // Attack
+  for(let pass=0;pass<10;pass++){
+    let attacked=false;
+    for(const from of T.filter(t=>t.owner===pid&&t.troops>2)){
+      for(const adjId of from.adj){
+        const to=getT(adjId);
+        if(to.owner===pid) continue;
+        if(from.troops>to.troops+1){
+          doBattle(from,to);
+          attacked=true;
+          if(checkWin()) return;
+          break;
+        }
+      }
+      if(attacked) break;
+    }
+    if(!attacked) break;
+  }
+
+  updateHUD(); draw();
+  aiTimer=setTimeout(()=>{ nextTurn(); },500);
+}
+
+// ── Battle ─────────────────────────────────────────────────────────────
+function doBattle(from,to){
+  addLog(`⚔️ ${from.name} → ${to.name}`);
+  burst(to.x*SCALE, to.y*SCALE, PLAYERS[from.owner].color, 14);
+
+  let atk=from.troops, def=to.troops;
+  while(atk>1 && def>0){
+    // Dice simulation
+    const ar=[];for(let i=0;i<Math.min(3,atk-1);i++) ar.push(Math.random());
+    const dr=[];for(let i=0;i<Math.min(2,def);i++) dr.push(Math.random()*0.95);
+    ar.sort((a,b)=>b-a); dr.sort((a,b)=>b-a);
+    const rounds=Math.min(ar.length,dr.length);
+    for(let i=0;i<rounds;i++){
+      if(ar[i]>dr[i]) def--; else atk--;
+    }
+  }
+
+  from.troops=atk;
+  if(def<=0){
+    to.owner=from.owner;
+    const moved=Math.max(1,Math.floor(atk/2));
+    to.troops=moved; from.troops=atk-moved+1;
+    burst(to.x*SCALE, to.y*SCALE, PLAYERS[from.owner].color, 20);
+    addLog(`✅ ${to.name} fethedildi!`);
+  } else {
+    to.troops=def;
+  }
+  draw();
+}
+
+function checkWin(){
+  for(const p of PLAYERS){
+    if(T.filter(t=>t.owner===p.id).length===T.length){
+      const ov=document.getElementById('overlay');
+      document.getElementById('ov-title').textContent = p.human?'🏆 Kazandınız!':'😔 Kaybettiniz';
+      document.getElementById('ov-sub').textContent   = p.human?'Tüm ülkeleri fethettiniz!':p.name+' tüm ülkeleri fethetti.';
+      ov.classList.add('show');
+      return true;
+    }
+  }
+  return false;
+}
+
+// ── Click ──────────────────────────────────────────────────────────────
+canvas.addEventListener('click', e=>{
+  if(!PLAYERS[G.cur].human) return;
+  const r=canvas.getBoundingClientRect();
+  const mx=(e.clientX-r.left)/SCALE, my=(e.clientY-r.top)/SCALE;
+  const hit=T.find(t=>dist(t.x,t.y,mx,my)<34);
+
+  if(G.phase==='reinforce'){
+    if(hit && hit.owner===G.cur && G.toPlace>0){
+      hit.troops++; G.toPlace--;
+      burst(hit.x*SCALE, hit.y*SCALE, PLAYERS[G.cur].color, 8);
+      updateHUD(); draw();
+    } else if(hit && hit.owner!==G.cur){
+      addLog('❌ Bu ülke sana ait değil!');
+    } else if(G.toPlace<=0){
+      addLog('✅ Tüm kuvvetler yerleştirildi, Geç butonuna bas.');
+    }
+
+  } else if(G.phase==='attack'){
+    if(!G.fromTerr){
+      if(hit && hit.owner===G.cur && hit.troops>1){ G.fromTerr=hit; G.sel=hit; }
+    } else {
+      if(!hit){ G.fromTerr=null; G.sel=null; }
+      else if(hit===G.fromTerr){ G.fromTerr=null; G.sel=null; }
+      else if(hit.owner!==G.cur && G.fromTerr.adj.includes(hit.id)){
+        doBattle(G.fromTerr, hit);
+        checkWin();
+        G.fromTerr=null; G.sel=null;
+      } else if(hit.owner===G.cur && hit.troops>1){
+        G.fromTerr=hit; G.sel=hit;
+      }
+    }
+    updateHUD(); draw();
+
+  } else if(G.phase==='fortify'){
+    if(!G.sel){
+      if(hit && hit.owner===G.cur && hit.troops>1) G.sel=hit;
+    } else {
+      if(!hit){ G.sel=null; }
+      else if(hit===G.sel){ G.sel=null; }
+      else if(hit.owner===G.cur && G.sel.adj.includes(hit.id)){
+        const move=G.sel.troops-1;
+        hit.troops+=move; G.sel.troops=1;
+        addLog(`🔀 ${G.sel.name}→${hit.name}: ${move} kuvvet`);
+        G.sel=null;
+      } else if(hit.owner===G.cur && hit.troops>1){ G.sel=hit; }
+      else { G.sel=null; }
+    }
+    draw();
+  }
+});
+
+// ── Draw ───────────────────────────────────────────────────────────────
+function draw(){
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  // BG gradient
+  const bg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*0.8);
+  bg.addColorStop(0,'#0d0d2b'); bg.addColorStop(1,'#050510');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // Stars
+  for(let i=0;i<100;i++){
+    const sx=((i*137.508+11)%900)*SCALE;
+    const sy=((i*97.33+7)%560)*SCALE;
+    const sr=(i%5===0?1.6:i%3===0?1.1:0.6)*SCALE;
+    const alpha=0.2+((i*53)%80)/200;
+    ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${alpha})`; ctx.fill();
+  }
+
+  // Connection lines
+  const drawn=new Set();
+  for(const t of T){
+    for(const adjId of t.adj){
+      const key=[t.id,adjId].sort().join('|');
+      if(drawn.has(key)) continue; drawn.add(key);
+      const t2=getT(adjId);
+      const sameOwner=t.owner===t2.owner&&t.owner>=0;
+      ctx.beginPath();
+      ctx.moveTo(t.x*SCALE, t.y*SCALE);
+      ctx.lineTo(t2.x*SCALE, t2.y*SCALE);
+      ctx.strokeStyle=sameOwner?PLAYERS[t.owner].color+'44':'rgba(255,255,255,0.07)';
+      ctx.lineWidth=(sameOwner?1.5:1)*SCALE;
+      ctx.stroke();
+    }
+  }
+
+  // Territories
+  for(const t of T) drawT(t);
+
+  // Particles
+  tickParticles();
+  if(particles.length) requestAnimationFrame(draw);
+}
+
+function drawT(t){
+  const x=t.x*SCALE, y=t.y*SCALE, r=26*SCALE;
+  const p=t.owner>=0?PLAYERS[t.owner]:null;
+  const col=p?p.color:'#374151';
+  const isSel = G.sel===t || G.fromTerr===t;
+  const isTarget = G.fromTerr && t.owner!==G.cur && G.fromTerr.adj.includes(t.id);
+  const isReach  = G.sel && G.phase==='fortify' && t!==G.sel && t.owner===G.cur && G.sel.adj.includes(t.id);
+  const isMyReinforce = G.phase==='reinforce' && t.owner===G.cur && G.toPlace>0;
+
+  // Pulse ring for reinforceable territories
+  if(isMyReinforce){
+    const pulse=0.5+0.5*Math.sin(Date.now()/300);
+    const pr=r+8*SCALE*pulse;
+    ctx.beginPath(); ctx.arc(x,y,pr,0,Math.PI*2);
+    ctx.strokeStyle=col+'88'; ctx.lineWidth=2*SCALE; ctx.stroke();
+    requestAnimationFrame(draw);
+  }
+
+  // Outer glow
+  if(isSel||isTarget||isReach||isMyReinforce){
+    const gc=isTarget?'#ef4444':isReach?'#22c55e':col;
+    const gr=ctx.createRadialGradient(x,y,r*.4,x,y,r*2.8);
+    gr.addColorStop(0,gc+'4a'); gr.addColorStop(1,gc+'00');
+    ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(x,y,r*2.8,0,Math.PI*2); ctx.fill();
+  }
+
+  // Shadow glow
+  ctx.shadowBlur=14*SCALE; ctx.shadowColor=col;
+
+  // Circle bg
+  const grd=ctx.createRadialGradient(x-r*.25,y-r*.25,0,x,y,r);
+  grd.addColorStop(0,col+'cc'); grd.addColorStop(1,col+'44');
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fillStyle=grd; ctx.fill();
+
+  // Border
+  ctx.strokeStyle=isSel?'#fff':isTarget?'#ef4444':isReach?'#22c55e':col+'bb';
+  ctx.lineWidth=(isSel||isTarget?2.8:1.8)*SCALE;
+  ctx.stroke();
+  ctx.shadowBlur=0;
+
+  // Troop count
+  ctx.fillStyle='#fff';
+  ctx.font=`bold ${Math.round(13*SCALE)}px 'Segoe UI',sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(t.troops, x, y);
+
+  // Name
+  ctx.fillStyle='rgba(255,255,255,0.82)';
+  ctx.font=`${Math.round(9*SCALE)}px 'Segoe UI',sans-serif`;
+  ctx.fillText(t.name, x, y+r+10*SCALE);
+}
+
+// ── Particles ──────────────────────────────────────────────────────────
+function burst(x,y,color,n){
+  for(let i=0;i<n;i++){
+    const a=(Math.PI*2*i/n)+Math.random()*.4;
+    const sp=(2+Math.random()*3)*SCALE;
+    particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,color});
+  }
+  requestAnimationFrame(draw);
+}
+
+function tickParticles(){
+  particles=particles.filter(p=>p.life>0);
+  for(const p of particles){
+    p.x+=p.vx; p.y+=p.vy; p.vy+=.08*SCALE;
+    p.vx*=.94; p.vy*=.94; p.life-=.035;
+    const hex=Math.round(p.life*255).toString(16).padStart(2,'0');
+    ctx.beginPath(); ctx.arc(p.x,p.y,3*SCALE*p.life,0,Math.PI*2);
+    ctx.fillStyle=p.color+hex; ctx.fill();
+  }
+}
+
+// ── HUD ────────────────────────────────────────────────────────────────
+function updateHUD(){
+  const p=PLAYERS[G.cur];
+  const badge=document.getElementById('player-badge');
+  badge.style.background=p.color+'22'; badge.style.borderColor=p.color; badge.style.color=p.light;
+  document.getElementById('badge-dot').style.background=p.color;
+  document.getElementById('badge-name').textContent=p.name;
+
+  const pt=document.getElementById('phase-text');
+  if(G.phase==='reinforce'){
+    const myTerrs=T.filter(t=>t.owner===G.cur).map(t=>t.name).join(', ');
+    pt.innerHTML=`<strong>Takviye</strong> — <strong style="color:${p.light}">${G.toPlace}</strong> kuvvet kaldı · Ülkelerin: <span style="color:${p.light};font-size:11px">${myTerrs}</span>`;
+  } else if(G.phase==='attack'){
+    const hint=G.fromTerr?`<strong style="color:${p.light}">${G.fromTerr.name}</strong> seçili — hedefe tıkla`:'Saldırmak için ülke seç (veya geç)';
+    pt.innerHTML=`<strong>Saldırı</strong> — ${hint}`;
+  } else {
+    pt.innerHTML=`<strong>Güçlendir</strong> — Kuvvet taşı veya turu bitir`;
+  }
+
+  const btn=document.getElementById('btn-end');
+  btn.disabled=!p.human;
+  btn.textContent=G.phase==='fortify'?'Turu Bitir ✓':'Sonraki Aşama →';
+
+  // Scoreboard
+  const sb=document.getElementById('scoreboard');
+  sb.innerHTML=PLAYERS.map(pl=>{
+    const cnt=T.filter(t=>t.owner===pl.id).length;
+    const troops=T.filter(t=>t.owner===pl.id).reduce((s,t)=>s+t.troops,0);
+    return `<div class="score-row">
+      <div class="score-dot" style="background:${pl.color}"></div>
+      <span class="score-name">${pl.name}</span>
+      <span class="score-count" style="color:${pl.light}">${cnt} 🏳 ${troops} ⚔</span>
+    </div>`;
+  }).join('');
+
+  // Log
+  const lb=document.getElementById('log-box');
+  lb.innerHTML=logLines.slice(-5).map((l,i,a)=>
+    `<div class="log-line ${i===a.length-1?'fresh':''}">${l}</div>`
+  ).join('') || '<div class="log-line">Oyun başladı!</div>';
+}
+
+function addLog(msg){ logLines.push(msg); if(logLines.length>8) logLines.shift(); updateHUD(); }
+
+// ── Helpers ────────────────────────────────────────────────────────────
+function dist(x1,y1,x2,y2){ return Math.hypot(x1-x2,y1-y2); }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]; } }
+
+// ── Resize ─────────────────────────────────────────────────────────────
+function resize(){
+  const maxW=Math.min(window.innerWidth,1000);
+  const maxH=window.innerHeight-72;
+  const aspect=900/560;
+  let w=maxW, h=maxW/aspect;
+  if(h>maxH){ h=maxH; w=h*aspect; }
+  canvas.width=Math.floor(w); canvas.height=Math.floor(h);
+  SCALE=w/900;
+  draw();
+}
+window.addEventListener('resize', resize);
+resize();
+</script>
+</body>
+</html>
