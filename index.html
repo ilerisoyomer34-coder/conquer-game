@@ -7,167 +7,185 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
-  --bg:#07071a;--bg2:#0f0f28;--bg3:#17173a;
-  --border:#2a2a55;--accent:#6366f1;--accent2:#a78bfa;
-  --gold:#f59e0b;--red:#ef4444;--green:#22c55e;--text:#e2e8f0;--text2:#94a3b8;
+  --bg:#06080f;--bg2:#0d1117;--bg3:#161b22;
+  --border:#21262d;--accent:#58a6ff;--accent2:#a78bfa;
+  --gold:#f0b429;--red:#f85149;--green:#3fb950;--text:#c9d1d9;--text2:#8b949e;
+  --ocean:#0a1628;--land:#1c2a1e;--land2:#243828;
 }
 body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;
-  min-height:100vh;overflow-x:hidden;user-select:none;-webkit-user-select:none;}
+  height:100vh;overflow:hidden;user-select:none;-webkit-user-select:none;display:flex;flex-direction:column;}
 
-/* ── TOP BAR ── */
+/* TOP BAR */
 #topbar{
-  position:sticky;top:0;z-index:100;
-  background:rgba(7,7,26,0.97);backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--border);
-  padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  background:rgba(6,8,15,0.97);border-bottom:1px solid var(--border);
+  padding:6px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;
+  z-index:100;
 }
-#topbar h1{font-size:15px;font-weight:900;background:linear-gradient(135deg,#f59e0b,#ef4444,#a78bfa);
+#topbar h1{font-size:14px;font-weight:900;background:linear-gradient(135deg,#f0b429,#f85149,#a78bfa);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;flex-shrink:0;}
-.stat{display:flex;align-items:center;gap:5px;background:var(--bg3);border:1px solid var(--border);
-  border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;}
-#approval-wrap{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;}
-#approval-bar-wrap{width:80px;height:8px;background:rgba(0,0,0,.4);border-radius:4px;overflow:hidden;}
-#approval-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,#22c55e,#86efac);transition:width .4s;}
+.stat{display:flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:20px;padding:3px 9px;font-size:11px;font-weight:700;}
+#approval-wrap{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;}
+#approval-bar-wrap{width:70px;height:6px;background:rgba(0,0,0,.5);border-radius:3px;overflow:hidden;}
+#approval-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,#3fb950,#56d364);transition:width .4s;}
 
-/* ── MAIN ── */
-#main{display:grid;grid-template-columns:1fr 290px;gap:10px;padding:10px;max-width:1120px;margin:0 auto;}
-@media(max-width:720px){#main{grid-template-columns:1fr;}}
+/* GAME AREA */
+#game-area{flex:1;display:grid;grid-template-columns:1fr 280px;overflow:hidden;}
+@media(max-width:700px){#game-area{grid-template-columns:1fr;}}
 
-/* ── MAP ── */
-#map{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
-@media(max-width:500px){#map{grid-template-columns:repeat(3,1fr);}}
+/* MAP */
+#map-wrap{position:relative;overflow:hidden;background:var(--ocean);}
+#map-svg{width:100%;height:100%;cursor:default;}
 
-.country-card{
-  background:var(--bg2);border:2px solid var(--border);border-radius:13px;
-  padding:9px 7px;cursor:pointer;transition:all .18s;text-align:center;position:relative;overflow:hidden;
+/* Ocean grid lines */
+.grid-line{stroke:rgba(88,166,255,0.06);stroke-width:1;}
+
+/* Country territories */
+.territory{
+  transition:filter .15s,opacity .15s;
+  cursor:pointer;
 }
-.country-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 18px rgba(99,102,241,.25);}
-.country-card.selected{border-color:#f59e0b;background:rgba(245,158,11,.08);box-shadow:0 0 18px rgba(245,158,11,.3);}
-.country-card.conquered{border-color:#22c55e;background:rgba(34,197,94,.07);}
-.country-card.conquered::after{content:'✓';position:absolute;top:4px;right:6px;color:#22c55e;font-weight:900;font-size:11px;}
-.c-flag{font-size:24px;display:block;margin-bottom:3px;}
-.c-name{font-size:10px;font-weight:800;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.c-leader{font-size:9px;color:var(--text2);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.bar-wrap{background:rgba(0,0,0,.3);border-radius:3px;height:4px;margin-bottom:2px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:3px;transition:width .4s;}
-.bar-lbl{font-size:8px;color:var(--text2);text-align:left;}
+.territory:hover{filter:brightness(1.4);}
+.territory.selected-t{filter:brightness(1.6)!important;}
+.territory.conquered-t{filter:brightness(1);}
 
-/* ── SIDE ── */
-#side{display:flex;flex-direction:column;gap:8px;}
+/* Country labels */
+.t-label{
+  font-size:9px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle;
+  pointer-events:none;text-shadow:0 1px 3px #000;
+}
+.t-flag{font-size:13px;text-anchor:middle;dominant-baseline:middle;pointer-events:none;}
 
-.box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:13px;}
-.box h3{font-size:12px;color:var(--text2);margin-bottom:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
+/* Conquest ring */
+.ring{fill:none;stroke:#3fb950;stroke-width:2;opacity:0;pointer-events:none;}
+.ring.visible{opacity:1;animation:pulse-ring 1.5s ease-in-out infinite;}
+@keyframes pulse-ring{0%,100%{stroke-opacity:1;r:attr(r)}50%{stroke-opacity:.3;}}
 
-#sel-flag{font-size:44px;text-align:center;display:block;margin-bottom:4px;}
-#sel-name{font-size:17px;font-weight:900;text-align:center;margin-bottom:2px;}
-#sel-leader{font-size:11px;color:var(--text2);text-align:center;margin-bottom:10px;}
-.info-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-bottom:6px;}
-.info-val{font-weight:800;color:var(--accent2);}
-.big-bar{background:rgba(0,0,0,.3);border-radius:5px;height:8px;overflow:hidden;margin-bottom:10px;}
-.big-bar-fill{height:100%;border-radius:5px;transition:width .4s;}
-#sel-quote{font-size:10px;color:#f59e0b;font-style:italic;text-align:center;
-  background:rgba(245,158,11,.08);border-radius:8px;padding:6px 8px;margin-bottom:10px;min-height:32px;}
+/* SIDE PANEL */
+#side{
+  background:var(--bg2);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+@media(max-width:700px){#side{max-height:220px;border-left:none;border-top:1px solid var(--border);}}
+
+.panel{padding:10px 12px;border-bottom:1px solid var(--border);}
+.panel h3{font-size:10px;color:var(--text2);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+
+/* Selected country info */
+#sel-flag{font-size:36px;display:block;text-align:center;margin-bottom:4px;}
+#sel-name{font-size:15px;font-weight:900;text-align:center;margin-bottom:1px;}
+#sel-leader{font-size:10px;color:var(--text2);text-align:center;margin-bottom:8px;}
+#sel-quote{font-size:9px;color:var(--gold);font-style:italic;text-align:center;
+  background:rgba(240,180,41,.07);border-radius:6px;padding:5px 7px;margin-bottom:8px;min-height:28px;}
+.irow{display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px;}
+.ival{font-weight:800;color:var(--accent2);}
+.mbar{background:rgba(0,0,0,.4);border-radius:3px;height:5px;overflow:hidden;margin-bottom:8px;}
+.mbar-fill{height:100%;border-radius:3px;transition:width .4s;}
 
 /* Bomb buttons */
-#bomb-btns{display:flex;flex-direction:column;gap:6px;margin-bottom:6px;}
+#bomb-btns{display:flex;flex-direction:column;gap:4px;}
 .bomb-btn{
-  width:100%;padding:8px 10px;border-radius:9px;border:1px solid;
-  color:#fff;font-size:12px;font-weight:700;font-family:inherit;
-  cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:space-between;
+  width:100%;padding:6px 9px;border-radius:7px;border:1px solid;
+  color:#fff;font-size:11px;font-weight:700;font-family:inherit;
+  cursor:pointer;transition:all .13s;display:flex;align-items:center;justify-content:space-between;
 }
-.bomb-btn:hover:not(:disabled){filter:brightness(1.15);transform:translateX(2px);}
-.bomb-btn:disabled{opacity:.3;cursor:not-allowed;transform:none;}
-.bomb-btn .b-count{background:rgba(0,0,0,.3);border-radius:6px;padding:1px 6px;font-size:10px;}
-#btn-love{width:100%;padding:8px;border-radius:9px;background:linear-gradient(135deg,#ec4899,#be185d);
-  border:none;color:#fff;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .15s;}
-#btn-love:hover:not(:disabled){opacity:.85;}
-#btn-love:disabled{opacity:.3;cursor:not-allowed;}
-#action-msg{font-size:10px;color:var(--text2);text-align:center;margin-top:6px;min-height:14px;}
+.bomb-btn:hover:not(:disabled){filter:brightness(1.2);transform:translateX(2px);}
+.bomb-btn:disabled{opacity:.25;cursor:not-allowed;transform:none;}
+.b-count{background:rgba(0,0,0,.35);border-radius:5px;padding:1px 5px;font-size:9px;}
+
+#btn-love{width:100%;padding:7px;border-radius:7px;background:linear-gradient(135deg,#ec4899,#be185d);
+  border:none;color:#fff;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .13s;margin-top:4px;}
+#btn-love:disabled{opacity:.25;cursor:not-allowed;}
+#action-msg{font-size:9px;color:var(--text2);text-align:center;margin-top:5px;min-height:12px;}
 
 /* Shop */
 .shop-item{
-  display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);
-  border-radius:9px;padding:7px 10px;margin-bottom:5px;cursor:pointer;transition:all .15s;
+  display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:7px;padding:5px 8px;margin-bottom:4px;cursor:pointer;transition:all .13s;
 }
-.shop-item:hover:not(.cant){border-color:var(--gold);background:rgba(245,158,11,.07);}
-.shop-item.cant{opacity:.4;cursor:not-allowed;}
-.shop-icon{font-size:18px;flex-shrink:0;}
-.shop-info{flex:1;}
-.shop-name{font-size:12px;font-weight:700;}
-.shop-desc{font-size:10px;color:var(--text2);}
-.shop-price{font-size:12px;font-weight:800;color:var(--gold);flex-shrink:0;}
+.shop-item:hover:not(.cant){border-color:var(--gold);background:rgba(240,180,41,.06);}
+.shop-item.cant{opacity:.35;cursor:not-allowed;}
+.si-icon{font-size:16px;}
+.si-info{flex:1;}
+.si-name{font-size:11px;font-weight:700;}
+.si-desc{font-size:9px;color:var(--text2);}
+.si-price{font-size:11px;font-weight:800;color:var(--gold);}
 
-/* ── QUESTION ── */
-#q-section{padding:10px 10px 0;max-width:1120px;margin:0 auto;}
-#q-panel{
-  background:var(--bg2);border:1px solid var(--border);border-radius:14px;
-  padding:14px;margin-bottom:10px;position:relative;overflow:hidden;
+/* QUESTION BAR */
+#q-bar{
+  background:var(--bg2);border-top:1px solid var(--border);
+  padding:8px 12px;flex-shrink:0;
 }
-#q-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,#f59e0b,#ef4444,#a78bfa,#60a5fa);}
-#q-category{font-size:10px;color:var(--accent2);font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
-#q-text{font-size:14px;font-weight:700;line-height:1.5;margin-bottom:12px;}
-#q-opts{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
-@media(max-width:500px){#q-opts{grid-template-columns:1fr;}}
+#q-cat{font-size:9px;color:var(--accent2);font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+#q-text{font-size:12px;font-weight:700;line-height:1.4;margin-bottom:7px;}
+#q-opts{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+@media(max-width:500px){#q-opts{grid-template-columns:1fr 1fr;}}
 .opt-btn{
   background:var(--bg3);border:1px solid var(--border);color:var(--text);
-  padding:9px 12px;border-radius:10px;cursor:pointer;text-align:left;
-  font-size:12px;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:7px;
+  padding:6px 10px;border-radius:8px;cursor:pointer;text-align:left;
+  font-size:11px;font-family:inherit;transition:all .13s;display:flex;align-items:center;gap:6px;
 }
 .opt-btn:hover:not(:disabled){background:var(--border);border-color:var(--accent);}
-.opt-btn.correct{background:rgba(34,197,94,.18);border-color:#22c55e;color:#86efac;}
-.opt-btn.wrong{background:rgba(239,68,68,.18);border-color:#ef4444;color:#fca5a5;}
+.opt-btn.correct{background:rgba(63,185,80,.18);border-color:#3fb950;color:#56d364;}
+.opt-btn.wrong{background:rgba(248,81,73,.18);border-color:#f85149;color:#ffa198;}
 .opt-btn:disabled{cursor:not-allowed;}
-.opt-key{background:var(--accent);color:#fff;width:20px;height:20px;border-radius:5px;
-  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;flex-shrink:0;}
-.opt-btn.correct .opt-key{background:#22c55e;}
-.opt-btn.wrong .opt-key{background:#ef4444;}
-#q-result{font-size:12px;font-weight:700;margin-top:8px;min-height:18px;text-align:center;}
+.opt-key{background:var(--accent);color:#fff;width:18px;height:18px;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;flex-shrink:0;}
+.opt-btn.correct .opt-key{background:#3fb950;}
+.opt-btn.wrong .opt-key{background:#f85149;}
+#q-result{font-size:11px;font-weight:700;margin-top:6px;min-height:16px;text-align:center;}
 
-/* ── TOAST ── */
-#toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-20px);
-  background:var(--bg3);border:1px solid var(--border);border-radius:20px;
-  padding:7px 18px;font-size:13px;font-weight:700;
-  opacity:0;transition:all .3s;pointer-events:none;z-index:200;white-space:nowrap;}
+/* TOAST */
+#toast{position:fixed;top:55px;left:50%;transform:translateX(-50%) translateY(-15px);
+  background:var(--bg3);border:1px solid var(--border);border-radius:18px;
+  padding:6px 16px;font-size:12px;font-weight:700;
+  opacity:0;transition:all .25s;pointer-events:none;z-index:500;white-space:nowrap;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* ── OVERLAY ── */
-#overlay{display:none;position:fixed;inset:0;background:rgba(7,7,26,.96);
-  z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;padding:20px;}
+/* OVERLAY */
+#overlay{display:none;position:fixed;inset:0;background:rgba(6,8,15,.96);
+  z-index:600;align-items:center;justify-content:center;flex-direction:column;gap:12px;text-align:center;padding:20px;}
 #overlay.show{display:flex;}
-#ov-emoji{font-size:60px;}
-#ov-title{font-size:30px;font-weight:900;}
-#ov-sub{font-size:13px;color:var(--text2);max-width:360px;line-height:1.6;}
-#btn-restart{background:linear-gradient(135deg,#f59e0b,#ef4444);border:none;color:#fff;padding:12px 32px;
-  border-radius:26px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:6px;}
+#ov-emoji{font-size:56px;}
+#ov-title{font-size:28px;font-weight:900;}
+#ov-sub{font-size:13px;color:var(--text2);max-width:340px;line-height:1.7;}
+#btn-restart{background:linear-gradient(135deg,#f0b429,#f85149);border:none;color:#fff;padding:11px 30px;
+  border-radius:24px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:4px;}
 
-/* Title screen */
-#title-screen{position:fixed;inset:0;background:radial-gradient(ellipse at center,#0d0d2b 0%,#050510 100%);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:300;padding:20px;text-align:center;}
-#title-screen h1{font-size:36px;font-weight:900;background:linear-gradient(135deg,#f59e0b,#ef4444,#a78bfa);
+/* TITLE */
+#title-screen{position:fixed;inset:0;background:radial-gradient(ellipse at center,#0d102b 0%,#04060e 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:600;padding:20px;text-align:center;}
+#title-screen h1{font-size:32px;font-weight:900;background:linear-gradient(135deg,#f0b429,#f85149,#a78bfa);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2;}
-#title-screen .sub{font-size:14px;color:var(--text2);max-width:340px;line-height:1.7;}
+#title-screen .sub{font-size:13px;color:var(--text2);max-width:320px;line-height:1.7;}
 .rules-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
-  border-radius:14px;padding:14px 18px;max-width:340px;font-size:12px;color:rgba(255,255,255,.65);line-height:2;}
-.rules-box strong{color:rgba(255,255,255,.9);}
-#btn-start{background:linear-gradient(135deg,#f59e0b,#ef4444);border:none;color:#fff;padding:13px 36px;
-  border-radius:28px;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit;
-  box-shadow:0 0 40px rgba(245,158,11,.4);transition:transform .15s;}
+  border-radius:12px;padding:12px 16px;max-width:320px;font-size:11px;color:rgba(255,255,255,.6);line-height:2;}
+.rules-box strong{color:rgba(255,255,255,.88);}
+#btn-start{background:linear-gradient(135deg,#f0b429,#f85149);border:none;color:#fff;padding:12px 32px;
+  border-radius:26px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;
+  box-shadow:0 0 40px rgba(240,180,41,.35);transition:transform .13s;}
 #btn-start:hover{transform:scale(1.05);}
+
+/* Explosion animation */
+@keyframes explode{
+  0%{opacity:1;r:5;}
+  100%{opacity:0;r:40;}
+}
+.explosion{animation:explode .5s ease-out forwards;fill:none;stroke-width:3;pointer-events:none;}
 </style>
 </head>
 <body>
 
 <div id="title-screen">
-  <h1>🌍 DÜNYA BENİM!<br><span style="font-size:20px">Başkanın Dünya Fetih Simülatörü</span></h1>
-  <p class="sub">Seçimler bitti, sıra bombalarda! Soruları cevapla, bomba al, dünyayı fethet. Komşun ne diyecek umurumuzda mı? 😏</p>
+  <h1>🌍 DÜNYA BENİM!<br><span style="font-size:18px">Başkanın Fetih Simülatörü</span></h1>
+  <p class="sub">Soruları cevapla, altın kazan, bomba al ve dünyayı fethedelim! Komşun ne diyecek umurumuzda mı? 😏</p>
   <div class="rules-box">
     <strong>Nasıl Oynanır?</strong><br>
     ❓ Soruyu cevapla → 💰 Altın kazan<br>
     🛒 Marketten bomba satın al<br>
-    🗺 Ülke seç → Bomba at → Fethet<br>
-    ❤️ Halk sevgisi yüksekse daha kolay!<br>
-    🏆 Tüm ülkeleri fethedince kazan!
+    🗺 Haritadan ülke seç → Bomba at<br>
+    ❤️ Halk sevgisi yüksekse daha etkili!<br>
+    🏆 Tüm 15 ülkeyi fethedince kazan!
   </div>
   <button id="btn-start" onclick="startGame()">FETHE BAŞLA 🚀</button>
 </div>
@@ -176,27 +194,48 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <div id="topbar">
   <h1>🌍 DÜNYA BENİM!</h1>
   <div class="stat">💰 <span id="s-gold">0</span></div>
-  <div class="stat">🏳 <span id="s-count">0</span>/15</div>
-  <div class="stat">✅ <span id="s-correct">0</span> doğru</div>
+  <div class="stat">🏴 <span id="s-count">0</span>/15</div>
+  <div class="stat">✅ <span id="s-correct">0</span></div>
   <div id="approval-wrap">
-    <span style="font-size:11px;color:var(--text2)">Başkanlık Onayı:</span>
+    <span style="font-size:10px;color:var(--text2)">Onay:</span>
     <div id="approval-bar-wrap"><div id="approval-bar" style="width:50%"></div></div>
-    <span id="s-approval" style="font-size:11px;font-weight:800;color:#22c55e">50%</span>
+    <span id="s-approval" style="font-size:10px;font-weight:800;color:#3fb950">50%</span>
   </div>
 </div>
 
-<!-- Main -->
-<div id="main">
-  <div id="map"></div>
+<!-- Game Area -->
+<div id="game-area">
+
+  <!-- World Map -->
+  <div id="map-wrap">
+    <svg id="map-svg" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet">
+      <!-- Ocean background -->
+      <rect width="900" height="420" fill="#0a1628"/>
+      <!-- Grid lines -->
+      <line x1="0" y1="105" x2="900" y2="105" class="grid-line"/>
+      <line x1="0" y1="210" x2="900" y2="210" class="grid-line"/>
+      <line x1="0" y1="315" x2="900" y2="315" class="grid-line"/>
+      <line x1="225" y1="0" x2="225" y2="420" class="grid-line"/>
+      <line x1="450" y1="0" x2="450" y2="420" class="grid-line"/>
+      <line x1="675" y1="0" x2="675" y2="420" class="grid-line"/>
+      <!-- Equator -->
+      <line x1="0" y1="210" x2="900" y2="210" stroke="rgba(88,166,255,0.12)" stroke-width="1" stroke-dasharray="6,4"/>
+
+      <!-- Country territories will be injected by JS -->
+      <g id="territories"></g>
+    </svg>
+  </div>
+
+  <!-- Side Panel -->
   <div id="side">
 
-    <!-- Selected country -->
-    <div class="box" id="info-box">
+    <!-- Selected Country Info -->
+    <div class="panel" id="info-panel">
       <h3>🎯 Hedef Ülke</h3>
       <span id="sel-flag">🌐</span>
-      <div id="sel-name" style="color:var(--text2)">Haritadan ülke seç</div>
-      <div id="sel-leader"></div>
-      <div id="sel-quote">Bir ülke seçince liderinin komik lafı burada çıkar 😄</div>
+      <div id="sel-name" style="color:var(--text2);font-size:15px;font-weight:900;text-align:center;margin-bottom:1px">Haritadan seç</div>
+      <div id="sel-leader" style="font-size:10px;color:var(--text2);text-align:center;margin-bottom:8px"></div>
+      <div id="sel-quote" style="font-size:9px;color:var(--gold);font-style:italic;text-align:center;background:rgba(240,180,41,.07);border-radius:6px;padding:5px 7px;margin-bottom:8px;min-height:28px;">Bir ülke seç 👆</div>
       <div id="sel-stats"></div>
       <div id="bomb-btns">
         <button class="bomb-btn" id="bb-klasik" style="background:linear-gradient(135deg,#374151,#1f2937);border-color:#6b7280" disabled onclick="useBomb('klasik')">
@@ -206,63 +245,62 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
           🔥 Ateş Bombası <span class="b-count" id="bc-atesh">0</span>
         </button>
         <button class="bomb-btn" id="bb-nukleer" style="background:linear-gradient(135deg,#14532d,#166534);border-color:#22c55e" disabled onclick="useBomb('nukleer')">
-          ☢️ Nükleer Bomba <span class="b-count" id="bc-nukleer">0</span>
+          ☢️ Nükleer <span class="b-count" id="bc-nukleer">0</span>
         </button>
         <button class="bomb-btn" id="bb-sirk" style="background:linear-gradient(135deg,#4a044e,#701a75);border-color:#d946ef" disabled onclick="useBomb('sirk')">
           🎪 Sirk Topu <span class="b-count" id="bc-sirk">0</span>
         </button>
       </div>
-      <button id="btn-love" disabled onclick="sendLove()">❤️ Halk Sevgisi Kazan (30 altın)</button>
+      <button id="btn-love" disabled onclick="sendLove()">❤️ Halk Sevgisi Kazan (30💰)</button>
       <div id="action-msg"></div>
     </div>
 
     <!-- Shop -->
-    <div class="box">
+    <div class="panel">
       <h3>🛒 Silah Marketi</h3>
       <div class="shop-item" id="sh-klasik" onclick="buyBomb('klasik')">
-        <span class="shop-icon">💣</span>
-        <div class="shop-info">
-          <div class="shop-name">Klasik Bomba</div>
-          <div class="shop-desc">15-25 hasar. Güvenilir, sıkıcı.</div>
+        <span class="si-icon">💣</span>
+        <div class="si-info">
+          <div class="si-name">Klasik Bomba</div>
+          <div class="si-desc">15-25 hasar</div>
         </div>
-        <span class="shop-price">40💰</span>
+        <span class="si-price">40💰</span>
       </div>
       <div class="shop-item" id="sh-atesh" onclick="buyBomb('atesh')">
-        <span class="shop-icon">🔥</span>
-        <div class="shop-info">
-          <div class="shop-name">Ateş Bombası</div>
-          <div class="shop-desc">25-45 hasar. Sıcak sıcak!</div>
+        <span class="si-icon">🔥</span>
+        <div class="si-info">
+          <div class="si-name">Ateş Bombası</div>
+          <div class="si-desc">25-45 hasar</div>
         </div>
-        <span class="shop-price">70💰</span>
+        <span class="si-price">70💰</span>
       </div>
       <div class="shop-item" id="sh-nukleer" onclick="buyBomb('nukleer')">
-        <span class="shop-icon">☢️</span>
-        <div class="shop-info">
-          <div class="shop-name">Nükleer Bomba</div>
-          <div class="shop-desc">60-100 hasar. BM kızacak!</div>
+        <span class="si-icon">☢️</span>
+        <div class="si-info">
+          <div class="si-name">Nükleer Bomba</div>
+          <div class="si-desc">60-100 hasar!</div>
         </div>
-        <span class="shop-price">150💰</span>
+        <span class="si-price">150💰</span>
       </div>
       <div class="shop-item" id="sh-sirk" onclick="buyBomb('sirk')">
-        <span class="shop-icon">🎪</span>
-        <div class="shop-info">
-          <div class="shop-name">Sirk Topu</div>
-          <div class="shop-desc">1-80 hasar. Kumar gibi!</div>
+        <span class="si-icon">🎪</span>
+        <div class="si-info">
+          <div class="si-name">Sirk Topu</div>
+          <div class="si-desc">1-80 hasar (kumar!)</div>
         </div>
-        <span class="shop-price">35💰</span>
+        <span class="si-price">35💰</span>
       </div>
     </div>
+
   </div>
 </div>
 
-<!-- Question -->
-<div id="q-section">
-  <div id="q-panel">
-    <div id="q-category">❓ SORU</div>
-    <div id="q-text">Yükleniyor...</div>
-    <div id="q-opts"></div>
-    <div id="q-result"></div>
-  </div>
+<!-- Question Bar -->
+<div id="q-bar">
+  <div id="q-cat">❓ SORU</div>
+  <div id="q-text">Yükleniyor...</div>
+  <div id="q-opts"></div>
+  <div id="q-result"></div>
 </div>
 
 <div id="toast"></div>
@@ -274,26 +312,117 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 </div>
 
 <script>
-// ── ÜLKELER ────────────────────────────────────────────────────────────
+// ── ÜLKELER (harita koordinatları SVG 900x420) ──────────────────────────
 const COUNTRY_DATA = [
-  { id:'turkey',    name:'Türkiye',    flag:'🇹🇷', pop:85,   baseD:60,  baseLove:80, leader:'Lider Mehmet Bey', quotes:['Bize bomba atarsan çay ısmarlarım!','Toprak bütünlüğümüz masada değil!','Biraz bekle, çay demliyor...'] },
-  { id:'germany',   name:'Almanya',    flag:'🇩🇪', pop:84,   baseD:75,  baseLove:45, leader:'Kanzler Hans Müller', quotes:['Verimliliğimizi küçümseme!','Dakikası dakikasına savaşırız.','Effizienz ist alles!'] },
-  { id:'france',    name:'Fransa',     flag:'🇫🇷', pop:68,   baseD:65,  baseLove:55, leader:'Başkan Pierre Baguette', quotes:['Mon dieu! Croissant atarım!','Şarabımıza dokunma!','Romantizmi bombalayanı affetmem.'] },
-  { id:'uk',        name:'İngiltere',  flag:'🇬🇧', pop:67,   baseD:65,  baseLove:50, leader:'Lord Teacup III', quotes:['This is not cricket!','Çayımı soğuttun, savaş bu!','Brexit yetmedi mi yaa?'] },
-  { id:'russia',    name:'Rusya',      flag:'🇷🇺', pop:145,  baseD:95,  baseLove:25, leader:'Putin-ski Vladimirof', quotes:['Bana bomba mı? Güldüm.','Sibirya\'ya tatile gidin.','Gas pipeline açık, dikkat et!'] },
-  { id:'usa',       name:'Amerika',    flag:'🇺🇸', pop:335,  baseD:100, baseLove:30, leader:'Başkan Chad McBurger', quotes:['Freedom fries\'ı dokunma!','Demokrasi ihraç ederim sana!','McDonald\'s\'ı mı bombaladın?!'] },
-  { id:'china',     name:'Çin',        flag:'🇨🇳', pop:1400, baseD:100, baseLove:20, leader:'Komiser Xiao Ping-Pong', quotes:['1.4 milyar insanız, dene bakalım.','Biz üretiyoruz sen bombalıyorsun?','Bombandan daha ucuzu var bizde.'] },
-  { id:'japan',     name:'Japonya',    flag:'🇯🇵', pop:125,  baseD:70,  baseLove:65, leader:'Başbakan Tanaka Sushi', quotes:['Anime karakterlerime zarar verme!','Teknoloji üstünlüğümüz var!','Çok şirin görünüyorsun, yine de hayır.'] },
-  { id:'india',     name:'Hindistan',  flag:'🇮🇳', pop:1400, baseD:80,  baseLove:50, leader:'Maharaja Curry Dev', quotes:['1.4 milyar destansı karşı koyuş!','Baharatlarımı almaya mı geldin?','Yoga ile savunuyoruz!'] },
-  { id:'brazil',    name:'Brezilya',   flag:'🇧🇷', pop:215,  baseD:60,  baseLove:70, leader:'Başkan Samba Santos', quotes:['Karnavalı durdurmaya mı geldin?','Futbol oynayalım, kazan ülkeyi al!','Capoeira ile savunuyoruz!'] },
-  { id:'australia', name:'Avustralya', flag:'🇦🇺', pop:26,   baseD:45,  baseLove:75, leader:'Steve Kangaroo PM', quotes:['Mate, cidden mi?','Kangurularım var, dikkat et!','Kriket sopasıyla savaşırız!'] },
-  { id:'egypt',     name:'Mısır',      flag:'🇪🇬', pop:104,  baseD:55,  baseLove:55, leader:'Firavun Hamdi II', quotes:['3000 yıllık piramit bombaya gülür!','Mumyalar çok sinirli olur sakın!','Nil\'imi kirletme!'] },
-  { id:'mexico',    name:'Meksika',    flag:'🇲🇽', pop:130,  baseD:55,  baseLove:60, leader:'El Presidente Taco Grande', quotes:['Tacos üzerine savaşmam!','Mariachi ile moral bozamam!','¡Ay caramba! Durun bir dakika!'] },
-  { id:'canada',    name:'Kanada',     flag:'🇨🇦', pop:38,   baseD:50,  baseLove:80, leader:'Başbakan Justin Maple', quotes:['Sorry eh, ama hayır!','Akçaağaç şurubumu bombalayanı affetmem.','Sakin ol, çay içelim.'] },
-  { id:'safrica',   name:'G. Afrika',  flag:'🇿🇦', pop:60,   baseD:45,  baseLove:65, leader:'Başkan Ubuntu Dlamini', quotes:['Ubuntu diyor ki: paylaş!','Elmaslarımı bombalamaya mı geldin?','Savana aslanları uyanıyor!'] },
+  {
+    id:'canada', name:'Kanada', flag:'🇨🇦', pop:38, baseD:50, baseLove:80,
+    leader:'Başbakan Justin Maple',
+    quotes:['Sorry eh, ama hayır!','Akçaağaç şurubumu bombalayanı affetmem.','Sakin ol, çay içelim.'],
+    // SVG polygon points (approximate Canada shape)
+    pts:'130,40 250,40 280,60 270,80 240,90 220,110 200,100 160,100 130,80',
+    cx:205, cy:72
+  },
+  {
+    id:'usa', name:'Amerika', flag:'🇺🇸', pop:335, baseD:100, baseLove:30,
+    leader:'Başkan Chad McBurger',
+    quotes:['Freedom fries\'ı dokunma!','Demokrasi ihraç ederim sana!','McDonald\'s\'ı mı bombaladın?!'],
+    pts:'130,105 265,105 270,135 250,155 230,170 190,175 155,165 130,145',
+    cx:200, cy:138
+  },
+  {
+    id:'mexico', name:'Meksika', flag:'🇲🇽', pop:130, baseD:55, baseLove:60,
+    leader:'El Presidente Taco Grande',
+    quotes:['Tacos üzerine savaşmam!','¡Ay caramba!','Mariachi ile geldim!'],
+    pts:'140,178 200,175 215,185 210,215 185,225 155,220 140,205',
+    cx:178, cy:200
+  },
+  {
+    id:'brazil', name:'Brezilya', flag:'🇧🇷', pop:215, baseD:60, baseLove:70,
+    leader:'Başkan Samba Santos',
+    quotes:['Karnavalı durdurmaya mı geldin?','Futbol oynayalım!','Capoeira ile savunuyoruz!'],
+    pts:'200,240 270,225 300,240 295,305 270,325 230,320 205,300 195,270',
+    cx:247, cy:275
+  },
+  {
+    id:'uk', name:'İngiltere', flag:'🇬🇧', pop:67, baseD:65, baseLove:50,
+    leader:'Lord Teacup III',
+    quotes:['This is not cricket!','Çayımı soğuttun, savaş bu!','Brexit yetmedi mi?'],
+    pts:'418,100 435,98 440,115 432,130 418,128',
+    cx:429, cy:113
+  },
+  {
+    id:'france', name:'Fransa', flag:'🇫🇷', pop:68, baseD:65, baseLove:55,
+    leader:'Başkan Pierre Baguette',
+    quotes:['Mon dieu! Croissant atarım!','Şarabımıza dokunma!','Romantizmi bombalayanı affetmem.'],
+    pts:'432,130 458,125 468,138 462,158 440,160 430,148',
+    cx:449, cy:142
+  },
+  {
+    id:'germany', name:'Almanya', flag:'🇩🇪', pop:84, baseD:75, baseLove:45,
+    leader:'Kanzler Hans Müller',
+    quotes:['Verimliliğimizi küçümseme!','Dakikası dakikasına savaşırız.','Effizienz ist alles!'],
+    pts:'452,108 480,105 492,118 488,135 468,138 458,125',
+    cx:472, cy:120
+  },
+  {
+    id:'russia', name:'Rusya', flag:'🇷🇺', pop:145, baseD:95, baseLove:25,
+    leader:'Putin-ski Vladimirof',
+    quotes:['Bana bomba mı? Güldüm.','Sibirya\'ya tatile gidin.','Gas pipeline açık, dikkat et!'],
+    pts:'470,60 700,55 720,75 710,100 680,110 600,115 520,105 490,90 470,75',
+    cx:590, cy:82
+  },
+  {
+    id:'turkey', name:'Türkiye', flag:'🇹🇷', pop:85, baseD:60, baseLove:80,
+    leader:'Lider Mehmet Bey',
+    quotes:['Bize bomba atarsan çay ısmarlarım!','Toprak bütünlüğümüz masada değil!','Biraz bekle, çay demliyor...'],
+    pts:'500,148 548,142 562,150 558,168 535,172 505,168',
+    cx:531, cy:157
+  },
+  {
+    id:'egypt', name:'Mısır', flag:'🇪🇬', pop:104, baseD:55, baseLove:55,
+    leader:'Firavun Hamdi II',
+    quotes:['3000 yıllık piramit bombaya gülür!','Mumyalar çok sinirli olur!','Nil\'imi kirletme!'],
+    pts:'498,175 528,172 535,185 530,210 505,212 495,198',
+    cx:514, cy:193
+  },
+  {
+    id:'safrica', name:'G. Afrika', flag:'🇿🇦', pop:60, baseD:45, baseLove:65,
+    leader:'Başkan Ubuntu Dlamini',
+    quotes:['Ubuntu diyor ki: paylaş!','Elmaslarımı bombalayanı affetmem.','Savana aslanları uyanıyor!'],
+    pts:'490,295 525,288 535,305 530,330 510,342 488,332 480,315',
+    cx:508, cy:314
+  },
+  {
+    id:'india', name:'Hindistan', flag:'🇮🇳', pop:1400, baseD:80, baseLove:50,
+    leader:'Maharaja Curry Dev',
+    quotes:['1.4 milyar destansı karşı koyuş!','Baharatlarımı almaya mı geldin?','Yoga ile savunuyoruz!'],
+    pts:'595,168 640,162 655,178 648,215 630,232 610,230 598,210',
+    cx:626, cy:197
+  },
+  {
+    id:'china', name:'Çin', flag:'🇨🇳', pop:1400, baseD:100, baseLove:20,
+    leader:'Komiser Xiao Ping-Pong',
+    quotes:['1.4 milyar insanız, dene bakalım.','Biz üretiyoruz sen bombalıyorsun?','Bombandan ucuzu var bizde.'],
+    pts:'640,110 720,105 740,120 735,155 705,162 655,162 632,148 635,125',
+    cx:686, cy:133
+  },
+  {
+    id:'japan', name:'Japonya', flag:'🇯🇵', pop:125, baseD:70, baseLove:65,
+    leader:'Başbakan Tanaka Sushi',
+    quotes:['Anime karakterlerime zarar verme!','Teknoloji üstünlüğümüz var!','Çok şirinsin, yine de hayır.'],
+    pts:'748,130 768,128 772,145 765,162 748,160 742,145',
+    cx:757, cy:145
+  },
+  {
+    id:'australia', name:'Avustralya', flag:'🇦🇺', pop:26, baseD:45, baseLove:75,
+    leader:'Steve Kangaroo PM',
+    quotes:['Mate, cidden mi?','Kangurularım var, dikkat et!','Kriket sopasıyla savaşırız!'],
+    pts:'690,295 780,285 800,305 795,355 760,368 710,362 688,340',
+    cx:743, cy:328
+  },
 ];
 
-// ── BOMBA TİPLERİ ──────────────────────────────────────────────────────
+// ── BOMBA TİPLERİ ────────────────────────────────────────────────────────
 const BOMBS = {
   klasik:  { name:'Klasik Bomba',  icon:'💣', price:40,  minDmg:15, maxDmg:25, loveHit:5,  msg:'BOOM! Klasik ama işe yarar.' },
   atesh:   { name:'Ateş Bombası',  icon:'🔥', price:70,  minDmg:25, maxDmg:45, loveHit:10, msg:'YANGIN VAR! İtfaiye yolda!' },
@@ -303,50 +432,46 @@ const BOMBS = {
 
 // ── SORULAR ────────────────────────────────────────────────────────────
 const QUESTIONS = [
-  // 🗳️ HALK NE İSTİYOR
-  // 🗳️ HALK ANKETİ — Başkanlık & Halk Soruları
+  // 🗳️ HALK ANKETİ
   { cat:'🗳️ Halk Anketi', q:"Halkın %72'si bu haftaki en büyük isteği nedir?", opts:["Zam olmasın","Trafik çözülsün","İnternet ucuzlasın","Cumartesi de tatil olsun"], ans:3, reward:25 },
   { cat:'🗳️ Halk Anketi', q:"Vatandaşlar senden ne istiyor?", opts:["Daha az vergi","Daha fazla park","Ücretsiz çay","Hepsini birden"], ans:3, reward:20 },
   { cat:'🗳️ Halk Anketi', q:"Seçim kampanyasında hangi söz oy getirir?", opts:["Her şeyi dürüstçe anlatacağım","Elektrik ücretsiz olacak","Trafik çözülecek","Halkımı çok seviyorum"], ans:1, reward:25 },
   { cat:'🗳️ Halk Anketi', q:"Halk en çok hangi konudan şikayet eder?", opts:["Hava durumu","Ekmek fiyatı","Komşunun köpeği","Hepsinden"], ans:3, reward:20 },
   { cat:'🗳️ Halk Anketi', q:"Başkan olarak ilk icraatın ne olur?", opts:["Maaşımı artırırım","Tatil sayısını artırırım","Trafik sorununu çözerim","Halkı dinlerim"], ans:1, reward:25 },
-  { cat:'🗳️ Halk Anketi', q:"Halk seni neden seçti?", opts:["Yakışıklı/güzel olduğum için","İyi konuşma yaptım","Rakibim daha kötüydü","Hâlâ bunu anlayamadım"], ans:2, reward:20 },
-  { cat:'🗳️ Halk Anketi', q:"Halkın %89'u ne istiyor?", opts:["Barış","Özgürlük","Refah","Önce barış, sonra refah, sonra özgürlük sırası var ya"], ans:3, reward:25 },
+  { cat:'🗳️ Halk Anketi', q:"Halk seni neden seçti?", opts:["Yakışıklı olduğum için","İyi konuşma yaptım","Rakibim daha kötüydü","Hâlâ bunu anlayamadım"], ans:2, reward:20 },
   { cat:'🗳️ Halk Anketi', q:"Ekonomi kötü gidince ne yaparsın?", opts:["Halka açıklarım","Medyayı kapatırım","Dışarıya çıkmam","Muhalefeti suçlarım"], ans:3, reward:25 },
   { cat:'🗳️ Halk Anketi', q:"Rakip başkan seni eleştiriyor, ne yaparsın?", opts:["Cevap veririm","Mahkemeye veririm","Tweet atarım","Savaş açarım"], ans:2, reward:20 },
-  { cat:'🗳️ Halk Anketi', q:"Halka en popüler söz nedir?", opts:["Köklü değişim","Güçlü ekonomi","Herkese iş","Her söz oy getirir"], ans:3, reward:20 },
-  { cat:'🗳️ Halk Anketi', q:"Ülkende en büyük sorun nedir?", opts:["İşsizlik","Enflasyon","Trafik","Sosyal medya bağımlılığı"], ans:3, reward:20 },
   { cat:'🗳️ Halk Anketi', q:"Başkanlık sarayında en çok ne yaparsın?", opts:["Çalışırım","Toplantı yaparım","Çay içerim","Netflix izlerim"], ans:3, reward:25 },
-  { cat:'🗳️ Halk Anketi', q:"BM'de konuşma yapacaksın, ne söylersin?", opts:["Barış istiyoruz","Ekonomimiz güçlü","Herkesi seviyoruz","Teşekkür ederim, çok uzun konuşmayacağım"], ans:3, reward:25 },
   { cat:'🗳️ Halk Anketi', q:"Seçimi kaybedersen ne yaparsın?", opts:["Sonucu kabul ederim","Tekrar seçime girerim","Tatile giderim","Sonuçları tanımam"], ans:3, reward:25 },
   { cat:'🗳️ Halk Anketi', q:"En iyi dış politika yöntemi nedir?", opts:["Diplomatik görüşme","Ekonomik yaptırım","Askeri güç","Komşuyu bombalayıp özür dilemek"], ans:3, reward:30 },
-  { cat:'🗳️ Halk Anketi', q:"Ülkene turist çekmek için ne yaparsın?", opts:["Reklam kampanyası","Vize kaldırırım","Fiyatları indiririm","Bedava yemek veririm"], ans:3, reward:20 },
-  { cat:'🗳️ Halk Anketi', q:"Halk senden ne beklemiyor?", opts:["Dürüstlük","Çalışkanlık","Ahlaklı davranmak","Hepsi bekleniyor ama olmaz"], ans:3, reward:25 },
-  { cat:'🗳️ Halk Anketi', q:"Vatandaşlara ne vaat edersin?", opts:["Özgürlük","Refah","Her şey çok iyi olacak","Elimden geleni yapacağım"], ans:2, reward:20 },
-  { cat:'🗳️ Halk Anketi', q:"Başkan olarak en zor karar nedir?", opts:["Savaş açmak","Vergi artırmak","İkisini de aynı anda yapmak","Vatandaşa 'hayır' demek"], ans:3, reward:25 },
   { cat:'🗳️ Halk Anketi', q:"Halkın mutluluğunu nasıl artırırsın?", opts:["Tatil günü artırırım","Vergi indiririm","Ekmek ucuzlatırım","Hepsini yaparım diyip hiçbirini yapmam"], ans:3, reward:25 },
+  { cat:'🗳️ Halk Anketi', q:"BM'de konuşma yapacaksın, ne söylersin?", opts:["Barış istiyoruz","Ekonomimiz güçlü","Herkesi seviyoruz","Teşekkür ederim, kısa keseceğim"], ans:3, reward:25 },
+  { cat:'🗳️ Halk Anketi', q:"Ülkene turist çekmek için ne yaparsın?", opts:["Reklam kampanyası","Vize kaldırırım","Fiyatları indiririm","Bedava yemek veririm"], ans:3, reward:20 },
+  { cat:'🗳️ Halk Anketi', q:"Başkan olarak en zor karar nedir?", opts:["Savaş açmak","Vergi artırmak","İkisini de aynı anda yapmak","Vatandaşa 'hayır' demek"], ans:3, reward:25 },
+  { cat:'🗳️ Halk Anketi', q:"Halkın %89'u ne istiyor?", opts:["Barış","Özgürlük","Refah","Önce barış sonra refah, sıra var ya"], ans:3, reward:25 },
+  { cat:'🗳️ Halk Anketi', q:"Vatandaşlara ne vaat edersin?", opts:["Özgürlük","Refah","Her şey çok iyi olacak","Elimden geleni yapacağım"], ans:2, reward:20 },
+  { cat:'🗳️ Halk Anketi', q:"Ülkende en büyük sorun nedir?", opts:["İşsizlik","Enflasyon","Trafik","Sosyal medya bağımlılığı"], ans:3, reward:20 },
+  { cat:'🗳️ Halk Anketi', q:"Halka en popüler söz nedir?", opts:["Köklü değişim","Güçlü ekonomi","Herkese iş","Her söz oy getirir"], ans:3, reward:20 },
+  { cat:'🗳️ Halk Anketi', q:"Halk senden ne beklemiyor?", opts:["Dürüstlük","Çalışkanlık","Ahlaklı davranmak","Hepsi bekleniyor ama olmaz"], ans:3, reward:25 },
 
-  // 😂 KOMİK SORULAR
+  // 😂 KOMİK
   { cat:'😂 Komik', q:"Kafes dövüşü ister misin?", opts:["Evet, rakibimi ezerim","Hayır, diplomatik çözerim","Bence ring daha şık","Rakibim beni ezer"], ans:2, reward:25 },
   { cat:'😂 Komik', q:"Sabah uyanınca başkan olarak ilk ne yaparsın?", opts:["Ülkeyi yönetirim","Twitter'ı açarım","Kahvaltı yaparım","Tekrar uyurum"], ans:3, reward:20 },
   { cat:'😂 Komik', q:"Hangi ülkeyi fethetmek en zordur?", opts:["Amerika","Rusya","Çin","Kendi nüfus müdürlüğü"], ans:3, reward:25 },
   { cat:'😂 Komik', q:"Dünya kaça kaça dönüyor?", opts:["Çok hızlı","Yavaşça","Ben döndürüyorum zaten","Dönüyor mu ki?"], ans:2, reward:20 },
-  { cat:'😂 Komik', q:"En iyi başkan özelliği nedir?", opts:["Bomba atacak cesaret","Saçını düzgün taramak","Konuşurken uyutmamak","Hepsini birden"], ans:2, reward:20 },
-  { cat:'😂 Komik', q:"Bir ülkeyi fethedince ilk iş nedir?", opts:["Vergi koyarım","Tatile giderim","İsim değiştiririm","Fotoğraf çektiririm"], ans:3, reward:20 },
-  { cat:'😂 Komik', q:"BM seni aradığında ne yaparsın?", opts:["Hemen açarım","Meşgul gösteririm","Açıp konuşmam","Bloke ederim"], ans:3, reward:25 },
   { cat:'😂 Komik', q:"Savaş açmak için en iyi bahane nedir?", opts:["Özgürlük","Demokrasi","Petrol","Komşu bana baktı"], ans:3, reward:30 },
   { cat:'😂 Komik', q:"Ülkeni nasıl savunursun?", opts:["Ordu ile","Dikenli tel ile","Komşuyu öne atarım","Tweet atarım"], ans:3, reward:25 },
-  { cat:'😂 Komik', q:"Başkan olunca ilk çıkarılan kanun ne olur?", opts:["Çalışma saatleri azalır","Tatil günleri artar","Çay zorunlu olur","Hepsi"], ans:3, reward:20 },
-  { cat:'😂 Komik', q:"Rusya'dan bomba gelince ne yaparsın?", opts:["Saklarım","Karşılık veririm","İade ederim","Piyango bileti sanırım"], ans:3, reward:30 },
+  { cat:'😂 Komik', q:"BM seni aradığında ne yaparsın?", opts:["Hemen açarım","Meşgul gösteririm","Açıp konuşmam","Bloke ederim"], ans:3, reward:25 },
   { cat:'😂 Komik', q:"Dünya barışı nasıl sağlanır?", opts:["Konuşarak","Anlaşarak","Herkesi ben fethedince","İnterneti kapatınca"], ans:2, reward:25 },
-  { cat:'😂 Komik', q:"Hangi silah en güçlüdür?", opts:["Nükleer","Kimyasal","Sosyal medya","Kötü komşuluk"], ans:2, reward:25 },
+  { cat:'😂 Komik', q:"Rusya'dan bomba gelince ne yaparsın?", opts:["Saklarım","Karşılık veririm","İade ederim","Piyango bileti sanırım"], ans:3, reward:30 },
   { cat:'😂 Komik', q:"Komşu ülke çok gürültü yapıyor, ne yaparsın?", opts:["Gidip konuşurum","Şikayet ederim","Fethedip sustururum","Kulaklık takarım"], ans:2, reward:20 },
-  { cat:'😂 Komik', q:"Dünya liderler zirvesinde ne yaparsın?", opts:["Çok konuşurum","Sessiz otururum","Uyurum","Selfie çektiririm"], ans:3, reward:20 },
-  { cat:'😂 Komik', q:"Ordun kaçar ise ne yaparsın?", opts:["Onları mahkemeye veririm","Ben de kaçarım","Yeni ordu kurarım","Barış müzakeresi yaparım"], ans:1, reward:25 },
+  { cat:'😂 Komik', q:"Bir ülkeyi fethedince ilk iş nedir?", opts:["Vergi koyarım","Tatile giderim","İsim değiştiririm","Fotoğraf çektiririm"], ans:3, reward:20 },
+  { cat:'😂 Komik', q:"Ordun kaçar ise ne yaparsın?", opts:["Mahkemeye veririm","Ben de kaçarım","Yeni ordu kurarım","Barış müzakeresi yaparım"], ans:1, reward:25 },
   { cat:'😂 Komik', q:"Ülkende para bitince ne yaparsın?", opts:["Vergi artırırım","Borç alırım","Para basarım","Komşudan ödünç alırım"], ans:2, reward:25 },
-  { cat:'😂 Komik', q:"Başkanlık koltuğu en rahat olan kim?", opts:["Erdoğan","Putin","Biden","Hepsi bacak bacak üstüne atıyor"], ans:3, reward:25 },
-  { cat:'😂 Komik', q:"Seçimde oy sayımı tutmuyorsa ne yaparsın?", opts:["Yeniden sayarım","Mahkemeye giderim","Sonuçları tanımam","Sayıcıyı işten çıkarırım"], ans:3, reward:25 },
   { cat:'😂 Komik', q:"Başka bir gezegende ülke kurarsan adı ne olur?", opts:["Yeni Türkiye","Mars Cumhuriyeti","Benim Gezegenlerim","İsmim ne ise o"], ans:3, reward:20 },
+  { cat:'😂 Komik', q:"Hangi silah en güçlüdür?", opts:["Nükleer","Kimyasal","Sosyal medya","Kötü komşuluk"], ans:2, reward:25 },
+  { cat:'😂 Komik', q:"Dünya liderler zirvesinde ne yaparsın?", opts:["Çok konuşurum","Sessiz otururum","Uyurum","Selfie çektiririm"], ans:3, reward:20 },
+  { cat:'😂 Komik', q:"Seçimde oy sayımı tutmuyorsa ne yaparsın?", opts:["Yeniden sayarım","Mahkemeye giderim","Sonuçları tanımam","Sayıcıyı işten çıkarırım"], ans:3, reward:25 },
 
   // 🌍 COĞRAFYA
   { cat:'🌍 Coğrafya', q:"Türkiye'nin başkenti neresidir?", opts:["İstanbul","Ankara","İzmir","Bursa"], ans:1, reward:20 },
@@ -359,44 +484,40 @@ const QUESTIONS = [
   { cat:'🌍 Coğrafya', q:"Amerika'nın başkenti neresidir?", opts:["New York","Los Angeles","Washington D.C.","Chicago"], ans:2, reward:20 },
   { cat:'🌍 Coğrafya', q:"Rusya'nın başkenti neresidir?", opts:["St. Petersburg","Moskova","Novosibirsk","Kazan"], ans:1, reward:15 },
   { cat:'🌍 Coğrafya', q:"Dünyanın en uzun nehri hangisidir?", opts:["Amazon","Nil","Yangtze","Mississippi"], ans:1, reward:25 },
+  { cat:'🌍 Coğrafya', q:"Avustralya'nın başkenti neresidir?", opts:["Sydney","Melbourne","Canberra","Brisbane"], ans:2, reward:25 },
+  { cat:'🌍 Coğrafya', q:"Dünyanın en büyük çölü hangisidir?", opts:["Sahara","Gobi","Arabistan","Antarktika"], ans:3, reward:25 },
 
   // 🔬 BİLİM
   { cat:'🔬 Bilim', q:"Su kaç derecede kaynar?", opts:["80°C","90°C","100°C","110°C"], ans:2, reward:15 },
   { cat:'🔬 Bilim', q:"Güneş sistemimizdeki en büyük gezegen?", opts:["Satürn","Mars","Jüpiter","Neptün"], ans:2, reward:20 },
-  { cat:'🔬 Bilim', q:"Fotosentez sırasında bitkiler ne üretir?", opts:["CO₂","Azot","Oksijen","Hidrojen"], ans:2, reward:20 },
   { cat:'🔬 Bilim', q:"Işık hızı saniyede yaklaşık kaçtır?", opts:["300 km","3.000 km","300.000 km","3 milyon km"], ans:2, reward:25 },
-  { cat:'🔬 Bilim', q:"İnsan vücudunda kaç kemik vardır?", opts:["106","206","306","406"], ans:1, reward:25 },
   { cat:'🔬 Bilim', q:"E=mc² formülü kime aittir?", opts:["Newton","Galileo","Einstein","Tesla"], ans:2, reward:20 },
   { cat:'🔬 Bilim', q:"Atmosferde en çok hangi gaz bulunur?", opts:["Oksijen","Karbondioksit","Azot","Helyum"], ans:2, reward:25 },
-  { cat:'🔬 Bilim', q:"Hangi vitamin güneş ışığından üretilir?", opts:["Vitamin A","Vitamin B","Vitamin C","Vitamin D"], ans:3, reward:20 },
-  { cat:'🔬 Bilim', q:"Güneş sistemimizde kaç gezegen vardır?", opts:["7","8","9","10"], ans:1, reward:15 },
   { cat:'🔬 Bilim', q:"DNA'nın açılımı nedir?", opts:["Deoksiribonükleik Asit","Dinükleik Asit","Diribonükleik Asit","Diazonik Asit"], ans:0, reward:30 },
+  { cat:'🔬 Bilim', q:"İnsan vücudunda kaç kemik vardır?", opts:["106","206","306","406"], ans:1, reward:25 },
+  { cat:'🔬 Bilim', q:"Güneş sistemimizde kaç gezegen vardır?", opts:["7","8","9","10"], ans:1, reward:15 },
 
   // 🏛️ TARİH
   { cat:'🏛️ Tarih', q:"Osmanlı İmparatorluğu hangi yıl kuruldu?", opts:["1299","1453","1071","1326"], ans:0, reward:25 },
-  { cat:'🏛️ Tarih', q:"Hangi yıl Türkiye Cumhuriyeti kuruldu?", opts:["1919","1920","1922","1923"], ans:3, reward:20 },
   { cat:'🏛️ Tarih', q:"İstanbul hangi yıl fethedildi?", opts:["1071","1299","1453","1683"], ans:2, reward:20 },
+  { cat:'🏛️ Tarih', q:"Türkiye Cumhuriyeti hangi yıl kuruldu?", opts:["1919","1920","1922","1923"], ans:3, reward:20 },
   { cat:'🏛️ Tarih', q:"1. Dünya Savaşı hangi yılda başladı?", opts:["1912","1914","1916","1918"], ans:1, reward:20 },
   { cat:'🏛️ Tarih', q:"Berlin Duvarı hangi yıl yıkıldı?", opts:["1987","1988","1989","1990"], ans:2, reward:25 },
-  { cat:'🏛️ Tarih', q:"Fransız Devrimi hangi yılda başladı?", opts:["1776","1789","1804","1815"], ans:1, reward:25 },
-  { cat:'🏛️ Tarih', q:"Çanakkale Savaşı hangi yılda yaşandı?", opts:["1912","1913","1914","1915"], ans:3, reward:25 },
-  { cat:'🏛️ Tarih', q:"Napoleon hangi ülkenin imparatoruydu?", opts:["İtalya","Fransa","İspanya","Belçika"], ans:1, reward:20 },
-  { cat:'🏛️ Tarih', q:"Soğuk Savaş hangi ülkeler arasındaydı?", opts:["ABD-Çin","SSCB-ABD","Almanya-Fransa","İngiltere-Rusya"], ans:1, reward:20 },
   { cat:'🏛️ Tarih', q:"Atatürk hangi yıl vefat etti?", opts:["1935","1936","1937","1938"], ans:3, reward:20 },
+  { cat:'🏛️ Tarih', q:"Çanakkale Savaşı hangi yılda yaşandı?", opts:["1912","1913","1914","1915"], ans:3, reward:25 },
+  { cat:'🏛️ Tarih', q:"Fransız Devrimi hangi yılda başladı?", opts:["1776","1789","1804","1815"], ans:1, reward:25 },
 
   // ⚽ SPOR
-  { cat:'⚽ Spor', q:"FIFA Dünya Kupası kaç yılda bir düzenlenir?", opts:["2 yılda bir","3 yılda bir","4 yılda bir","5 yılda bir"], ans:2, reward:15 },
+  { cat:'⚽ Spor', q:"FIFA Dünya Kupası kaç yılda bir düzenlenir?", opts:["2","3","4","5"], ans:2, reward:15 },
   { cat:'⚽ Spor', q:"Hangi ülke en çok FIFA Dünya Kupası kazanmıştır?", opts:["Almanya","Arjantin","Brezilya","Fransa"], ans:2, reward:20 },
-  { cat:'⚽ Spor', q:"Hangi sporda 'grand slam' terimi kullanılır?", opts:["Futbol","Tenis","Basketbol","Yüzme"], ans:1, reward:20 },
+  { cat:'⚽ Spor', q:"2022 FIFA Dünya Kupası'nı hangi ülke kazandı?", opts:["Fransa","Brezilya","Arjantin","İngiltere"], ans:2, reward:20 },
   { cat:'⚽ Spor', q:"Formula 1'de en çok şampiyonluk kazanan pilot kimdir?", opts:["Schumacher","Hamilton","Senna","Vettel"], ans:1, reward:25 },
-  { cat:'⚽ Spor', q:"Hangi ülke 2022 FIFA Dünya Kupası'nı kazandı?", opts:["Fransa","Brezilya","Arjantin","İngiltere"], ans:2, reward:20 },
 
   // 💻 TEKNOLOJİ
   { cat:'💻 Teknoloji', q:"İlk iPhone hangi yılda tanıtıldı?", opts:["2005","2006","2007","2008"], ans:2, reward:20 },
   { cat:'💻 Teknoloji', q:"Hangi şirket Windows işletim sistemini yapar?", opts:["Apple","Google","Microsoft","IBM"], ans:2, reward:15 },
-  { cat:'💻 Teknoloji', q:"Python nedir?", opts:["Yılan türü","Programlama dili","Yazılım","Oyun motoru"], ans:1, reward:15 },
-  { cat:'💻 Teknoloji', q:"Hangi şirket Android işletim sistemini geliştirdi?", opts:["Apple","Samsung","Microsoft","Google"], ans:3, reward:15 },
   { cat:'💻 Teknoloji', q:"ChatGPT'yi kim geliştirdi?", opts:["Google","Microsoft","OpenAI","Meta"], ans:2, reward:20 },
+  { cat:'💻 Teknoloji', q:"Hangi şirket Android'i geliştirdi?", opts:["Apple","Samsung","Microsoft","Google"], ans:3, reward:15 },
 
   // 🧮 MATEMATİK
   { cat:'🧮 Matematik', q:"π (pi) sayısı yaklaşık kaçtır?", opts:["2.71","3.14","3.41","3.71"], ans:1, reward:15 },
@@ -405,16 +526,27 @@ const QUESTIONS = [
   { cat:'🧮 Matematik', q:"Bir üçgenin iç açıları toplamı kaçtır?", opts:["90°","180°","270°","360°"], ans:1, reward:15 },
   { cat:'🧮 Matematik', q:"Bir küpün kaç yüzü vardır?", opts:["4","5","6","8"], ans:2, reward:15 },
 
-  // 🎬 GENEL
+  // 🎬 GENEL KÜLTÜR
   { cat:'🎬 Genel', q:"Mona Lisa tablosu kimin eseridir?", opts:["Michelangelo","Raphael","Da Vinci","Picasso"], ans:2, reward:20 },
-  { cat:'🎬 Genel', q:"Hangi yıl insanlar Ay'a ilk adım attı?", opts:["1967","1968","1969","1970"], ans:2, reward:20 },
-  { cat:'🎬 Genel', q:"Dünyanın en uzun yaşayan hayvanı nedir?", opts:["Fil","Kaplumbağa","Papağan","Balina"], ans:1, reward:25 },
+  { cat:'🎬 Genel', q:"İnsanlar Ay'a ilk olarak hangi yılda adım attı?", opts:["1967","1968","1969","1970"], ans:2, reward:20 },
   { cat:'🎬 Genel', q:"Dünyanın en pahalı baharatı nedir?", opts:["Tarçın","Safran","Karabiber","Vanilya"], ans:1, reward:25 },
   { cat:'🎬 Genel', q:"Hangi ülke en fazla Oscar ödülü almıştır?", opts:["İngiltere","Fransa","Amerika","İtalya"], ans:2, reward:20 },
 ];
 
-// ── ENVANTER ──────────────────────────────────────────────────────────
-let inv={klasik:0,atesh:0,nukleer:0,bok:0,sirk:0};
+// ── RENK PALETİ ──────────────────────────────────────────────────────────
+const NEUTRAL_COLORS = {
+  canada:'#1a3520', usa:'#1e2d3d', mexico:'#2d2010', brazil:'#1a2d10',
+  uk:'#1a2035', france:'#1a2535', germany:'#252015', russia:'#201520',
+  turkey:'#252010', egypt:'#2d2510', safrica:'#1a2520', india:'#2d1a10',
+  china:'#201515', japan:'#151a25', australia:'#1a2010'
+};
+const CONQUERED_COLOR = '#0f3320';
+const SELECTED_STROKE = '#f0b429';
+const NEUTRAL_STROKE = '#2a3a2a';
+const CONQUERED_STROKE = '#3fb950';
+
+// ── STATE ────────────────────────────────────────────────────────────────
+let inv={klasik:0,atesh:0,nukleer:0,sirk:0};
 let gold=0,selected=null,qIndex=0,correctCount=0,qAnswered=false,approval=50;
 let countries=[];
 
@@ -423,9 +555,7 @@ function initGame(){
   gold=150; inv={klasik:2,atesh:0,nukleer:0,sirk:0};
   selected=null; correctCount=0; approval=50; qIndex=0; qAnswered=false;
 
-  countries=COUNTRY_DATA.map(d=>({
-    ...d, defense:d.baseD, love:d.baseLove, conquered:false
-  }));
+  countries=COUNTRY_DATA.map(d=>({...d, defense:d.baseD, love:d.baseLove, conquered:false}));
 
   shuffle(QUESTIONS);
   renderMap(); showQuestion(); updateStats(); selectCountry(null);
@@ -437,63 +567,110 @@ function startGame(){
   initGame();
 }
 
-// ── MAP ────────────────────────────────────────────────────────────────
+// ── MAP RENDER ────────────────────────────────────────────────────────────
 function renderMap(){
-  const map=document.getElementById('map');
-  map.innerHTML='';
+  const g=document.getElementById('territories');
+  g.innerHTML='';
   countries.forEach(c=>{
-    const div=document.createElement('div');
-    div.className='country-card'+(c.conquered?' conquered':'');
-    div.id='card-'+c.id;
-    div.onclick=()=>selectCountry(c);
-    div.innerHTML=`
-      <span class="c-flag">${c.flag}</span>
-      <div class="c-name">${c.name}</div>
-      <div class="c-leader">${c.leader}</div>
-      <div class="bar-lbl">❤️ ${c.love}%</div>
-      <div class="bar-wrap"><div class="bar-fill" style="width:${c.love}%;background:${loveGrad(c.love)}"></div></div>
-      <div class="bar-lbl">🛡 ${c.defense}/${c.baseD}</div>
-      <div class="bar-wrap"><div class="bar-fill" style="width:${c.defense/c.baseD*100}%;background:linear-gradient(90deg,#3b82f6,#6366f1)"></div></div>
-    `;
-    map.appendChild(div);
+    const grp=document.createElementNS('http://www.w3.org/2000/svg','g');
+    grp.id='grp-'+c.id;
+    grp.style.cursor='pointer';
+    grp.addEventListener('click',()=>selectCountry(c));
+
+    // Territory polygon
+    const poly=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    poly.setAttribute('points',c.pts);
+    poly.setAttribute('fill',NEUTRAL_COLORS[c.id]||'#1a2020');
+    poly.setAttribute('stroke',NEUTRAL_STROKE);
+    poly.setAttribute('stroke-width','1.5');
+    poly.setAttribute('stroke-linejoin','round');
+    poly.id='poly-'+c.id;
+
+    // Flag emoji
+    const flag=document.createElementNS('http://www.w3.org/2000/svg','text');
+    flag.setAttribute('x',c.cx);
+    flag.setAttribute('y',c.cy-6);
+    flag.setAttribute('class','t-flag');
+    flag.textContent=c.flag;
+
+    // Name label
+    const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
+    lbl.setAttribute('x',c.cx);
+    lbl.setAttribute('y',c.cy+9);
+    lbl.setAttribute('class','t-label');
+    lbl.textContent=c.name;
+
+    grp.appendChild(poly);
+    grp.appendChild(flag);
+    grp.appendChild(lbl);
+    g.appendChild(grp);
   });
 }
 
-function updateCard(c){
-  const div=document.getElementById('card-'+c.id);
-  if(!div) return;
-  div.className='country-card'+(c.conquered?' conquered':'')+(selected===c?' selected':'');
-  div.innerHTML=`
-    <span class="c-flag">${c.flag}</span>
-    <div class="c-name">${c.name}</div>
-    <div class="c-leader">${c.leader}</div>
-    <div class="bar-lbl">❤️ ${c.love}%</div>
-    <div class="bar-wrap"><div class="bar-fill" style="width:${c.love}%;background:${loveGrad(c.love)}"></div></div>
-    <div class="bar-lbl">🛡 ${c.defense}/${c.baseD}</div>
-    <div class="bar-wrap"><div class="bar-fill" style="width:${c.defense/c.baseD*100}%;background:linear-gradient(90deg,#3b82f6,#6366f1)"></div></div>
-  `;
-  div.onclick=()=>selectCountry(c);
+function updateTerritoryVisual(c){
+  const poly=document.getElementById('poly-'+c.id);
+  if(!poly) return;
+  if(c.conquered){
+    const pct=1; // fully conquered
+    poly.setAttribute('fill',CONQUERED_COLOR);
+    poly.setAttribute('stroke',CONQUERED_STROKE);
+    poly.setAttribute('stroke-width','2');
+  } else if(selected===c){
+    const baseColor=NEUTRAL_COLORS[c.id]||'#1a2020';
+    poly.setAttribute('fill',baseColor);
+    poly.setAttribute('stroke',SELECTED_STROKE);
+    poly.setAttribute('stroke-width','2.5');
+  } else {
+    poly.setAttribute('fill',NEUTRAL_COLORS[c.id]||'#1a2020');
+    poly.setAttribute('stroke',NEUTRAL_STROKE);
+    poly.setAttribute('stroke-width','1.5');
+  }
 }
 
-function loveGrad(v){
-  return v>=70?'linear-gradient(90deg,#ec4899,#f43f5e)':
-         v>=40?'linear-gradient(90deg,#f97316,#ef4444)':'linear-gradient(90deg,#6b7280,#9ca3af)';
+// Explosion animation on map
+function showExplosion(cx,cy){
+  const svg=document.getElementById('map-svg');
+  const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  circle.setAttribute('cx',cx);
+  circle.setAttribute('cy',cy);
+  circle.setAttribute('r','5');
+  circle.setAttribute('fill','none');
+  circle.setAttribute('stroke','#f0b429');
+  circle.setAttribute('stroke-width','3');
+  circle.setAttribute('class','explosion');
+  svg.appendChild(circle);
+  setTimeout(()=>circle.remove(),600);
+
+  // Second ring
+  const circle2=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  circle2.setAttribute('cx',cx);
+  circle2.setAttribute('cy',cy);
+  circle2.setAttribute('r','5');
+  circle2.setAttribute('fill','none');
+  circle2.setAttribute('stroke','#f85149');
+  circle2.setAttribute('stroke-width','2');
+  circle2.setAttribute('class','explosion');
+  circle2.style.animationDelay='0.1s';
+  svg.appendChild(circle2);
+  setTimeout(()=>circle2.remove(),700);
 }
 
-// ── SELECT ─────────────────────────────────────────────────────────────
+// ── SELECT ────────────────────────────────────────────────────────────────
 function selectCountry(c){
-  if(selected){ const o=document.getElementById('card-'+selected.id); if(o) o.classList.remove('selected'); }
+  const prev=selected;
   selected=c;
-  if(c){ const e=document.getElementById('card-'+c.id); if(e) e.classList.add('selected'); }
+
+  if(prev) updateTerritoryVisual(prev);
+  if(c) updateTerritoryVisual(c);
 
   refreshBombBtns();
 
   if(!c){
     document.getElementById('sel-flag').textContent='🌐';
-    document.getElementById('sel-name').textContent='Haritadan ülke seç';
+    document.getElementById('sel-name').textContent='Haritadan seç';
     document.getElementById('sel-name').style.color='var(--text2)';
     document.getElementById('sel-leader').textContent='';
-    document.getElementById('sel-quote').textContent='Bir ülke seçince liderinin komik lafı burada çıkar 😄';
+    document.getElementById('sel-quote').textContent='Bir ülke seç 👆';
     document.getElementById('sel-stats').innerHTML='';
     document.getElementById('btn-love').disabled=true;
     return;
@@ -506,14 +683,14 @@ function selectCountry(c){
   document.getElementById('sel-quote').textContent='"'+c.quotes[Math.floor(Math.random()*c.quotes.length)]+'"';
 
   const defPct=Math.round(c.defense/c.baseD*100);
+  const loveColor=c.love>=70?'#f43f5e':c.love>=40?'#f97316':'#9ca3af';
   document.getElementById('sel-stats').innerHTML=`
-    <div class="info-row"><span>👥 Nüfus</span><span class="info-val">${c.pop>=1000?(c.pop/1000).toFixed(1)+'B':c.pop+'M'}</span></div>
-    <div class="info-row"><span>❤️ Halk Sevgisi</span><span class="info-val" style="color:${c.love>=70?'#f43f5e':c.love>=40?'#f97316':'#9ca3af'}">${c.love}%</span></div>
-    <div style="font-size:10px;color:var(--text2);margin-bottom:3px">🛡 Savunma: ${c.defense}/${c.baseD} (${defPct}%)</div>
-    <div class="big-bar" style="margin-bottom:10px">
-      <div class="big-bar-fill" style="width:${defPct}%;background:linear-gradient(90deg,#3b82f6,#6366f1)"></div>
-    </div>
-    ${c.conquered?'<div style="color:#22c55e;font-weight:800;font-size:12px;text-align:center;margin-bottom:8px">✅ Bu ülke senindir!</div>':''}
+    <div class="irow"><span>👥 Nüfus</span><span class="ival">${c.pop>=1000?(c.pop/1000).toFixed(1)+'B':c.pop+'M'}</span></div>
+    <div class="irow"><span>❤️ Halk Sevgisi</span><span class="ival" style="color:${loveColor}">${c.love}%</span></div>
+    <div class="mbar"><div class="mbar-fill" style="width:${c.love}%;background:linear-gradient(90deg,#ec4899,#f43f5e)"></div></div>
+    <div class="irow"><span>🛡 Savunma</span><span class="ival">${c.defense}/${c.baseD}</span></div>
+    <div class="mbar"><div class="mbar-fill" style="width:${defPct}%;background:linear-gradient(90deg,#3b82f6,#6366f1)"></div></div>
+    ${c.conquered?'<div style="color:#3fb950;font-weight:800;font-size:11px;text-align:center;margin-top:4px">✅ Bu ülke senindir!</div>':''}
   `;
 
   document.getElementById('btn-love').disabled=c.conquered||gold<30;
@@ -527,57 +704,64 @@ function refreshBombBtns(){
   Object.keys(BOMBS).forEach(key=>{
     const btn=document.getElementById('bb-'+key);
     const span=document.getElementById('bc-'+key);
-    span.textContent=inv[key];
-    btn.disabled=!c||c.conquered||inv[key]<=0;
+    if(btn){ span.textContent=inv[key]; btn.disabled=!c||c.conquered||inv[key]<=0; }
   });
 }
 
-// ── USE BOMB ───────────────────────────────────────────────────────────
+// ── BOMB ─────────────────────────────────────────────────────────────────
 function useBomb(type){
   if(!selected||selected.conquered||inv[type]<=0) return;
   const b=BOMBS[type];
   inv[type]--;
 
-  // Hasar hesapla
   let baseDmg=b.minDmg+Math.floor(Math.random()*(b.maxDmg-b.minDmg+1));
-  // Halk sevgisi bonusu
-  let loveMult = selected.love>=70?1.3 : selected.love>=40?1.0 : 0.7;
+  let loveMult=selected.love>=70?1.3:selected.love>=40?1.0:0.7;
   let dmg=Math.round(baseDmg*loveMult);
 
   selected.defense=Math.max(0,selected.defense-dmg);
   selected.love=Math.max(0,selected.love-b.loveHit);
 
-  // Yeni lider lafı
+  showExplosion(selected.cx,selected.cy);
+
   document.getElementById('sel-quote').textContent='"'+selected.quotes[Math.floor(Math.random()*selected.quotes.length)]+'"';
 
   const eff=loveMult>1?'🔥 Etkili!':loveMult<1?'😤 Direniyor!':'';
   showMsg(`${b.msg} ${eff} ${dmg} hasar! Savunma: ${selected.defense}/${selected.baseD}`,'#f97316');
 
   if(selected.defense<=0) conquer(selected);
-  else { updateCard(selected); selectCountry(selected); }
+  else { updateTerritoryVisual(selected); selectCountry(selected); }
   updateStats(); refreshBombBtns();
 }
 
-// ── LOVE ───────────────────────────────────────────────────────────────
+// ── LOVE ─────────────────────────────────────────────────────────────────
 function sendLove(){
   if(!selected||selected.conquered||gold<30) return;
   gold-=30;
   const gain=10+Math.floor(Math.random()*16);
   selected.love=Math.min(100,selected.love+gain);
   approval=Math.min(100,approval+2);
-  updateCard(selected); selectCountry(selected); updateStats();
+  updateTerritoryVisual(selected); selectCountry(selected); updateStats();
   showMsg(`❤️ Halk sevgisi +${gain}! Bombalar daha etkili olacak.`,'#ec4899');
   document.getElementById('btn-love').disabled=selected.conquered||gold<30;
 }
 
-// ── CONQUER ────────────────────────────────────────────────────────────
+// ── CONQUER ───────────────────────────────────────────────────────────────
 function conquer(c){
   c.conquered=true; c.defense=0;
   const income=Math.max(25,Math.floor(c.pop/8));
   gold+=income;
   approval=Math.min(100,approval+5);
-  updateCard(c); selectCountry(c); updateStats();
-  showMsg(`🎉 ${c.name} fethedildi! +${income} altın! Lider kaçtı!`,'#22c55e');
+  updateTerritoryVisual(c);
+
+  // Flash green
+  const poly=document.getElementById('poly-'+c.id);
+  if(poly){
+    poly.setAttribute('fill','#0f4020');
+    setTimeout(()=>{ if(c.conquered) poly.setAttribute('fill',CONQUERED_COLOR); },600);
+  }
+
+  selectCountry(c); updateStats();
+  showMsg(`🎉 ${c.name} fethedildi! +${income} altın! Lider kaçtı!`,'#3fb950');
   toast(`🏳 ${c.name} artık senindir! 🎉`);
 
   if(countries.filter(x=>x.conquered).length===countries.length){
@@ -590,25 +774,21 @@ function conquer(c){
   }
 }
 
-// ── SHOP ───────────────────────────────────────────────────────────────
-['klasik','atesh','nukleer','sirk'].forEach(key=>{
-  document.getElementById('sh-'+key).addEventListener('click',()=>buyBomb(key));
-});
-
+// ── SHOP ─────────────────────────────────────────────────────────────────
 function buyBomb(type){
   const b=BOMBS[type];
-  if(gold<b.price){ showMsg('💸 Yeterli altın yok!','#ef4444'); return; }
+  if(gold<b.price){ showMsg('💸 Yeterli altın yok!','#f85149'); return; }
   gold-=b.price; inv[type]++;
   updateStats(); refreshBombBtns();
   toast(`${b.icon} ${b.name} satın alındı!`);
   if(selected) selectCountry(selected);
 }
 
-// ── QUESTION ───────────────────────────────────────────────────────────
+// ── QUESTION ──────────────────────────────────────────────────────────────
 function showQuestion(){
   qAnswered=false;
   const q=QUESTIONS[qIndex%QUESTIONS.length];
-  document.getElementById('q-category').textContent='❓ '+q.cat;
+  document.getElementById('q-cat').textContent='❓ '+q.cat;
   document.getElementById('q-text').textContent=q.q;
   document.getElementById('q-result').textContent='';
 
@@ -637,19 +817,19 @@ function answer(idx){
     gold+=q.reward; correctCount++;
     approval=Math.min(100,approval+1);
     document.getElementById('q-result').textContent=`✅ Doğru! +${q.reward} altın!`;
-    document.getElementById('q-result').style.color='#86efac';
+    document.getElementById('q-result').style.color='#56d364';
     toast(`+${q.reward} 💰 Doğru cevap!`);
   } else {
     document.getElementById('q-result').textContent=`❌ Yanlış! Doğru: ${q.opts[q.ans]}`;
-    document.getElementById('q-result').style.color='#fca5a5';
+    document.getElementById('q-result').style.color='#ffa198';
   }
   updateStats();
-  if(selected) { document.getElementById('btn-love').disabled=selected.conquered||gold<30; refreshBombBtns(); }
+  if(selected){ document.getElementById('btn-love').disabled=selected.conquered||gold<30; refreshBombBtns(); }
   qIndex++;
   setTimeout(showQuestion,1900);
 }
 
-// ── STATS ──────────────────────────────────────────────────────────────
+// ── STATS ─────────────────────────────────────────────────────────────────
 function updateStats(){
   document.getElementById('s-gold').textContent=gold;
   document.getElementById('s-count').textContent=countries.filter(c=>c.conquered).length;
@@ -657,13 +837,12 @@ function updateStats(){
   document.getElementById('s-approval').textContent=approval+'%';
   document.getElementById('approval-bar').style.width=approval+'%';
   document.getElementById('approval-bar').style.background=
-    approval>=70?'linear-gradient(90deg,#22c55e,#86efac)':
-    approval>=40?'linear-gradient(90deg,#f59e0b,#fcd34d)':'linear-gradient(90deg,#ef4444,#fca5a5)';
+    approval>=70?'linear-gradient(90deg,#3fb950,#56d364)':
+    approval>=40?'linear-gradient(90deg,#f0b429,#fcd34d)':'linear-gradient(90deg,#f85149,#ffa198)';
 
-  // Market güncellemesi
   ['klasik','atesh','nukleer','sirk'].forEach(key=>{
     const el=document.getElementById('sh-'+key);
-    if(el) el.classList.toggle('cant', gold<BOMBS[key].price);
+    if(el) el.classList.toggle('cant',gold<BOMBS[key].price);
   });
 }
 
