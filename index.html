@@ -1,569 +1,516 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Ülke Fethet</title>
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      background:#050510;
-      display:flex; flex-direction:column;
-      align-items:center; justify-content:center;
-      height:100vh; overflow:hidden;
-      font-family:'Segoe UI',system-ui,sans-serif;
-      user-select:none; -webkit-user-select:none;
-    }
-    canvas { display:block; cursor:pointer; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>🌍 Ülke Fethet</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07071a;--bg2:#0f0f28;--bg3:#17173a;
+  --border:#2a2a55;--accent:#6366f1;--accent2:#a78bfa;
+  --gold:#f59e0b;--red:#ef4444;--green:#22c55e;--text:#e2e8f0;--text2:#94a3b8;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;
+  min-height:100vh;overflow-x:hidden;user-select:none;-webkit-user-select:none;}
 
-    #hud {
-      position:fixed; bottom:0; left:0; right:0;
-      background:linear-gradient(to top, rgba(5,5,20,0.98), rgba(5,5,20,0.85));
-      border-top:1px solid rgba(255,255,255,0.08);
-      padding:12px 20px calc(12px + env(safe-area-inset-bottom));
-      display:flex; align-items:center; gap:14px; flex-wrap:wrap;
-    }
-    .badge {
-      display:flex; align-items:center; gap:7px;
-      padding:6px 14px; border-radius:20px;
-      font-size:13px; font-weight:600; border:2px solid;
-      flex-shrink:0;
-    }
-    .dot { width:9px; height:9px; border-radius:50%; }
-    #phase-text {
-      flex:1; text-align:center;
-      font-size:13px; color:rgba(255,255,255,0.65);
-      min-width:120px;
-    }
-    #phase-text strong { color:#fff; }
-    #btn-end {
-      background:linear-gradient(135deg,#3b82f6,#6366f1);
-      border:none; color:#fff; padding:8px 22px;
-      border-radius:20px; font-size:13px; font-weight:700;
-      cursor:pointer; font-family:inherit; flex-shrink:0;
-      transition:opacity .2s, transform .1s;
-    }
-    #btn-end:hover { opacity:.85; }
-    #btn-end:active { transform:scale(.95); }
-    #btn-end:disabled { opacity:.35; cursor:not-allowed; }
+/* ── TOP BAR ── */
+#topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(7,7,26,0.95);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+#topbar h1{font-size:16px;font-weight:800;background:linear-gradient(135deg,#a78bfa,#60a5fa);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;flex-shrink:0;}
+.stat{display:flex;align-items:center;gap:5px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:20px;padding:5px 12px;font-size:13px;font-weight:600;}
+.stat-icon{font-size:15px;}
+#progress-text{margin-left:auto;font-size:12px;color:var(--text2);}
 
-    #scoreboard {
-      pointer-events:none;
-      position:fixed; top:16px; right:16px;
-      background:rgba(5,5,20,0.92);
-      border:1px solid rgba(255,255,255,0.08);
-      border-radius:14px; padding:12px 16px;
-      font-size:12px; display:flex; flex-direction:column; gap:5px;
-      min-width:150px;
-    }
-    .score-row { display:flex; align-items:center; gap:7px; }
-    .score-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-    .score-name { flex:1; color:rgba(255,255,255,0.8); }
-    .score-count { font-weight:700; }
+/* ── MAIN LAYOUT ── */
+#main{display:grid;grid-template-columns:1fr 280px;gap:12px;padding:12px;max-width:1100px;margin:0 auto;}
+@media(max-width:700px){#main{grid-template-columns:1fr;}}
 
-    #log-box {
-      pointer-events:none;
-      position:fixed; top:16px; left:16px;
-      background:rgba(5,5,20,0.92);
-      border:1px solid rgba(255,255,255,0.08);
-      border-radius:14px; padding:10px 14px;
-      font-size:11.5px; max-width:190px;
-      display:flex; flex-direction:column; gap:3px;
-    }
-    .log-line { color:rgba(255,255,255,0.5); line-height:1.5; }
-    .log-line.fresh { color:rgba(255,255,255,0.85); }
+/* ── COUNTRY MAP ── */
+#map{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+@media(max-width:500px){#map{grid-template-columns:repeat(3,1fr);}}
 
-    #overlay {
-      display:none; position:fixed; inset:0;
-      background:rgba(5,5,20,0.96);
-      align-items:center; justify-content:center;
-      z-index:200; flex-direction:column; gap:18px;
-      text-align:center; padding:20px;
-    }
-    #overlay.show { display:flex; }
-    #overlay h1 { font-size:38px; font-weight:900; }
-    #overlay p  { font-size:15px; color:rgba(255,255,255,0.55); }
-    #btn-restart {
-      background:linear-gradient(135deg,#3b82f6,#6366f1);
-      border:none; color:#fff; padding:13px 36px;
-      border-radius:28px; font-size:16px; font-weight:700;
-      cursor:pointer; font-family:inherit; margin-top:6px;
-      transition:opacity .2s;
-    }
-    #btn-restart:hover { opacity:.85; }
+.country-card{
+  background:var(--bg2);border:2px solid var(--border);border-radius:14px;
+  padding:10px 8px;cursor:pointer;transition:all .2s;text-align:center;
+  position:relative;overflow:hidden;
+}
+.country-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 20px rgba(99,102,241,.3);}
+.country-card.selected{border-color:var(--accent2);background:rgba(99,102,241,.15);
+  box-shadow:0 0 20px rgba(167,139,250,.4);}
+.country-card.conquered{border-color:#22c55e;background:rgba(34,197,94,.08);}
+.country-card.conquered::after{content:'✓';position:absolute;top:4px;right:6px;color:#22c55e;font-weight:900;font-size:12px;}
+.country-card.enemy{border-color:#ef4444;background:rgba(239,68,68,.08);}
 
-    #title-screen {
-      position:fixed; inset:0;
-      background:radial-gradient(ellipse at center, #0d0d2b 0%, #050510 100%);
-      display:flex; flex-direction:column;
-      align-items:center; justify-content:center;
-      gap:20px; z-index:300; padding:20px; text-align:center;
-    }
-    #title-screen h1 {
-      font-size:42px; font-weight:900;
-      background:linear-gradient(135deg,#60a5fa,#a78bfa,#34d399);
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-      background-clip:text;
-    }
-    #title-screen p { font-size:14px; color:rgba(255,255,255,0.5); max-width:340px; line-height:1.7; }
-    #btn-start {
-      background:linear-gradient(135deg,#3b82f6,#6366f1);
-      border:none; color:#fff; padding:14px 40px;
-      border-radius:30px; font-size:17px; font-weight:800;
-      cursor:pointer; font-family:inherit;
-      box-shadow:0 0 40px rgba(99,102,241,0.5);
-      transition:transform .15s, box-shadow .15s;
-    }
-    #btn-start:hover { transform:scale(1.05); box-shadow:0 0 60px rgba(99,102,241,0.7); }
-    .rules {
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.08);
-      border-radius:14px; padding:16px 20px;
-      text-align:left; max-width:340px;
-      font-size:12.5px; color:rgba(255,255,255,0.6);
-      line-height:1.9;
-    }
-    .rules strong { color:rgba(255,255,255,0.85); }
-  </style>
+.c-flag{font-size:26px;display:block;margin-bottom:4px;}
+.c-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.c-pop{font-size:10px;color:var(--text2);margin-bottom:5px;}
+
+.bar-wrap{background:rgba(0,0,0,.3);border-radius:4px;height:5px;margin-bottom:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:4px;transition:width .4s ease;}
+.bar-love .bar-fill{background:linear-gradient(90deg,#f43f5e,#ec4899);}
+.bar-def .bar-fill{background:linear-gradient(90deg,#3b82f6,#6366f1);}
+.bar-label{font-size:9px;color:var(--text2);text-align:left;margin-bottom:1px;}
+
+/* ── SIDE PANEL ── */
+#side{display:flex;flex-direction:column;gap:10px;}
+
+#info-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px;}
+#info-box h3{font-size:13px;color:var(--text2);margin-bottom:12px;}
+#sel-flag{font-size:48px;text-align:center;display:block;margin-bottom:6px;}
+#sel-name{font-size:18px;font-weight:800;text-align:center;margin-bottom:12px;}
+.info-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:8px;}
+.info-val{font-weight:700;color:var(--accent2);}
+.big-bar{background:rgba(0,0,0,.3);border-radius:6px;height:10px;overflow:hidden;margin-bottom:12px;}
+.big-bar-fill{height:100%;border-radius:6px;transition:width .5s ease;}
+
+#btn-bomb{
+  width:100%;padding:11px;border-radius:11px;
+  background:linear-gradient(135deg,#ef4444,#dc2626);
+  border:none;color:#fff;font-size:14px;font-weight:700;font-family:inherit;
+  cursor:pointer;transition:all .15s;margin-bottom:8px;
+}
+#btn-bomb:hover{opacity:.85;transform:scale(1.02);}
+#btn-bomb:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+#btn-love{
+  width:100%;padding:9px;border-radius:11px;
+  background:linear-gradient(135deg,#ec4899,#be185d);
+  border:none;color:#fff;font-size:13px;font-weight:600;font-family:inherit;
+  cursor:pointer;transition:all .15s;
+}
+#btn-love:hover{opacity:.85;}
+#btn-love:disabled{opacity:.35;cursor:not-allowed;}
+#action-msg{font-size:11px;color:var(--text2);text-align:center;margin-top:8px;min-height:16px;}
+
+/* Shop */
+#shop-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:14px;}
+#shop-box h3{font-size:13px;color:var(--text2);margin-bottom:10px;}
+#btn-buy{
+  width:100%;padding:10px;border-radius:11px;
+  background:linear-gradient(135deg,var(--gold),#d97706);
+  border:none;color:#1a1a00;font-size:13px;font-weight:800;font-family:inherit;
+  cursor:pointer;transition:all .15s;
+}
+#btn-buy:hover{opacity:.85;}
+#btn-buy:disabled{opacity:.35;cursor:not-allowed;}
+.shop-info{font-size:11px;color:var(--text2);margin-top:8px;text-align:center;}
+
+/* ── QUESTION PANEL ── */
+#q-panel{
+  background:var(--bg2);border:1px solid var(--border);border-radius:16px;
+  padding:16px;margin:0 12px 12px;max-width:1100px;margin-left:auto;margin-right:auto;
+  position:relative; overflow:hidden;
+}
+#q-panel::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2),#60a5fa);
+}
+#q-label{font-size:11px;color:var(--accent2);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+#q-text{font-size:15px;font-weight:600;color:var(--text);margin-bottom:14px;line-height:1.5;}
+#q-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+@media(max-width:500px){#q-opts{grid-template-columns:1fr;}}
+.opt-btn{
+  background:var(--bg3);border:1px solid var(--border);color:var(--text);
+  padding:10px 14px;border-radius:11px;cursor:pointer;text-align:left;
+  font-size:13px;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:8px;
+}
+.opt-btn:hover:not(:disabled){background:var(--border);border-color:var(--accent);}
+.opt-btn.correct{background:rgba(34,197,94,.2);border-color:#22c55e;color:#86efac;}
+.opt-btn.wrong{background:rgba(239,68,68,.2);border-color:#ef4444;color:#fca5a5;}
+.opt-btn:disabled{cursor:not-allowed;}
+.opt-key{background:var(--accent);color:#fff;width:22px;height:22px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;}
+.opt-btn.correct .opt-key{background:#22c55e;}
+.opt-btn.wrong .opt-key{background:#ef4444;}
+#q-result{font-size:13px;font-weight:600;margin-top:10px;min-height:20px;text-align:center;}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);
+  background:var(--bg3);border:1px solid var(--border);border-radius:20px;
+  padding:8px 20px;font-size:13px;font-weight:600;
+  opacity:0;transition:all .3s;pointer-events:none;z-index:200;white-space:nowrap;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── OVERLAY ── */
+#overlay{
+  display:none;position:fixed;inset:0;background:rgba(7,7,26,.96);
+  z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center;padding:20px;
+}
+#overlay.show{display:flex;}
+#ov-emoji{font-size:64px;}
+#ov-title{font-size:32px;font-weight:900;}
+#ov-sub{font-size:15px;color:var(--text2);max-width:360px;}
+#btn-restart{
+  background:linear-gradient(135deg,var(--accent),#818cf8);
+  border:none;color:#fff;padding:13px 36px;border-radius:28px;
+  font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px;
+}
+</style>
 </head>
 <body>
 
-<!-- Title Screen -->
-<div id="title-screen">
+<!-- Top bar -->
+<div id="topbar">
   <h1>🌍 Ülke Fethet</h1>
-  <p>Tüm ülkeleri ele geçir, 2 yapay zeka rakibini yen!</p>
-  <div class="rules">
-    <strong>Nasıl Oynanır?</strong><br>
-    🔵 <strong>Takviye:</strong> Ülkelerine kuvvet yerleştir<br>
-    ⚔️ <strong>Saldırı:</strong> Ülke seç → komşuya saldır<br>
-    🏰 <strong>Güçlendir:</strong> Kuvvetleri taşı<br>
-    🏆 <strong>Kazanmak:</strong> Tüm ülkeleri fethet
-  </div>
-  <button id="btn-start" onclick="startGame()">Oyna ▶</button>
+  <div class="stat"><span class="stat-icon">💰</span><span id="s-gold">0</span> Altın</div>
+  <div class="stat"><span class="stat-icon">💣</span><span id="s-bomb">0</span> Bomba</div>
+  <div class="stat"><span class="stat-icon">🏳</span><span id="s-count">0</span>/15</div>
+  <div id="progress-text">Doğru: <span id="s-correct">0</span></div>
 </div>
 
-<canvas id="c"></canvas>
-
-<div id="hud">
-  <div id="player-badge" class="badge">
-    <div class="dot" id="badge-dot"></div>
-    <span id="badge-name"></span>
+<!-- Main -->
+<div id="main">
+  <div id="map"></div>
+  <div id="side">
+    <div id="info-box">
+      <h3>📍 Seçili Ülke</h3>
+      <span id="sel-flag">🌐</span>
+      <div id="sel-name" style="color:var(--text2)">Haritadan ülke seç</div>
+      <div id="sel-stats"></div>
+      <button id="btn-bomb" disabled>💣 Bomba At (1 bomba)</button>
+      <button id="btn-love" disabled>❤️ Halk Sevgisi Kazan (30 altın)</button>
+      <div id="action-msg"></div>
+    </div>
+    <div id="shop-box">
+      <h3>🛒 Market</h3>
+      <button id="btn-buy">💣 Bomba Satın Al (50 altın)</button>
+      <div class="shop-info">Soruları doğru cevapla → altın kazan → bomba al → ülkeleri fethet!</div>
+    </div>
   </div>
-  <div id="phase-text">Hazırlanıyor...</div>
-  <button id="btn-end" onclick="endPhase()">Geç →</button>
 </div>
 
-<div id="scoreboard"></div>
-<div id="log-box"></div>
+<!-- Question -->
+<div id="q-panel">
+  <div id="q-label">❓ SORU — Doğru cevapla altın kazan!</div>
+  <div id="q-text">Yükleniyor...</div>
+  <div id="q-opts"></div>
+  <div id="q-result"></div>
+</div>
 
+<div id="toast"></div>
 <div id="overlay">
-  <h1 id="ov-title"></h1>
-  <p id="ov-sub"></p>
+  <div id="ov-emoji"></div>
+  <div id="ov-title"></div>
+  <div id="ov-sub"></div>
   <button id="btn-restart" onclick="initGame()">Tekrar Oyna ↺</button>
 </div>
 
 <script>
-const canvas = document.getElementById('c');
-const ctx    = canvas.getContext('2d');
-let SCALE    = 1;
-
-// ── Territories ────────────────────────────────────────────────────────
-const TERR_DEF = [
-  { id:'canada',    name:'Kanada',     x:130, y:85,  adj:['usa','uk','russia'] },
-  { id:'usa',       name:'ABD',        x:148, y:172, adj:['canada','mexico','uk'] },
-  { id:'mexico',    name:'Meksika',    x:120, y:258, adj:['usa','brazil'] },
-  { id:'brazil',    name:'Brezilya',   x:228, y:338, adj:['mexico','argentina','nafrica'] },
-  { id:'argentina', name:'Arjantin',   x:212, y:438, adj:['brazil'] },
-  { id:'uk',        name:'İngiltere',  x:368, y:82,  adj:['canada','usa','france','germany'] },
-  { id:'france',    name:'Fransa',     x:388, y:152, adj:['uk','germany','spain','italy','nafrica'] },
-  { id:'germany',   name:'Almanya',    x:446, y:108, adj:['uk','france','italy','russia'] },
-  { id:'spain',     name:'İspanya',    x:344, y:192, adj:['france','nafrica'] },
-  { id:'italy',     name:'İtalya',     x:444, y:174, adj:['france','germany','nafrica'] },
-  { id:'russia',    name:'Rusya',      x:538, y:76,  adj:['canada','germany','mideast','china'] },
-  { id:'nafrica',   name:'K. Afrika',  x:402, y:278, adj:['spain','france','italy','brazil','cafrica','mideast'] },
-  { id:'cafrica',   name:'O. Afrika',  x:432, y:364, adj:['nafrica','safrica'] },
-  { id:'safrica',   name:'G. Afrika',  x:432, y:452, adj:['cafrica'] },
-  { id:'mideast',   name:'Ortadoğu',   x:534, y:204, adj:['russia','nafrica','india'] },
-  { id:'india',     name:'Hindistan',  x:608, y:246, adj:['mideast','china','seasia'] },
-  { id:'china',     name:'Çin',        x:666, y:146, adj:['russia','india','japan','seasia'] },
-  { id:'japan',     name:'Japonya',    x:750, y:122, adj:['china'] },
-  { id:'seasia',    name:'GD. Asya',   x:708, y:272, adj:['india','china','australia'] },
-  { id:'australia', name:'Avustralya', x:736, y:396, adj:['seasia'] },
+// ── ÜLKELER ────────────────────────────────────────────────────────────
+const COUNTRY_DATA = [
+  { id:'turkey',    name:'Türkiye',     flag:'🇹🇷', pop:85,  baseDefense:60, baseLove:80 },
+  { id:'germany',   name:'Almanya',     flag:'🇩🇪', pop:84,  baseDefense:70, baseLove:50 },
+  { id:'france',    name:'Fransa',      flag:'🇫🇷', pop:68,  baseDefense:65, baseLove:55 },
+  { id:'uk',        name:'İngiltere',   flag:'🇬🇧', pop:67,  baseDefense:65, baseLove:50 },
+  { id:'russia',    name:'Rusya',       flag:'🇷🇺', pop:145, baseDefense:90, baseLove:30 },
+  { id:'usa',       name:'Amerika',     flag:'🇺🇸', pop:335, baseDefense:100,baseLove:35 },
+  { id:'china',     name:'Çin',         flag:'🇨🇳', pop:1400,baseDefense:95, baseLove:25 },
+  { id:'japan',     name:'Japonya',     flag:'🇯🇵', pop:125, baseDefense:70, baseLove:60 },
+  { id:'india',     name:'Hindistan',   flag:'🇮🇳', pop:1400,baseDefense:80, baseLove:45 },
+  { id:'brazil',    name:'Brezilya',    flag:'🇧🇷', pop:215, baseDefense:65, baseLove:65 },
+  { id:'australia', name:'Avustralya',  flag:'🇦🇺', pop:26,  baseDefense:50, baseLove:70 },
+  { id:'egypt',     name:'Mısır',       flag:'🇪🇬', pop:104, baseDefense:55, baseLove:55 },
+  { id:'mexico',    name:'Meksika',     flag:'🇲🇽', pop:130, baseDefense:55, baseLove:60 },
+  { id:'canada',    name:'Kanada',      flag:'🇨🇦', pop:38,  baseDefense:50, baseLove:75 },
+  { id:'safrica',   name:'G. Afrika',   flag:'🇿🇦', pop:60,  baseDefense:45, baseLove:65 },
 ];
 
-const PLAYERS = [
-  { id:0, name:'Sen',    color:'#3b82f6', light:'#93c5fd', human:true  },
-  { id:1, name:'Kızıl', color:'#ef4444', light:'#fca5a5', human:false },
-  { id:2, name:'Yeşil', color:'#22c55e', light:'#86efac', human:false },
+// ── SORULAR ────────────────────────────────────────────────────────────
+const QUESTIONS = [
+  { q:"Türkiye'nin başkenti neresidir?",          opts:["İstanbul","Ankara","İzmir","Bursa"],             ans:1, reward:25 },
+  { q:"Dünyanın en büyük okyanusu hangisidir?",   opts:["Atlantik","Hint","Arktik","Pasifik"],            ans:3, reward:25 },
+  { q:"Güneş sistemimizdeki en büyük gezegen?",   opts:["Satürn","Mars","Jüpiter","Neptün"],              ans:2, reward:25 },
+  { q:"Su kaç derecede kaynar?",                  opts:["80°C","90°C","100°C","110°C"],                  ans:2, reward:20 },
+  { q:"Dünyanın en uzun nehri hangisidir?",        opts:["Amazon","Nil","Yangtze","Mississippi"],         ans:1, reward:30 },
+  { q:"Türk lirasının sembolü nedir?",            opts:["€","$","₺","£"],                                ans:2, reward:20 },
+  { q:"Bir yılda kaç ay vardır?",                 opts:["10","11","12","13"],                             ans:2, reward:15 },
+  { q:"Japonya'nın başkenti hangisidir?",         opts:["Osaka","Kyoto","Tokyo","Hiroshima"],             ans:2, reward:25 },
+  { q:"Dünyanın en büyük çölü hangisidir?",       opts:["Gobi","Arabistan","Sahra","Antarktika"],        ans:3, reward:35 },
+  { q:"Hızın birimi nedir?",                      opts:["Newton","Joule","m/s","Pascal"],                 ans:2, reward:20 },
+  { q:"Hangi element H sembolüyle gösterilir?",   opts:["Helyum","Hidrojen","Hafniyum","Holmiyum"],      ans:1, reward:25 },
+  { q:"Osmanlı İmparatorluğu hangi yıl kuruldu?", opts:["1299","1453","1071","1326"],                    ans:0, reward:30 },
+  { q:"Ekvator hangi kıtayı tam ortadan böler?",  opts:["Asya","Afrika","Avrupa","Antarktika"],           ans:1, reward:30 },
+  { q:"DNA'nın açılımı nedir?",                   opts:["Deoksiribonükleik Asit","Dinükleik Asit","Diribonükleik Asit","Dinitrojen Asit"], ans:0, reward:35 },
+  { q:"Ayın Dünya'ya uzaklığı yaklaşık kaçtır?", opts:["38.000 km","384.000 km","3.840.000 km","38.400 km"], ans:1, reward:35 },
+  { q:"İtalya'nın başkenti neresidir?",           opts:["Milano","Venedik","Floransa","Roma"],            ans:3, reward:20 },
+  { q:"Hangi ülke piramitleriyle ünlüdür?",       opts:["İran","Irak","Mısır","Suriye"],                 ans:2, reward:20 },
+  { q:"Dünya'nın en yüksek dağı hangisidir?",     opts:["K2","Everest","Kangchenjunga","Makalu"],        ans:1, reward:25 },
+  { q:"Işık hızı saniyede yaklaşık kaçtır?",      opts:["300 km","3.000 km","300.000 km","3.000.000 km"],ans:2, reward:30 },
+  { q:"Hangi renk tehlike anlamında kullanılır?", opts:["Mavi","Yeşil","Sarı","Kırmızı"],                ans:3, reward:15 },
+  { q:"Bir üçgenin iç açıları toplamı kaçtır?",   opts:["90°","180°","270°","360°"],                    ans:1, reward:25 },
+  { q:"Brezilya'nın resmi dili hangisidir?",      opts:["İspanyolca","Portekizce","Fransızca","İngilizce"], ans:1, reward:30 },
+  { q:"Hangi hayvan 'ormanın kralı' olarak bilinir?", opts:["Kaplan","Leopar","Çita","Aslan"],           ans:3, reward:20 },
+  { q:"Türkiye'nin yüzölçümü yaklaşık kaçtır?",  opts:["581.000 km²","781.000 km²","681.000 km²","481.000 km²"], ans:1, reward:30 },
+  { q:"Hangi gezegen Güneş'e en yakındır?",       opts:["Venüs","Mars","Merkür","Dünya"],                ans:2, reward:30 },
+  { q:"Bir dikdörtgenin alanı nasıl hesaplanır?", opts:["Çevre×2","Kenar³","Uzunluk×Genişlik","Kenar²"], ans:2, reward:25 },
+  { q:"İnsan vücudunda kaç kemik vardır?",        opts:["106","206","306","406"],                         ans:1, reward:30 },
+  { q:"Hangi ülkenin bayrağında ay ve yıldız var?",opts:["Yunanistan","Türkiye","Portekiz","İsveç"],     ans:1, reward:20 },
+  { q:"Avustralya hangi okyanus üzerindedir?",    opts:["Atlantik","Hint","Arktik","Pasifik"],            ans:3, reward:25 },
+  { q:"Kanada'nın başkenti neresidir?",           opts:["Toronto","Vancouver","Ottawa","Montreal"],       ans:2, reward:30 },
+  { q:"Fotosentez sırasında bitkiler ne üretir?", opts:["CO₂","Azot","Oksijen","Hidrojen"],              ans:2, reward:25 },
+  { q:"Hangi yıl Türkiye Cumhuriyeti kuruldu?",   opts:["1919","1920","1922","1923"],                    ans:3, reward:25 },
+  { q:"Dünyanın en küçük ülkesi hangisidir?",     opts:["Monako","San Marino","Vatikan","Liechtenstein"], ans:2, reward:35 },
+  { q:"Renk körü bireyler hangi renkleri karıştırır?", opts:["Mavi-Sarı","Kırmızı-Yeşil","Mor-Turuncu","Beyaz-Siyah"], ans:1, reward:30 },
+  { q:"Su molekülünün kimyasal formülü nedir?",   opts:["CO₂","H₂O","NaCl","O₂"],                       ans:1, reward:20 },
 ];
 
-let T=[], G={}, particles=[], logLines=[], aiTimer=null;
-
-function getT(id){ return T.find(t=>t.id===id); }
-
-// ── Init ───────────────────────────────────────────────────────────────
-function startGame(){
-  document.getElementById('title-screen').style.display='none';
-  initGame();
-}
+// ── OYUN DURUMU ────────────────────────────────────────────────────────
+let countries=[], gold=0, bombs=0, selected=null, qIndex=0, correctCount=0, qAnswered=false;
 
 function initGame(){
   document.getElementById('overlay').classList.remove('show');
-  if(aiTimer){ clearTimeout(aiTimer); aiTimer=null; }
-  particles=[]; logLines=[];
+  gold=100; bombs=2; selected=null; correctCount=0;
 
-  T = TERR_DEF.map(d=>({...d, owner:-1, troops:0}));
+  countries = COUNTRY_DATA.map(d=>({
+    ...d,
+    defense: d.baseDefense,
+    love: d.baseLove,
+    conquered: false
+  }));
 
-  // Shuffle & distribute
-  const ids=[...Array(T.length).keys()];
-  shuffle(ids);
-  ids.forEach((ti,i)=>{
-    T[ti].owner = i%3;
-    T[ti].troops = 3 + Math.floor(Math.random()*3);
+  shuffle(QUESTIONS);
+  qIndex=0; qAnswered=false;
+
+  renderMap();
+  showQuestion();
+  updateStats();
+  selectCountry(null);
+  document.getElementById('action-msg').textContent='';
+}
+
+// ── MAP ────────────────────────────────────────────────────────────────
+function renderMap(){
+  const map=document.getElementById('map');
+  map.innerHTML='';
+  countries.forEach(c=>{
+    const div=document.createElement('div');
+    div.className='country-card'+(c.conquered?' conquered':'');
+    div.id='card-'+c.id;
+    div.onclick=()=>selectCountry(c);
+    div.innerHTML=`
+      <span class="c-flag">${c.flag}</span>
+      <div class="c-name">${c.name}</div>
+      <div class="c-pop">👥 ${c.pop >= 1000 ? (c.pop/1000).toFixed(1)+'B' : c.pop+'M'}</div>
+      <div class="bar-label">❤️ Halk Sevgisi</div>
+      <div class="bar-wrap bar-love"><div class="bar-fill" style="width:${c.love}%;background:${loveColor(c.love)}"></div></div>
+      <div class="bar-label">🛡 Savunma</div>
+      <div class="bar-wrap bar-def"><div class="bar-fill" style="width:${(c.defense/c.baseDefense)*100}%"></div></div>
+    `;
+    map.appendChild(div);
+  });
+}
+
+function updateCard(c){
+  const div=document.getElementById('card-'+c.id);
+  if(!div) return;
+  div.className='country-card'+(c.conquered?' conquered':'')+(selected===c?' selected':'');
+  div.querySelector('.bar-wrap.bar-love .bar-fill').style.width=c.love+'%';
+  div.querySelector('.bar-wrap.bar-love .bar-fill').style.background=loveColor(c.love);
+  div.querySelector('.bar-wrap.bar-def .bar-fill').style.width=(c.defense/c.baseDefense*100)+'%';
+}
+
+function loveColor(v){
+  if(v>=70) return 'linear-gradient(90deg,#ec4899,#f43f5e)';
+  if(v>=40) return 'linear-gradient(90deg,#f97316,#ef4444)';
+  return 'linear-gradient(90deg,#6b7280,#ef4444)';
+}
+
+// ── SELECT COUNTRY ─────────────────────────────────────────────────────
+function selectCountry(c){
+  if(selected){
+    const old=document.getElementById('card-'+selected.id);
+    if(old) old.classList.remove('selected');
+  }
+  selected=c;
+  if(c){
+    const el=document.getElementById('card-'+c.id);
+    if(el) el.classList.add('selected');
+  }
+
+  const bombBtn=document.getElementById('btn-bomb');
+  const loveBtn=document.getElementById('btn-love');
+
+  if(!c){
+    document.getElementById('sel-flag').textContent='🌐';
+    document.getElementById('sel-name').textContent='Haritadan ülke seç';
+    document.getElementById('sel-name').style.color='var(--text2)';
+    document.getElementById('sel-stats').innerHTML='';
+    bombBtn.disabled=true; loveBtn.disabled=true;
+    return;
+  }
+
+  document.getElementById('sel-flag').textContent=c.flag;
+  document.getElementById('sel-name').textContent=c.name;
+  document.getElementById('sel-name').style.color='var(--text)';
+
+  const defPct=Math.round(c.defense/c.baseDefense*100);
+  document.getElementById('sel-stats').innerHTML=`
+    <div class="info-row"><span>👥 Nüfus</span><span class="info-val">${c.pop >= 1000 ? (c.pop/1000).toFixed(1)+'B' : c.pop+'M'}</span></div>
+    <div class="info-row"><span>❤️ Halk Sevgisi</span><span class="info-val" style="color:${c.love>=70?'#f43f5e':c.love>=40?'#f97316':'#6b7280'}">${c.love}%</span></div>
+    <div class="bar-label" style="font-size:11px;color:var(--text2);margin-bottom:4px;">🛡 Savunma: ${c.defense}/${c.baseDefense}</div>
+    <div class="big-bar" style="margin-bottom:12px">
+      <div class="big-bar-fill" style="width:${defPct}%;background:linear-gradient(90deg,#3b82f6,#6366f1)"></div>
+    </div>
+    ${c.conquered ? '<div style="color:#22c55e;font-weight:700;font-size:13px;text-align:center;margin-bottom:8px">✅ Bu ülke senin!</div>' : ''}
+  `;
+
+  bombBtn.disabled = c.conquered || bombs<=0;
+  loveBtn.disabled = c.conquered || gold<30;
+  document.getElementById('action-msg').textContent=
+    c.conquered ? '✅ Fethedildi!' :
+    bombs<=0 ? '💣 Bomban yok — Market\'ten satın al!' : '';
+}
+
+// ── ACTIONS ────────────────────────────────────────────────────────────
+document.getElementById('btn-bomb').onclick=function(){
+  if(!selected||selected.conquered||bombs<=0) return;
+  bombs--;
+
+  // Damage based on love: yüksek sevgi = daha az direniş
+  let dmg;
+  if(selected.love>=70)      dmg=25+Math.floor(Math.random()*10); // 25-34
+  else if(selected.love>=40) dmg=15+Math.floor(Math.random()*10); // 15-24
+  else                       dmg=8+Math.floor(Math.random()*8);  // 8-15
+
+  selected.defense=Math.max(0,selected.defense-dmg);
+  selected.love=Math.max(0,selected.love-8);
+
+  showMsg(`💥 ${dmg} hasar verdi! Savunma: ${selected.defense}`,'#f97316');
+
+  if(selected.defense<=0){
+    conquer(selected);
+  } else {
+    updateCard(selected);
+    selectCountry(selected);
+    updateStats();
+  }
+};
+
+document.getElementById('btn-love').onclick=function(){
+  if(!selected||selected.conquered||gold<30) return;
+  gold-=30;
+  const gain=10+Math.floor(Math.random()*11); // 10-20
+  selected.love=Math.min(100,selected.love+gain);
+  updateCard(selected);
+  selectCountry(selected);
+  updateStats();
+  showMsg(`❤️ Halk sevgisi +${gain}! Şimdi bombalar daha etkili!`,'#ec4899');
+};
+
+document.getElementById('btn-buy').onclick=function(){
+  if(gold<50) return showMsg('💸 Yeterli altın yok!','#ef4444');
+  gold-=50; bombs++;
+  updateStats();
+  showMsg('💣 Bomba satın alındı!','#f59e0b');
+  if(selected) selectCountry(selected);
+};
+
+function conquer(c){
+  c.conquered=true;
+  c.defense=0;
+  const income=Math.max(20,Math.floor(c.pop/10));
+  gold+=income;
+  updateCard(c);
+  selectCountry(c);
+  updateStats();
+  showMsg(`🎉 ${c.name} fethedildi! +${income} altın kazandın!`,'#22c55e');
+  toast(`🏳 ${c.name} artık senindir! 🎉`);
+
+  const conquered=countries.filter(x=>x.conquered).length;
+  if(conquered===countries.length){
+    setTimeout(()=>{
+      document.getElementById('ov-emoji').textContent='🏆';
+      document.getElementById('ov-title').textContent='Kazandınız!';
+      document.getElementById('ov-sub').textContent=`Tüm 15 ülkeyi fethettiniz! ${correctCount} soruyu doğru cevapladınız.`;
+      document.getElementById('overlay').classList.add('show');
+    },800);
+  }
+}
+
+// ── QUESTION ───────────────────────────────────────────────────────────
+function showQuestion(){
+  qAnswered=false;
+  const q=QUESTIONS[qIndex%QUESTIONS.length];
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('q-result').textContent='';
+
+  const opts=document.getElementById('q-opts');
+  opts.innerHTML='';
+  const keys=['A','B','C','D'];
+  q.opts.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt-btn';
+    btn.innerHTML=`<span class="opt-key">${keys[i]}</span>${opt}`;
+    btn.onclick=()=>answer(i);
+    opts.appendChild(btn);
+  });
+}
+
+function answer(idx){
+  if(qAnswered) return;
+  qAnswered=true;
+  const q=QUESTIONS[qIndex%QUESTIONS.length];
+  const btns=document.querySelectorAll('.opt-btn');
+
+  btns.forEach((b,i)=>{
+    b.disabled=true;
+    if(i===q.ans) b.classList.add('correct');
+    else if(i===idx && idx!==q.ans) b.classList.add('wrong');
   });
 
-  G = { cur:0, phase:'reinforce', toPlace:calcR(0), sel:null, fromTerr:null };
-  updateHUD(); draw();
-  if(!PLAYERS[G.cur].human) aiTimer=setTimeout(aiTurn,700);
-}
-
-function calcR(pid){
-  return Math.max(3, Math.floor(T.filter(t=>t.owner===pid).length/3));
-}
-
-// ── Phase control ──────────────────────────────────────────────────────
-function endPhase(){
-  if(!PLAYERS[G.cur].human) return;
-  if(G.phase==='reinforce' && G.toPlace>0){ addLog('⚠️ Kuvvetleri yerleştir!'); return; }
-  if(G.phase==='reinforce')      { G.phase='attack'; G.sel=null; G.fromTerr=null; }
-  else if(G.phase==='attack')    { G.phase='fortify'; G.sel=null; G.fromTerr=null; }
-  else                           { nextTurn(); return; }
-  updateHUD(); draw();
-}
-
-function nextTurn(){
-  G.cur=(G.cur+1)%3;
-  // Skip eliminated
-  let tries=0;
-  while(T.filter(t=>t.owner===G.cur).length===0 && tries<3){ G.cur=(G.cur+1)%3; tries++; }
-  G.phase='reinforce'; G.toPlace=calcR(G.cur);
-  G.sel=null; G.fromTerr=null;
-  updateHUD(); draw();
-  if(!PLAYERS[G.cur].human) aiTimer=setTimeout(aiTurn,600);
-}
-
-// ── AI ─────────────────────────────────────────────────────────────────
-function aiTurn(){
-  const pid=G.cur;
-  const mine=T.filter(t=>t.owner===pid);
-  if(!mine.length){ nextTurn(); return; }
-
-  // Reinforce: most threatened territory
-  const target = mine.reduce((best,t)=>{
-    const e=t.adj.filter(id=>getT(id)?.owner!==pid).length;
-    const be=best.adj.filter(id=>getT(id)?.owner!==pid).length;
-    return e>be?t:best;
-  });
-  target.troops+=G.toPlace; G.toPlace=0;
-
-  // Attack
-  for(let pass=0;pass<10;pass++){
-    let attacked=false;
-    for(const from of T.filter(t=>t.owner===pid&&t.troops>2)){
-      for(const adjId of from.adj){
-        const to=getT(adjId);
-        if(to.owner===pid) continue;
-        if(from.troops>to.troops+1){
-          doBattle(from,to);
-          attacked=true;
-          if(checkWin()) return;
-          break;
-        }
-      }
-      if(attacked) break;
-    }
-    if(!attacked) break;
-  }
-
-  updateHUD(); draw();
-  aiTimer=setTimeout(()=>{ nextTurn(); },500);
-}
-
-// ── Battle ─────────────────────────────────────────────────────────────
-function doBattle(from,to){
-  addLog(`⚔️ ${from.name} → ${to.name}`);
-  burst(to.x*SCALE, to.y*SCALE, PLAYERS[from.owner].color, 14);
-
-  let atk=from.troops, def=to.troops;
-  while(atk>1 && def>0){
-    // Dice simulation
-    const ar=[];for(let i=0;i<Math.min(3,atk-1);i++) ar.push(Math.random());
-    const dr=[];for(let i=0;i<Math.min(2,def);i++) dr.push(Math.random()*0.95);
-    ar.sort((a,b)=>b-a); dr.sort((a,b)=>b-a);
-    const rounds=Math.min(ar.length,dr.length);
-    for(let i=0;i<rounds;i++){
-      if(ar[i]>dr[i]) def--; else atk--;
-    }
-  }
-
-  from.troops=atk;
-  if(def<=0){
-    to.owner=from.owner;
-    const moved=Math.max(1,Math.floor(atk/2));
-    to.troops=moved; from.troops=atk-moved+1;
-    burst(to.x*SCALE, to.y*SCALE, PLAYERS[from.owner].color, 20);
-    addLog(`✅ ${to.name} fethedildi!`);
+  if(idx===q.ans){
+    gold+=q.reward;
+    correctCount++;
+    document.getElementById('q-result').textContent=`✅ Doğru! +${q.reward} altın kazandın!`;
+    document.getElementById('q-result').style.color='#86efac';
+    toast(`+${q.reward} 💰 Doğru cevap!`);
   } else {
-    to.troops=def;
+    document.getElementById('q-result').textContent=`❌ Yanlış! Doğru cevap: ${q.opts[q.ans]}`;
+    document.getElementById('q-result').style.color='#fca5a5';
   }
-  draw();
+
+  updateStats();
+  if(selected) selectCountry(selected);
+  qIndex++;
+  setTimeout(showQuestion, 1800);
 }
 
-function checkWin(){
-  for(const p of PLAYERS){
-    if(T.filter(t=>t.owner===p.id).length===T.length){
-      const ov=document.getElementById('overlay');
-      document.getElementById('ov-title').textContent = p.human?'🏆 Kazandınız!':'😔 Kaybettiniz';
-      document.getElementById('ov-sub').textContent   = p.human?'Tüm ülkeleri fethettiniz!':p.name+' tüm ülkeleri fethetti.';
-      ov.classList.add('show');
-      return true;
-    }
-  }
-  return false;
+// ── UI HELPERS ─────────────────────────────────────────────────────────
+function updateStats(){
+  document.getElementById('s-gold').textContent=gold;
+  document.getElementById('s-bomb').textContent=bombs;
+  document.getElementById('s-count').textContent=countries.filter(c=>c.conquered).length;
+  document.getElementById('s-correct').textContent=correctCount;
+  document.getElementById('btn-buy').disabled=gold<50;
 }
 
-// ── Click ──────────────────────────────────────────────────────────────
-canvas.addEventListener('click', e=>{
-  if(!PLAYERS[G.cur].human) return;
-  const r=canvas.getBoundingClientRect();
-  const mx=(e.clientX-r.left)/SCALE, my=(e.clientY-r.top)/SCALE;
-  const hit=T.find(t=>dist(t.x,t.y,mx,my)<34);
-
-  if(G.phase==='reinforce'){
-    if(hit && hit.owner===G.cur && G.toPlace>0){
-      hit.troops++; G.toPlace--;
-      burst(hit.x*SCALE, hit.y*SCALE, PLAYERS[G.cur].color, 8);
-      updateHUD(); draw();
-    } else if(hit && hit.owner!==G.cur){
-      addLog('❌ Bu ülke sana ait değil!');
-    } else if(G.toPlace<=0){
-      addLog('✅ Tüm kuvvetler yerleştirildi, Geç butonuna bas.');
-    }
-
-  } else if(G.phase==='attack'){
-    if(!G.fromTerr){
-      if(hit && hit.owner===G.cur && hit.troops>1){ G.fromTerr=hit; G.sel=hit; }
-    } else {
-      if(!hit){ G.fromTerr=null; G.sel=null; }
-      else if(hit===G.fromTerr){ G.fromTerr=null; G.sel=null; }
-      else if(hit.owner!==G.cur && G.fromTerr.adj.includes(hit.id)){
-        doBattle(G.fromTerr, hit);
-        checkWin();
-        G.fromTerr=null; G.sel=null;
-      } else if(hit.owner===G.cur && hit.troops>1){
-        G.fromTerr=hit; G.sel=hit;
-      }
-    }
-    updateHUD(); draw();
-
-  } else if(G.phase==='fortify'){
-    if(!G.sel){
-      if(hit && hit.owner===G.cur && hit.troops>1) G.sel=hit;
-    } else {
-      if(!hit){ G.sel=null; }
-      else if(hit===G.sel){ G.sel=null; }
-      else if(hit.owner===G.cur && G.sel.adj.includes(hit.id)){
-        const move=G.sel.troops-1;
-        hit.troops+=move; G.sel.troops=1;
-        addLog(`🔀 ${G.sel.name}→${hit.name}: ${move} kuvvet`);
-        G.sel=null;
-      } else if(hit.owner===G.cur && hit.troops>1){ G.sel=hit; }
-      else { G.sel=null; }
-    }
-    draw();
-  }
-});
-
-// ── Draw ───────────────────────────────────────────────────────────────
-function draw(){
-  const W=canvas.width, H=canvas.height;
-  ctx.clearRect(0,0,W,H);
-
-  // BG gradient
-  const bg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*0.8);
-  bg.addColorStop(0,'#0d0d2b'); bg.addColorStop(1,'#050510');
-  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
-
-  // Stars
-  for(let i=0;i<100;i++){
-    const sx=((i*137.508+11)%900)*SCALE;
-    const sy=((i*97.33+7)%560)*SCALE;
-    const sr=(i%5===0?1.6:i%3===0?1.1:0.6)*SCALE;
-    const alpha=0.2+((i*53)%80)/200;
-    ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2);
-    ctx.fillStyle=`rgba(255,255,255,${alpha})`; ctx.fill();
-  }
-
-  // Connection lines
-  const drawn=new Set();
-  for(const t of T){
-    for(const adjId of t.adj){
-      const key=[t.id,adjId].sort().join('|');
-      if(drawn.has(key)) continue; drawn.add(key);
-      const t2=getT(adjId);
-      const sameOwner=t.owner===t2.owner&&t.owner>=0;
-      ctx.beginPath();
-      ctx.moveTo(t.x*SCALE, t.y*SCALE);
-      ctx.lineTo(t2.x*SCALE, t2.y*SCALE);
-      ctx.strokeStyle=sameOwner?PLAYERS[t.owner].color+'44':'rgba(255,255,255,0.07)';
-      ctx.lineWidth=(sameOwner?1.5:1)*SCALE;
-      ctx.stroke();
-    }
-  }
-
-  // Territories
-  for(const t of T) drawT(t);
-
-  // Particles
-  tickParticles();
-  if(particles.length) requestAnimationFrame(draw);
+function showMsg(msg, color){
+  const el=document.getElementById('action-msg');
+  el.textContent=msg;
+  el.style.color=color||'var(--text2)';
 }
 
-function drawT(t){
-  const x=t.x*SCALE, y=t.y*SCALE, r=26*SCALE;
-  const p=t.owner>=0?PLAYERS[t.owner]:null;
-  const col=p?p.color:'#374151';
-  const isSel = G.sel===t || G.fromTerr===t;
-  const isTarget = G.fromTerr && t.owner!==G.cur && G.fromTerr.adj.includes(t.id);
-  const isReach  = G.sel && G.phase==='fortify' && t!==G.sel && t.owner===G.cur && G.sel.adj.includes(t.id);
-  const isMyReinforce = G.phase==='reinforce' && t.owner===G.cur && G.toPlace>0;
-
-  // Pulse ring for reinforceable territories
-  if(isMyReinforce){
-    const pulse=0.5+0.5*Math.sin(Date.now()/300);
-    const pr=r+8*SCALE*pulse;
-    ctx.beginPath(); ctx.arc(x,y,pr,0,Math.PI*2);
-    ctx.strokeStyle=col+'88'; ctx.lineWidth=2*SCALE; ctx.stroke();
-    requestAnimationFrame(draw);
-  }
-
-  // Outer glow
-  if(isSel||isTarget||isReach||isMyReinforce){
-    const gc=isTarget?'#ef4444':isReach?'#22c55e':col;
-    const gr=ctx.createRadialGradient(x,y,r*.4,x,y,r*2.8);
-    gr.addColorStop(0,gc+'4a'); gr.addColorStop(1,gc+'00');
-    ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(x,y,r*2.8,0,Math.PI*2); ctx.fill();
-  }
-
-  // Shadow glow
-  ctx.shadowBlur=14*SCALE; ctx.shadowColor=col;
-
-  // Circle bg
-  const grd=ctx.createRadialGradient(x-r*.25,y-r*.25,0,x,y,r);
-  grd.addColorStop(0,col+'cc'); grd.addColorStop(1,col+'44');
-  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
-  ctx.fillStyle=grd; ctx.fill();
-
-  // Border
-  ctx.strokeStyle=isSel?'#fff':isTarget?'#ef4444':isReach?'#22c55e':col+'bb';
-  ctx.lineWidth=(isSel||isTarget?2.8:1.8)*SCALE;
-  ctx.stroke();
-  ctx.shadowBlur=0;
-
-  // Troop count
-  ctx.fillStyle='#fff';
-  ctx.font=`bold ${Math.round(13*SCALE)}px 'Segoe UI',sans-serif`;
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(t.troops, x, y);
-
-  // Name
-  ctx.fillStyle='rgba(255,255,255,0.82)';
-  ctx.font=`${Math.round(9*SCALE)}px 'Segoe UI',sans-serif`;
-  ctx.fillText(t.name, x, y+r+10*SCALE);
+let toastTimer=null;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.classList.add('show');
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2200);
 }
 
-// ── Particles ──────────────────────────────────────────────────────────
-function burst(x,y,color,n){
-  for(let i=0;i<n;i++){
-    const a=(Math.PI*2*i/n)+Math.random()*.4;
-    const sp=(2+Math.random()*3)*SCALE;
-    particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,color});
-  }
-  requestAnimationFrame(draw);
-}
-
-function tickParticles(){
-  particles=particles.filter(p=>p.life>0);
-  for(const p of particles){
-    p.x+=p.vx; p.y+=p.vy; p.vy+=.08*SCALE;
-    p.vx*=.94; p.vy*=.94; p.life-=.035;
-    const hex=Math.round(p.life*255).toString(16).padStart(2,'0');
-    ctx.beginPath(); ctx.arc(p.x,p.y,3*SCALE*p.life,0,Math.PI*2);
-    ctx.fillStyle=p.color+hex; ctx.fill();
-  }
-}
-
-// ── HUD ────────────────────────────────────────────────────────────────
-function updateHUD(){
-  const p=PLAYERS[G.cur];
-  const badge=document.getElementById('player-badge');
-  badge.style.background=p.color+'22'; badge.style.borderColor=p.color; badge.style.color=p.light;
-  document.getElementById('badge-dot').style.background=p.color;
-  document.getElementById('badge-name').textContent=p.name;
-
-  const pt=document.getElementById('phase-text');
-  if(G.phase==='reinforce'){
-    const myTerrs=T.filter(t=>t.owner===G.cur).map(t=>t.name).join(', ');
-    pt.innerHTML=`<strong>Takviye</strong> — <strong style="color:${p.light}">${G.toPlace}</strong> kuvvet kaldı · Ülkelerin: <span style="color:${p.light};font-size:11px">${myTerrs}</span>`;
-  } else if(G.phase==='attack'){
-    const hint=G.fromTerr?`<strong style="color:${p.light}">${G.fromTerr.name}</strong> seçili — hedefe tıkla`:'Saldırmak için ülke seç (veya geç)';
-    pt.innerHTML=`<strong>Saldırı</strong> — ${hint}`;
-  } else {
-    pt.innerHTML=`<strong>Güçlendir</strong> — Kuvvet taşı veya turu bitir`;
-  }
-
-  const btn=document.getElementById('btn-end');
-  btn.disabled=!p.human;
-  btn.textContent=G.phase==='fortify'?'Turu Bitir ✓':'Sonraki Aşama →';
-
-  // Scoreboard
-  const sb=document.getElementById('scoreboard');
-  sb.innerHTML=PLAYERS.map(pl=>{
-    const cnt=T.filter(t=>t.owner===pl.id).length;
-    const troops=T.filter(t=>t.owner===pl.id).reduce((s,t)=>s+t.troops,0);
-    return `<div class="score-row">
-      <div class="score-dot" style="background:${pl.color}"></div>
-      <span class="score-name">${pl.name}</span>
-      <span class="score-count" style="color:${pl.light}">${cnt} 🏳 ${troops} ⚔</span>
-    </div>`;
-  }).join('');
-
-  // Log
-  const lb=document.getElementById('log-box');
-  lb.innerHTML=logLines.slice(-5).map((l,i,a)=>
-    `<div class="log-line ${i===a.length-1?'fresh':''}">${l}</div>`
-  ).join('') || '<div class="log-line">Oyun başladı!</div>';
-}
-
-function addLog(msg){ logLines.push(msg); if(logLines.length>8) logLines.shift(); updateHUD(); }
-
-// ── Helpers ────────────────────────────────────────────────────────────
-function dist(x1,y1,x2,y2){ return Math.hypot(x1-x2,y1-y2); }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]; } }
 
-// ── Resize ─────────────────────────────────────────────────────────────
-function resize(){
-  const maxW=Math.min(window.innerWidth,1000);
-  const maxH=window.innerHeight-72;
-  const aspect=900/560;
-  let w=maxW, h=maxW/aspect;
-  if(h>maxH){ h=maxH; w=h*aspect; }
-  canvas.width=Math.floor(w); canvas.height=Math.floor(h);
-  SCALE=w/900;
-  draw();
-}
-window.addEventListener('resize', resize);
-resize();
+// Start
+initGame();
 </script>
 </body>
 </html>
