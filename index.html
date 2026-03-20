@@ -208,9 +208,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
         <button class="bomb-btn" id="bb-nukleer" style="background:linear-gradient(135deg,#14532d,#166534);border-color:#22c55e" disabled onclick="useBomb('nukleer')">
           ☢️ Nükleer Bomba <span class="b-count" id="bc-nukleer">0</span>
         </button>
-        <button class="bomb-btn" id="bb-bok" style="background:linear-gradient(135deg,#3b1f00,#5a2d00);border-color:#92400e" disabled onclick="useBomb('bok')">
-          💩 Bok Fırlatıcı <span class="b-count" id="bc-bok">0</span>
-        </button>
         <button class="bomb-btn" id="bb-sirk" style="background:linear-gradient(135deg,#4a044e,#701a75);border-color:#d946ef" disabled onclick="useBomb('sirk')">
           🎪 Sirk Topu <span class="b-count" id="bc-sirk">0</span>
         </button>
@@ -245,14 +242,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
           <div class="shop-desc">60-100 hasar. BM kızacak!</div>
         </div>
         <span class="shop-price">150💰</span>
-      </div>
-      <div class="shop-item" id="sh-bok" onclick="buyBomb('bok')">
-        <span class="shop-icon">💩</span>
-        <div class="shop-info">
-          <div class="shop-name">Bok Fırlatıcı</div>
-          <div class="shop-desc">5-12 hasar ama moralleri çöker!</div>
-        </div>
-        <span class="shop-price">20💰</span>
       </div>
       <div class="shop-item" id="sh-sirk" onclick="buyBomb('sirk')">
         <span class="shop-icon">🎪</span>
@@ -309,238 +298,119 @@ const BOMBS = {
   klasik:  { name:'Klasik Bomba',  icon:'💣', price:40,  minDmg:15, maxDmg:25, loveHit:5,  msg:'BOOM! Klasik ama işe yarar.' },
   atesh:   { name:'Ateş Bombası',  icon:'🔥', price:70,  minDmg:25, maxDmg:45, loveHit:10, msg:'YANGIN VAR! İtfaiye yolda!' },
   nukleer: { name:'Nükleer Bomba', icon:'☢️', price:150, minDmg:60, maxDmg:100,loveHit:20, msg:'☢️ BM acil toplantıya çağrıldı!' },
-  bok:     { name:'Bok Fırlatıcı', icon:'💩', price:20,  minDmg:5,  maxDmg:12, loveHit:25, msg:'💩 İğrenç! Moralleri çöktü!' },
   sirk:    { name:'Sirk Topu',     icon:'🎪', price:35,  minDmg:1,  maxDmg:80, loveHit:8,  msg:'🎪 Kumar gibiydi... ne çıktı?' },
 };
 
 // ── SORULAR ────────────────────────────────────────────────────────────
 const QUESTIONS = [
-  // 😂 SAÇMA SORULAR
-  { cat:'😂 Absürt', q:"Kafes dövüşünde kimi dövmek isterdin?", opts:["Putin'i","Biden'ı","Kendi patronumu","Hiçbirini, barışçılım"], ans:2, reward:25 },
-  { cat:'😂 Absürt', q:"Sabah uyanınca ilk ne yaparsın?", opts:["Ülke bomblayım","Twitter aç","Kahvaltı yap","Tekrar uyu"], ans:3, reward:15 },
-  { cat:'😂 Absürt', q:"Hangi ülkeyi fethetmek en zor?", opts:["Amerika","Rusya","Kendi nüfus müdürlüğü","Çin"], ans:2, reward:20 },
-  { cat:'😂 Absürt', q:"Dünya kaça kaça dönüyor?", opts:["Çok hızlı","Yavaşça","Bilmiyorum","Ben döndürüyorum zaten"], ans:3, reward:25 },
-  { cat:'😂 Absürt', q:"En iyi başkan özelliği nedir?", opts:["Bomba atacak cesareti","Saçını düzgün taramak","Konuşurken uyutmamak","Hepsini birden"], ans:2, reward:20 },
-  { cat:'😂 Absürt', q:"Bir ülkeyi fethedince ne yaparsın?", opts:["Vergi koyarım","Tatile giderim","İsim değiştiririm","Hepsini birden"], ans:3, reward:20 },
-  { cat:'😂 Absürt', q:"BM seni aradığında ne yaparsın?", opts:["Telefonu açmam","Meşgul gösteririm","Konuşurum ama dinlemem","Bloke ederim"], ans:3, reward:25 },
-  { cat:'😂 Absürt', q:"Dünya liderleriyle toplantıda ne yersin?", opts:["Kuru ekmek","Havyar","Sandviç","Getirdiklerini"], ans:1, reward:15 },
-  { cat:'😂 Absürt', q:"Savaş açmak için en iyi bahane nedir?", opts:["Özgürlük","Demokrasi","Petrol","Hepsinin üçü de petrol"], ans:3, reward:30 },
-  { cat:'😂 Absürt', q:"Ülkeni nasıl savunursun?", opts:["Ordu ile","Dikenli tel ile","Komşuyu öne atarım","Tweet atarım"], ans:3, reward:25 },
-  { cat:'😂 Absürt', q:"Başkan olunca ilk kanun ne olur?", opts:["Çalışma saatleri azalır","Tatil günleri artar","Çay zorunlu olur","Hepsi"], ans:3, reward:20 },
-  { cat:'😂 Absürt', q:"Rusya'dan bomba gelince ne yaparsın?", opts:["Saklarım","Karşılık veririm","Diplomatik kriz çıkarırım","İade ederim"], ans:3, reward:30 },
-  { cat:'😂 Absürt', q:"Dünya barışı nasıl sağlanır?", opts:["Konuşarak","Anlaşarak","Herkesi ben fethedince","İnterneti kapatınca"], ans:2, reward:25 },
-  { cat:'😂 Absürt', q:"Hangi silah en güçlüdür?", opts:["Nükleer","Kimyasal","Kötü komşuluk","Sosyal medya"], ans:3, reward:25 },
-  { cat:'😂 Absürt', q:"Komşu ülke çok gürültü yapıyor, ne yaparsın?", opts:["Gidip konuşurum","Şikayet ederim","Fethedip sustururum","Kulaklık takarım"], ans:2, reward:20 },
+  // 🗳️ HALK NE İSTİYOR
+  // 🗳️ HALK ANKETİ — Başkanlık & Halk Soruları
+  { cat:'🗳️ Halk Anketi', q:"Halkın %72'si bu haftaki en büyük isteği nedir?", opts:["Zam olmasın","Trafik çözülsün","İnternet ucuzlasın","Cumartesi de tatil olsun"], ans:3, reward:25 },
+  { cat:'🗳️ Halk Anketi', q:"Vatandaşlar senden ne istiyor?", opts:["Daha az vergi","Daha fazla park","Ücretsiz çay","Hepsini birden"], ans:3, reward:20 },
+  { cat:'🗳️ Halk Anketi', q:"Seçim kampanyasında hangi söz oy getirir?", opts:["Her şeyi dürüstçe anlatacağım","Elektrik ücretsiz olacak","Trafik çözülecek","Halkımı çok seviyorum"], ans:1, reward:25 },
+  { cat:'🗳️ Halk Anketi', q:"Halk en çok hangi konudan şikayet eder?", opts:["Hava durumu","Ekmek fiyatı","Komşunun köpeği","Hepsinden"], ans:3, reward:20 },
+  { cat:'🗳️ Halk Anketi', q:"Başkan olarak ilk icraatın ne olur?", opts:["Maaşımı artırırım","Tatil sayısını artırırım","Trafik sorununu çözerim","Halkı dinlerim"], ans:1, reward:25 },
+  { cat:'🗳️ Halk Anketi', q:"Halk seni neden seçti?", opts:["Yakışıklı/güzel olduğum için","İyi konuşma yaptım","Rakibim daha kötüydü","Hâlâ bunu anlayamadım"], ans:2, reward:20 },
+  { cat:'🗳️ Halk Anketi', q:"Halkın %89'u ne istiyor?", opts:["Barış","Özgürlük","Refah","Önce barış, sonra refah, sonra özgürlük sırası var ya"], ans:3, reward:25 },
+  { cat:'🗳️ Halk Anketi', q:"Ekonomi kötü gidince ne yaparsın?", opts:["Halka açıklarım","Medyayı kapatırım","Dışarıya çıkmam","Muhalefeti suçlarım"], ans:3, reward:25 },
+  { cat:'🗳️ Halk Anketi', q:"Rakip başkan seni eleştiriyor, ne yaparsın?", opts:["Cevap veririm","Mahkemeye veririm","Tweet atarım","Savaş açarım"], ans:2, reward:20 },
+  { cat:'🗳️ Halk Anketi', q:"Halka en popüler söz nedir?", opts:["Köklü değişim","Güçlü ekonomi","Herkese iş","Her söz oy getirir"], ans:3, reward:20 },
+  { cat:'🗳️ Halk Anketi', q:"Ülkende en büyük sorun nedir?", opts:["İşsizlik","Enflasyon","Trafik","Sosyal medya bağımlılığı"], ans:3, reward:20 },
+  { cat:'🗳️ Halk Anketi', q:"Başkanlık sarayında en çok ne yaparsın?", opts:["Çalışırım","Toplantı yaparım","Çay içerim","Netflix izlerim"], ans:3, reward:25 },
+  { cat:'🗳️ Halk Anketi', q:"BM'de konuşma yapacaksın, ne söylersin?", opts:["Barış istiyoruz","Ekonomimiz güçlü","Herkesi seviyoruz","Teşekkür ederim, çok uzun konuşmayacağım"], ans:3, reward:25 },
+  { cat:'🗳️ Halk Anketi', q:"Seçimi kaybedersen ne yaparsın?", opts:["Sonucu kabul ederim","Tekrar seçime girerim","Tatile giderim","Sonuçları tanımam"], ans:3, reward:25 },
+  { cat:'🗳️ Halk Anketi', q:"En iyi dış politika yöntemi nedir?", opts:["Diplomatik görüşme","Ekonomik yaptırım","Askeri güç","Komşuyu bombalayıp özür dilemek"], ans:3, reward:30 },
+  { cat:'🗳️ Halk Anketi', q:"Ülkene turist çekmek için ne yaparsın?", opts:["Reklam kampanyası","Vize kaldırırım","Fiyatları indiririm","Bedava yemek veririm"], ans:3, reward:20 },
+  { cat:'🗳️ Halk Anketi', q:"Halk senden ne beklemiyor?", opts:["Dürüstlük","Çalışkanlık","Ahlaklı davranmak","Hepsi bekleniyor ama olmaz"], ans:3, reward:25 },
+  { cat:'🗳️ Halk Anketi', q:"Vatandaşlara ne vaat edersin?", opts:["Özgürlük","Refah","Her şey çok iyi olacak","Elimden geleni yapacağım"], ans:2, reward:20 },
+  { cat:'🗳️ Halk Anketi', q:"Başkan olarak en zor karar nedir?", opts:["Savaş açmak","Vergi artırmak","İkisini de aynı anda yapmak","Vatandaşa 'hayır' demek"], ans:3, reward:25 },
+  { cat:'🗳️ Halk Anketi', q:"Halkın mutluluğunu nasıl artırırsın?", opts:["Tatil günü artırırım","Vergi indiririm","Ekmek ucuzlatırım","Hepsini yaparım diyip hiçbirini yapmam"], ans:3, reward:25 },
+
+  // 😂 KOMİK SORULAR
+  { cat:'😂 Komik', q:"Kafes dövüşü ister misin?", opts:["Evet, rakibimi ezerim","Hayır, diplomatik çözerim","Bence ring daha şık","Rakibim beni ezer"], ans:2, reward:25 },
+  { cat:'😂 Komik', q:"Sabah uyanınca başkan olarak ilk ne yaparsın?", opts:["Ülkeyi yönetirim","Twitter'ı açarım","Kahvaltı yaparım","Tekrar uyurum"], ans:3, reward:20 },
+  { cat:'😂 Komik', q:"Hangi ülkeyi fethetmek en zordur?", opts:["Amerika","Rusya","Çin","Kendi nüfus müdürlüğü"], ans:3, reward:25 },
+  { cat:'😂 Komik', q:"Dünya kaça kaça dönüyor?", opts:["Çok hızlı","Yavaşça","Ben döndürüyorum zaten","Dönüyor mu ki?"], ans:2, reward:20 },
+  { cat:'😂 Komik', q:"En iyi başkan özelliği nedir?", opts:["Bomba atacak cesaret","Saçını düzgün taramak","Konuşurken uyutmamak","Hepsini birden"], ans:2, reward:20 },
+  { cat:'😂 Komik', q:"Bir ülkeyi fethedince ilk iş nedir?", opts:["Vergi koyarım","Tatile giderim","İsim değiştiririm","Fotoğraf çektiririm"], ans:3, reward:20 },
+  { cat:'😂 Komik', q:"BM seni aradığında ne yaparsın?", opts:["Hemen açarım","Meşgul gösteririm","Açıp konuşmam","Bloke ederim"], ans:3, reward:25 },
+  { cat:'😂 Komik', q:"Savaş açmak için en iyi bahane nedir?", opts:["Özgürlük","Demokrasi","Petrol","Komşu bana baktı"], ans:3, reward:30 },
+  { cat:'😂 Komik', q:"Ülkeni nasıl savunursun?", opts:["Ordu ile","Dikenli tel ile","Komşuyu öne atarım","Tweet atarım"], ans:3, reward:25 },
+  { cat:'😂 Komik', q:"Başkan olunca ilk çıkarılan kanun ne olur?", opts:["Çalışma saatleri azalır","Tatil günleri artar","Çay zorunlu olur","Hepsi"], ans:3, reward:20 },
+  { cat:'😂 Komik', q:"Rusya'dan bomba gelince ne yaparsın?", opts:["Saklarım","Karşılık veririm","İade ederim","Piyango bileti sanırım"], ans:3, reward:30 },
+  { cat:'😂 Komik', q:"Dünya barışı nasıl sağlanır?", opts:["Konuşarak","Anlaşarak","Herkesi ben fethedince","İnterneti kapatınca"], ans:2, reward:25 },
+  { cat:'😂 Komik', q:"Hangi silah en güçlüdür?", opts:["Nükleer","Kimyasal","Sosyal medya","Kötü komşuluk"], ans:2, reward:25 },
+  { cat:'😂 Komik', q:"Komşu ülke çok gürültü yapıyor, ne yaparsın?", opts:["Gidip konuşurum","Şikayet ederim","Fethedip sustururum","Kulaklık takarım"], ans:2, reward:20 },
+  { cat:'😂 Komik', q:"Dünya liderler zirvesinde ne yaparsın?", opts:["Çok konuşurum","Sessiz otururum","Uyurum","Selfie çektiririm"], ans:3, reward:20 },
+  { cat:'😂 Komik', q:"Ordun kaçar ise ne yaparsın?", opts:["Onları mahkemeye veririm","Ben de kaçarım","Yeni ordu kurarım","Barış müzakeresi yaparım"], ans:1, reward:25 },
+  { cat:'😂 Komik', q:"Ülkende para bitince ne yaparsın?", opts:["Vergi artırırım","Borç alırım","Para basarım","Komşudan ödünç alırım"], ans:2, reward:25 },
+  { cat:'😂 Komik', q:"Başkanlık koltuğu en rahat olan kim?", opts:["Erdoğan","Putin","Biden","Hepsi bacak bacak üstüne atıyor"], ans:3, reward:25 },
+  { cat:'😂 Komik', q:"Seçimde oy sayımı tutmuyorsa ne yaparsın?", opts:["Yeniden sayarım","Mahkemeye giderim","Sonuçları tanımam","Sayıcıyı işten çıkarırım"], ans:3, reward:25 },
+  { cat:'😂 Komik', q:"Başka bir gezegende ülke kurarsan adı ne olur?", opts:["Yeni Türkiye","Mars Cumhuriyeti","Benim Gezegenlerim","İsmim ne ise o"], ans:3, reward:20 },
 
   // 🌍 COĞRAFYA
   { cat:'🌍 Coğrafya', q:"Türkiye'nin başkenti neresidir?", opts:["İstanbul","Ankara","İzmir","Bursa"], ans:1, reward:20 },
   { cat:'🌍 Coğrafya', q:"Dünyanın en büyük okyanusu hangisidir?", opts:["Atlantik","Hint","Arktik","Pasifik"], ans:3, reward:20 },
-  { cat:'🌍 Coğrafya', q:"Dünyanın en uzun nehri hangisidir?", opts:["Amazon","Nil","Yangtze","Mississippi"], ans:1, reward:25 },
-  { cat:'🌍 Coğrafya', q:"Dünyanın en büyük çölü hangisidir?", opts:["Gobi","Arabistan","Sahra","Antarktika"], ans:3, reward:30 },
   { cat:'🌍 Coğrafya', q:"Japonya'nın başkenti neresidir?", opts:["Osaka","Kyoto","Tokyo","Hiroshima"], ans:2, reward:20 },
   { cat:'🌍 Coğrafya', q:"Kanada'nın başkenti neresidir?", opts:["Toronto","Vancouver","Ottawa","Montreal"], ans:2, reward:25 },
-  { cat:'🌍 Coğrafya', q:"Avustralya hangi kıtada yer alır?", opts:["Asya","Afrika","Okyanusya","Avrupa"], ans:2, reward:20 },
   { cat:'🌍 Coğrafya', q:"Brezilya'nın resmi dili hangisidir?", opts:["İspanyolca","Portekizce","Fransızca","Brezilce"], ans:1, reward:25 },
-  { cat:'🌍 Coğrafya', q:"Ekvator hangi kıtayı tam ortadan böler?", opts:["Asya","Afrika","Avrupa","Antarktika"], ans:1, reward:25 },
   { cat:'🌍 Coğrafya', q:"Dünyanın en yüksek dağı hangisidir?", opts:["K2","Everest","Kangchenjunga","Makalu"], ans:1, reward:20 },
-  { cat:'🌍 Coğrafya', q:"İtalya'nın başkenti neresidir?", opts:["Milano","Venedik","Floransa","Roma"], ans:3, reward:20 },
-  { cat:'🌍 Coğrafya', q:"Hangi ülke piramitleriyle ünlüdür?", opts:["İran","Irak","Mısır","Suriye"], ans:2, reward:15 },
-  { cat:'🌍 Coğrafya', q:"Türkiye'nin yüzölçümü yaklaşık kaçtır?", opts:["581.000 km²","781.000 km²","681.000 km²","481.000 km²"], ans:1, reward:30 },
-  { cat:'🌍 Coğrafya', q:"Dünyanın en küçük ülkesi hangisidir?", opts:["Monako","San Marino","Vatikan","Liechtenstein"], ans:2, reward:30 },
-  { cat:'🌍 Coğrafya', q:"Nil nehri hangi okyanusa dökülür?", opts:["Atlantik","Hint","Akdeniz","Kızıldeniz"], ans:2, reward:25 },
-  { cat:'🌍 Coğrafya', q:"Hangi ülke hem Avrupa'da hem Asya'dadır?", opts:["Rusya","Kazakistan","Her ikisi de","Türkiye"], ans:3, reward:25 },
-  { cat:'🌍 Coğrafya', q:"Amazon nehri hangi kıtada akar?", opts:["Afrika","Asya","Güney Amerika","Kuzey Amerika"], ans:2, reward:20 },
   { cat:'🌍 Coğrafya', q:"Hindistan'ın başkenti neresidir?", opts:["Mumbai","Kolkata","Yeni Delhi","Chennai"], ans:2, reward:25 },
-  { cat:'🌍 Coğrafya', q:"Meksika'nın başkenti neresidir?", opts:["Guadalajara","Cancún","Monterrey","Meksiko"], ans:3, reward:20 },
-  { cat:'🌍 Coğrafya', q:"Güney Amerika'nın en büyük ülkesi hangisidir?", opts:["Arjantin","Peru","Kolombiya","Brezilya"], ans:3, reward:25 },
-  { cat:'🌍 Coğrafya', q:"Afrika'nın en büyük ülkesi hangisidir?", opts:["Nijerya","Kongo","Etiyopya","Cezayir"], ans:3, reward:30 },
-  { cat:'🌍 Coğrafya', q:"Çin'in başkenti neresidir?", opts:["Şangay","Pekin","Guangzhou","Shenzhen"], ans:1, reward:20 },
-  { cat:'🌍 Coğrafya', q:"Rusya'nın başkenti neresidir?", opts:["St. Petersburg","Moskova","Novosibirsk","Kazan"], ans:1, reward:15 },
   { cat:'🌍 Coğrafya', q:"Amerika'nın başkenti neresidir?", opts:["New York","Los Angeles","Washington D.C.","Chicago"], ans:2, reward:20 },
-  { cat:'🌍 Coğrafya', q:"İngiltere'nin başkenti neresidir?", opts:["Manchester","Birmingham","Edinburgh","Londra"], ans:3, reward:15 },
-  { cat:'🌍 Coğrafya', q:"Fransa'nın başkenti neresidir?", opts:["Lyon","Marsilya","Bordeaux","Paris"], ans:3, reward:15 },
-  { cat:'🌍 Coğrafya', q:"Almanya'nın başkenti neresidir?", opts:["Hamburg","Münih","Frankfurt","Berlin"], ans:3, reward:15 },
-  { cat:'🌍 Coğrafya', q:"Hangi ülkede en fazla insan yaşar?", opts:["Hindistan","Amerika","Çin","Endonezya"], ans:0, reward:20 },
-  { cat:'🌍 Coğrafya', q:"En uzun kara sınırına sahip ülke hangisidir?", opts:["Çin","Rusya","Amerika","Brezilya"], ans:1, reward:30 },
-  { cat:'🌍 Coğrafya', q:"Hangi kıtada ülke yoktur?", opts:["Arktika","Antarktika","Okyanusya","Hiçbiri"], ans:1, reward:25 },
+  { cat:'🌍 Coğrafya', q:"Rusya'nın başkenti neresidir?", opts:["St. Petersburg","Moskova","Novosibirsk","Kazan"], ans:1, reward:15 },
+  { cat:'🌍 Coğrafya', q:"Dünyanın en uzun nehri hangisidir?", opts:["Amazon","Nil","Yangtze","Mississippi"], ans:1, reward:25 },
 
-  // 🔬 FEN BİLİMLERİ
+  // 🔬 BİLİM
   { cat:'🔬 Bilim', q:"Su kaç derecede kaynar?", opts:["80°C","90°C","100°C","110°C"], ans:2, reward:15 },
   { cat:'🔬 Bilim', q:"Güneş sistemimizdeki en büyük gezegen?", opts:["Satürn","Mars","Jüpiter","Neptün"], ans:2, reward:20 },
-  { cat:'🔬 Bilim', q:"Hangi element H sembolüyle gösterilir?", opts:["Helyum","Hidrojen","Hafniyum","Holmiyum"], ans:1, reward:20 },
-  { cat:'🔬 Bilim', q:"DNA'nın açılımı nedir?", opts:["Deoksiribonükleik Asit","Dinükleik Asit","Diribonükleik Asit","Diazonik Asit"], ans:0, reward:30 },
   { cat:'🔬 Bilim', q:"Fotosentez sırasında bitkiler ne üretir?", opts:["CO₂","Azot","Oksijen","Hidrojen"], ans:2, reward:20 },
   { cat:'🔬 Bilim', q:"Işık hızı saniyede yaklaşık kaçtır?", opts:["300 km","3.000 km","300.000 km","3 milyon km"], ans:2, reward:25 },
-  { cat:'🔬 Bilim', q:"Su molekülünün kimyasal formülü nedir?", opts:["CO₂","H₂O","NaCl","O₂"], ans:1, reward:15 },
   { cat:'🔬 Bilim', q:"İnsan vücudunda kaç kemik vardır?", opts:["106","206","306","406"], ans:1, reward:25 },
-  { cat:'🔬 Bilim', q:"Ayın Dünya'ya uzaklığı yaklaşık kaçtır?", opts:["38.000 km","384.000 km","3.840.000 km","38.400 km"], ans:1, reward:30 },
-  { cat:'🔬 Bilim', q:"Hangi gezegen Güneş'e en yakındır?", opts:["Venüs","Mars","Merkür","Dünya"], ans:2, reward:25 },
-  { cat:'🔬 Bilim', q:"Bir üçgenin iç açıları toplamı kaçtır?", opts:["90°","180°","270°","360°"], ans:1, reward:20 },
-  { cat:'🔬 Bilim', q:"Renk körü bireyler hangi renkleri karıştırır?", opts:["Mavi-Sarı","Kırmızı-Yeşil","Mor-Turuncu","Beyaz-Siyah"], ans:1, reward:25 },
-  { cat:'🔬 Bilim', q:"Ses hangi ortamda daha hızlı yayılır?", opts:["Hava","Su","Vakum","Katı cisimler"], ans:3, reward:30 },
-  { cat:'🔬 Bilim', q:"Hangi vitaminler yağda çözünür?", opts:["B ve C","A, D, E, K","Sadece A","C ve D"], ans:1, reward:30 },
-  { cat:'🔬 Bilim', q:"Periyodik tablonun 1. elementi hangisidir?", opts:["Oksijen","Karbon","Helyum","Hidrojen"], ans:3, reward:20 },
-  { cat:'🔬 Bilim', q:"Newton'un kaçıncı yasası F=ma formülüdür?", opts:["1. Yasa","2. Yasa","3. Yasa","Hiçbiri"], ans:1, reward:25 },
-  { cat:'🔬 Bilim', q:"Hangi kan grubu 'evrensel verici'dir?", opts:["A+","B+","AB+","O-"], ans:3, reward:25 },
-  { cat:'🔬 Bilim', q:"İnsan beyninin ağırlığı yaklaşık kaçtır?", opts:["0.5 kg","1.4 kg","2.5 kg","3 kg"], ans:1, reward:25 },
-  { cat:'🔬 Bilim', q:"Hangi element en iyi elektrik iletkendir?", opts:["Altın","Bakır","Alüminyum","Gümüş"], ans:3, reward:30 },
-  { cat:'🔬 Bilim', q:"Yerçekimi ivmesi yaklaşık kaçtır?", opts:["8.5 m/s²","9.8 m/s²","10.5 m/s²","11 m/s²"], ans:1, reward:20 },
-  { cat:'🔬 Bilim', q:"Hangi organ kan üretir?", opts:["Karaciğer","Böbrek","Kemik iliği","Dalak"], ans:2, reward:30 },
-  { cat:'🔬 Bilim', q:"Atmosferde en çok hangi gaz bulunur?", opts:["Oksijen","Karbondioksit","Azot","Helyum"], ans:2, reward:25 },
-  { cat:'🔬 Bilim', q:"Hangi hayvanın kalbi 3 odacıklıdır?", opts:["Kuş","Memeli","Sürüngen","Balık"], ans:2, reward:35 },
   { cat:'🔬 Bilim', q:"E=mc² formülü kime aittir?", opts:["Newton","Galileo","Einstein","Tesla"], ans:2, reward:20 },
+  { cat:'🔬 Bilim', q:"Atmosferde en çok hangi gaz bulunur?", opts:["Oksijen","Karbondioksit","Azot","Helyum"], ans:2, reward:25 },
   { cat:'🔬 Bilim', q:"Hangi vitamin güneş ışığından üretilir?", opts:["Vitamin A","Vitamin B","Vitamin C","Vitamin D"], ans:3, reward:20 },
   { cat:'🔬 Bilim', q:"Güneş sistemimizde kaç gezegen vardır?", opts:["7","8","9","10"], ans:1, reward:15 },
-  { cat:'🔬 Bilim', q:"Atom çekirdeğinde hangi parçacıklar bulunur?", opts:["Elektron ve proton","Proton ve nötron","Nötron ve elektron","Sadece proton"], ans:1, reward:25 },
-  { cat:'🔬 Bilim', q:"İnsanda kaç kromozom çifti vardır?", opts:["21","22","23","24"], ans:2, reward:30 },
-  { cat:'🔬 Bilim', q:"Hangi gaz asit yağmuruna neden olur?", opts:["CO₂","SO₂","N₂","O₃"], ans:1, reward:30 },
-  { cat:'🔬 Bilim', q:"Dünya'nın uydusu nedir?", opts:["Phobos","Europa","Ay","Titan"], ans:2, reward:15 },
+  { cat:'🔬 Bilim', q:"DNA'nın açılımı nedir?", opts:["Deoksiribonükleik Asit","Dinükleik Asit","Diribonükleik Asit","Diazonik Asit"], ans:0, reward:30 },
 
   // 🏛️ TARİH
   { cat:'🏛️ Tarih', q:"Osmanlı İmparatorluğu hangi yıl kuruldu?", opts:["1299","1453","1071","1326"], ans:0, reward:25 },
   { cat:'🏛️ Tarih', q:"Hangi yıl Türkiye Cumhuriyeti kuruldu?", opts:["1919","1920","1922","1923"], ans:3, reward:20 },
   { cat:'🏛️ Tarih', q:"İstanbul hangi yıl fethedildi?", opts:["1071","1299","1453","1683"], ans:2, reward:20 },
-  { cat:'🏛️ Tarih', q:"Atatürk hangi yıl vefat etti?", opts:["1935","1936","1937","1938"], ans:3, reward:20 },
   { cat:'🏛️ Tarih', q:"1. Dünya Savaşı hangi yılda başladı?", opts:["1912","1914","1916","1918"], ans:1, reward:20 },
-  { cat:'🏛️ Tarih', q:"2. Dünya Savaşı hangi yılda sona erdi?", opts:["1943","1944","1945","1946"], ans:2, reward:20 },
-  { cat:'🏛️ Tarih', q:"Roma İmparatorluğu'nun başkenti neresidir?", opts:["Atina","İstanbul","Kartaca","Roma"], ans:3, reward:20 },
-  { cat:'🏛️ Tarih', q:"Hangi ülke atom bombası kullanan tek ülkedir?", opts:["Rusya","Amerika","İngiltere","Japonya"], ans:1, reward:25 },
   { cat:'🏛️ Tarih', q:"Berlin Duvarı hangi yıl yıkıldı?", opts:["1987","1988","1989","1990"], ans:2, reward:25 },
   { cat:'🏛️ Tarih', q:"Fransız Devrimi hangi yılda başladı?", opts:["1776","1789","1804","1815"], ans:1, reward:25 },
-  { cat:'🏛️ Tarih', q:"Atatürk'ün soyadı kanunu hangi yılda çıktı?", opts:["1930","1932","1934","1936"], ans:2, reward:25 },
   { cat:'🏛️ Tarih', q:"Çanakkale Savaşı hangi yılda yaşandı?", opts:["1912","1913","1914","1915"], ans:3, reward:25 },
-  { cat:'🏛️ Tarih', q:"Kurtuluş Savaşı hangi yılda başladı?", opts:["1918","1919","1920","1921"], ans:1, reward:20 },
   { cat:'🏛️ Tarih', q:"Napoleon hangi ülkenin imparatoruydu?", opts:["İtalya","Fransa","İspanya","Belçika"], ans:1, reward:20 },
-  { cat:'🏛️ Tarih', q:"Hangi imparatorluk 'Üzerinde güneş batmayan' olarak anılır?", opts:["Osmanlı","Roma","Fransız","İngiliz"], ans:3, reward:25 },
-  { cat:'🏛️ Tarih', q:"Süveyş Kanalı hangi yılda açıldı?", opts:["1859","1869","1879","1889"], ans:1, reward:30 },
-  { cat:'🏛️ Tarih', q:"Magna Carta hangi ülkede imzalandı?", opts:["Fransa","Almanya","İngiltere","İtalya"], ans:2, reward:25 },
-  { cat:'🏛️ Tarih', q:"Birinci Dünya Savaşı'nda hangi ülke Osmanlı'nın yanındaydı?", opts:["İngiltere","Fransa","Almanya","Rusya"], ans:2, reward:25 },
-  { cat:'🏛️ Tarih', q:"Mısır medeniyetindeki ünlü yazı sistemi nedir?", opts:["Latin","Kiril","Hiyeroglif","Çivi yazısı"], ans:2, reward:25 },
   { cat:'🏛️ Tarih', q:"Soğuk Savaş hangi ülkeler arasındaydı?", opts:["ABD-Çin","SSCB-ABD","Almanya-Fransa","İngiltere-Rusya"], ans:1, reward:20 },
-
-  // 🇹🇷 TÜRKİYE
-  { cat:'🇹🇷 Türkiye', q:"Türkiye'nin en büyük şehri hangisidir?", opts:["Ankara","İzmir","Bursa","İstanbul"], ans:3, reward:15 },
-  { cat:'🇹🇷 Türkiye', q:"Türkiye'nin para birimi nedir?", opts:["Euro","Dolar","Türk Lirası","Pound"], ans:2, reward:15 },
-  { cat:'🇹🇷 Türkiye', q:"Türkiye kaç ilden oluşmaktadır?", opts:["72","79","81","84"], ans:2, reward:20 },
-  { cat:'🇹🇷 Türkiye', q:"Türkiye'de en uzun kıyı şeridine sahip deniz hangisidir?", opts:["Karadeniz","Ege","Marmara","Akdeniz"], ans:3, reward:25 },
-  { cat:'🇹🇷 Türkiye', q:"Türkiye'nin en yüksek dağı hangisidir?", opts:["Erciyes","Süphan","Ararat (Ağrı)","Uludağ"], ans:2, reward:20 },
-  { cat:'🇹🇷 Türkiye', q:"Türkiye hangi yılda NATO'ya katıldı?", opts:["1949","1952","1955","1961"], ans:1, reward:30 },
-  { cat:'🇹🇷 Türkiye', q:"Türkiye'nin milli bayramı hangi gündür?", opts:["29 Ekim","23 Nisan","19 Mayıs","30 Ağustos"], ans:0, reward:15 },
-  { cat:'🇹🇷 Türkiye', q:"Boğaziçi Köprüsü hangi iki şehir parçasını bağlar?", opts:["Anadolu-Rumeli","Kadıköy-Beşiktaş","Üsküdar-Eminönü","Bakırköy-Maltepe"], ans:0, reward:20 },
-  { cat:'🇹🇷 Türkiye', q:"Türk alfabesi kaç harften oluşur?", opts:["26","28","29","30"], ans:2, reward:20 },
-  { cat:'🇹🇷 Türkiye', q:"Türkiye'nin en uzun nehri hangisidir?", opts:["Sakarya","Kızılırmak","Fırat","Dicle"], ans:1, reward:25 },
-  { cat:'🇹🇷 Türkiye', q:"Atatürk hangi şehirde doğdu?", opts:["Ankara","İstanbul","Selanik","İzmir"], ans:2, reward:20 },
-  { cat:'🇹🇷 Türkiye', q:"Türkiye'nin sembolü olan hayvan hangisidir?", opts:["Aslan","Kurt","Kartal","Geyik"], ans:1, reward:20 },
-  { cat:'🇹🇷 Türkiye', q:"TBMM hangi yılda açıldı?", opts:["1919","1920","1921","1923"], ans:1, reward:25 },
-  { cat:'🇹🇷 Türkiye', q:"Türkiye hangi kıtalara yayılır?", opts:["Asya-Avrupa","Afrika-Asya","Avrupa-Afrika","Asya-Okyanusya"], ans:0, reward:20 },
-  { cat:'🇹🇷 Türkiye', q:"İstanbul'un tarihi yarımadası nerede?", opts:["Beşiktaş","Avrupa yakası","Anadolu yakası","Kadıköy"], ans:1, reward:25 },
+  { cat:'🏛️ Tarih', q:"Atatürk hangi yıl vefat etti?", opts:["1935","1936","1937","1938"], ans:3, reward:20 },
 
   // ⚽ SPOR
   { cat:'⚽ Spor', q:"FIFA Dünya Kupası kaç yılda bir düzenlenir?", opts:["2 yılda bir","3 yılda bir","4 yılda bir","5 yılda bir"], ans:2, reward:15 },
-  { cat:'⚽ Spor', q:"Basketbolda bir sayı kaç puan değerindedir?", opts:["1","2","3","4"], ans:1, reward:15 },
-  { cat:'⚽ Spor', q:"Olimpiyat Oyunları kaç yılda bir düzenlenir?", opts:["2","3","4","5"], ans:2, reward:15 },
-  { cat:'⚽ Spor', q:"Voleybolda bir takımda kaç oyuncu bulunur?", opts:["5","6","7","8"], ans:1, reward:15 },
   { cat:'⚽ Spor', q:"Hangi ülke en çok FIFA Dünya Kupası kazanmıştır?", opts:["Almanya","Arjantin","Brezilya","Fransa"], ans:2, reward:20 },
-  { cat:'⚽ Spor', q:"Tenis kortunda orta çizginin adı nedir?", opts:["Servis","Net","Bant","Hat"], ans:1, reward:20 },
   { cat:'⚽ Spor', q:"Hangi sporda 'grand slam' terimi kullanılır?", opts:["Futbol","Tenis","Basketbol","Yüzme"], ans:1, reward:20 },
-  { cat:'⚽ Spor', q:"Türkiye'nin en başarılı futbol kulübü hangisidir?", opts:["Fenerbahçe","Galatasaray","Beşiktaş","Trabzonspor"], ans:1, reward:20 },
   { cat:'⚽ Spor', q:"Formula 1'de en çok şampiyonluk kazanan pilot kimdir?", opts:["Schumacher","Hamilton","Senna","Vettel"], ans:1, reward:25 },
-  { cat:'⚽ Spor', q:"Boks maçlarında bir raund kaç dakikadır?", opts:["2","3","4","5"], ans:1, reward:20 },
   { cat:'⚽ Spor', q:"Hangi ülke 2022 FIFA Dünya Kupası'nı kazandı?", opts:["Fransa","Brezilya","Arjantin","İngiltere"], ans:2, reward:20 },
-  { cat:'⚽ Spor', q:"Yüzmede 'kelebek' stilinde kaç kol hareketi vardır?", opts:["Biri tek tek","İkisi birlikte","Sırayla","Dönüşümlü"], ans:1, reward:25 },
-  { cat:'⚽ Spor', q:"NBA hangi ülkede oynanır?", opts:["Kanada","Amerika","Her ikisinde de","İngiltere"], ans:2, reward:20 },
-  { cat:'⚽ Spor', q:"Kriket hangi ülkenin milli sporu sayılır?", opts:["Avustralya","Amerika","İngiltere","Güney Afrika"], ans:2, reward:25 },
-  { cat:'⚽ Spor', q:"Atıcılıkta hedef kaç puana tam isabetle değerlenir?", opts:["5","8","10","12"], ans:2, reward:20 },
 
   // 💻 TEKNOLOJİ
-  { cat:'💻 Teknoloji', q:"WWW'nin açılımı nedir?", opts:["World Wide Web","World Wireless Web","World Wide Wait","Wide World Web"], ans:0, reward:20 },
   { cat:'💻 Teknoloji', q:"İlk iPhone hangi yılda tanıtıldı?", opts:["2005","2006","2007","2008"], ans:2, reward:20 },
   { cat:'💻 Teknoloji', q:"Hangi şirket Windows işletim sistemini yapar?", opts:["Apple","Google","Microsoft","IBM"], ans:2, reward:15 },
-  { cat:'💻 Teknoloji', q:"1 GB kaç MB'tır?", opts:["512","1000","1024","2048"], ans:2, reward:20 },
   { cat:'💻 Teknoloji', q:"Python nedir?", opts:["Yılan türü","Programlama dili","Yazılım","Oyun motoru"], ans:1, reward:15 },
-  { cat:'💻 Teknoloji', q:"İnternet'in öncülü olan ağ nedir?", opts:["BITNET","ARPANET","NSFNET","MILNET"], ans:1, reward:30 },
-  { cat:'💻 Teknoloji', q:"HTML ne anlama gelir?", opts:["Hyper Text Markup Language","High Tech Modern Language","Hyper Transfer Method Language","Home Tool Markup Language"], ans:0, reward:20 },
   { cat:'💻 Teknoloji', q:"Hangi şirket Android işletim sistemini geliştirdi?", opts:["Apple","Samsung","Microsoft","Google"], ans:3, reward:15 },
-  { cat:'💻 Teknoloji', q:"CPU ne anlama gelir?", opts:["Central Processing Unit","Computer Power Unit","Core Program Unit","Central Program Unit"], ans:0, reward:20 },
-  { cat:'💻 Teknoloji', q:"Bitcoin hangi yılda icat edildi?", opts:["2007","2008","2009","2010"], ans:2, reward:25 },
-  { cat:'💻 Teknoloji', q:"Hangi şirket iPhone'u üretir?", opts:["Samsung","Sony","Apple","Google"], ans:2, reward:15 },
-  { cat:'💻 Teknoloji', q:"RAM ne anlama gelir?", opts:["Random Access Memory","Read All Memory","Run Access Mode","Root All Memory"], ans:0, reward:20 },
-  { cat:'💻 Teknoloji', q:"Yapay zeka alanında en çok kullanılan programlama dili?", opts:["Java","C++","Python","JavaScript"], ans:2, reward:25 },
-  { cat:'💻 Teknoloji', q:"Wi-Fi 'Kablosuz Sadakat' standardı hangi frekansları kullanır?", opts:["1-2 GHz","2.4 ve 5 GHz","6-8 GHz","10 GHz"], ans:1, reward:25 },
   { cat:'💻 Teknoloji', q:"ChatGPT'yi kim geliştirdi?", opts:["Google","Microsoft","OpenAI","Meta"], ans:2, reward:20 },
 
   // 🧮 MATEMATİK
   { cat:'🧮 Matematik', q:"π (pi) sayısı yaklaşık kaçtır?", opts:["2.71","3.14","3.41","3.71"], ans:1, reward:15 },
-  { cat:'🧮 Matematik', q:"Bir dikdörtgenin alanı nasıl hesaplanır?", opts:["Çevre×2","Kenar³","Uzunluk×Genişlik","Kenar²"], ans:2, reward:15 },
-  { cat:'🧮 Matematik', q:"0'ın faktöriyeli kaçtır?", opts:["0","1","Tanımsız","Sonsuz"], ans:1, reward:25 },
   { cat:'🧮 Matematik', q:"√144 kaçtır?", opts:["11","12","13","14"], ans:1, reward:20 },
   { cat:'🧮 Matematik', q:"2³ kaçtır?", opts:["5","6","8","9"], ans:2, reward:15 },
-  { cat:'🧮 Matematik', q:"Bir dairenin alanı nasıl hesaplanır?", opts:["2πr","πr²","2πr²","πr"], ans:1, reward:20 },
-  { cat:'🧮 Matematik', q:"Fibonacci dizisinde 8'den sonra gelen sayı nedir?", opts:["11","12","13","14"], ans:2, reward:25 },
-  { cat:'🧮 Matematik', q:"Binom açılımında (a+b)² = ?", opts:["a²+b²","a²+2ab+b²","a²-2ab+b²","a²+ab+b²"], ans:1, reward:20 },
-  { cat:'🧮 Matematik', q:"1 km kaç metredir?", opts:["100 m","500 m","1000 m","10000 m"], ans:2, reward:15 },
   { cat:'🧮 Matematik', q:"Bir üçgenin iç açıları toplamı kaçtır?", opts:["90°","180°","270°","360°"], ans:1, reward:15 },
-  { cat:'🧮 Matematik', q:"Asal sayı nedir?", opts:["1'e bölünen","Çift sayı","Sadece 1 ve kendine bölünen","3'e bölünen"], ans:2, reward:20 },
-  { cat:'🧮 Matematik', q:"10! (10 faktöriyel) kaçtır?", opts:["362.880","3.628.800","36.288","36.288.000"], ans:1, reward:35 },
   { cat:'🧮 Matematik', q:"Bir küpün kaç yüzü vardır?", opts:["4","5","6","8"], ans:2, reward:15 },
-  { cat:'🧮 Matematik', q:"log₁₀(100) kaçtır?", opts:["1","2","10","100"], ans:1, reward:25 },
-  { cat:'🧮 Matematik', q:"Öklid algoritması ne için kullanılır?", opts:["Asal sayı bulmak","EBOB bulmak","Pi hesaplamak","Karekök bulmak"], ans:1, reward:30 },
 
-  // 🎬 GENEL KÜLTÜR
-  { cat:'🎬 Genel', q:"Harry Potter kitabının yazarı kimdir?", opts:["Stephenie Meyer","J.R.R Tolkien","J.K. Rowling","C.S Lewis"], ans:2, reward:15 },
-  { cat:'🎬 Genel', q:"Hangi renk tehlike anlamında kullanılır?", opts:["Mavi","Yeşil","Sarı","Kırmızı"], ans:3, reward:15 },
-  { cat:'🎬 Genel', q:"Gökkuşağında kaç renk vardır?", opts:["5","6","7","8"], ans:2, reward:15 },
-  { cat:'🎬 Genel', q:"Hangi hayvan 'ormanın kralı' olarak bilinir?", opts:["Kaplan","Leopar","Çita","Aslan"], ans:3, reward:15 },
+  // 🎬 GENEL
   { cat:'🎬 Genel', q:"Mona Lisa tablosu kimin eseridir?", opts:["Michelangelo","Raphael","Da Vinci","Picasso"], ans:2, reward:20 },
-  { cat:'🎬 Genel', q:"Olimpiyat oyunlarında kaç halka vardır?", opts:["4","5","6","7"], ans:1, reward:15 },
-  { cat:'🎬 Genel', q:"Bir yılda kaç hafta vardır?", opts:["48","50","52","54"], ans:2, reward:15 },
-  { cat:'🎬 Genel', q:"Romeo ve Juliet'in yazarı kimdir?", opts:["Molière","Dickens","Shakespeare","Goethe"], ans:2, reward:20 },
-  { cat:'🎬 Genel', q:"Hangi müzik aleti 'klavyeli' çalgılar grubundadır?", opts:["Keman","Gitar","Piyano","Flüt"], ans:2, reward:15 },
-  { cat:'🎬 Genel', q:"Nobel Barış Ödülü hangi şehirde verilir?", opts:["Stockholm","Oslo","Kopenhag","Helsinki"], ans:1, reward:25 },
   { cat:'🎬 Genel', q:"Hangi yıl insanlar Ay'a ilk adım attı?", opts:["1967","1968","1969","1970"], ans:2, reward:20 },
-  { cat:'🎬 Genel', q:"En derin okyanus çukuru hangisidir?", opts:["Tonga Çukuru","Mariana Çukuru","Puerto Rico Çukuru","Java Çukuru"], ans:1, reward:25 },
-  { cat:'🎬 Genel', q:"Hangi ülkede sürücüler soldan gider?", opts:["Fransa","Almanya","İngiltere","İtalya"], ans:2, reward:20 },
-  { cat:'🎬 Genel', q:"Bir oktavda kaç nota vardır?", opts:["5","6","7","8"], ans:3, reward:20 },
-  { cat:'🎬 Genel', q:"Hangi hayvan en uzun süre uyur?", opts:["Ayı","Kedi","Koala","Yunus"], ans:2, reward:25 },
+  { cat:'🎬 Genel', q:"Dünyanın en uzun yaşayan hayvanı nedir?", opts:["Fil","Kaplumbağa","Papağan","Balina"], ans:1, reward:25 },
   { cat:'🎬 Genel', q:"Dünyanın en pahalı baharatı nedir?", opts:["Tarçın","Safran","Karabiber","Vanilya"], ans:1, reward:25 },
   { cat:'🎬 Genel', q:"Hangi ülke en fazla Oscar ödülü almıştır?", opts:["İngiltere","Fransa","Amerika","İtalya"], ans:2, reward:20 },
-  { cat:'🎬 Genel', q:"İnsan gözü kaç renge kadar ayırt edebilir?", opts:["100","1.000","10.000","10 milyon"], ans:3, reward:30 },
-  { cat:'🎬 Genel', q:"Hangi müzik türü Türkiye'ye özgüdür?", opts:["Flamenko","Tango","Arabesk","Samba"], ans:2, reward:20 },
-  { cat:'🎬 Genel', q:"Dünyanın en büyük demokrasisi hangi ülkedir?", opts:["Amerika","Hindistan","Brezilya","Almanya"], ans:1, reward:25 },
-
-  // 🦁 HAYVANLAR
-  { cat:'🦁 Hayvanlar', q:"Hangi hayvanın kalbi en büyüktür?", opts:["Fil","Mavi balina","Zürafa","Balinaköpekbalığı"], ans:1, reward:25 },
-  { cat:'🦁 Hayvanlar', q:"Yarasa nasıl yön bulur?", opts:["Görme","Koku","Ekolokasyon","Manyetik alan"], ans:2, reward:25 },
-  { cat:'🦁 Hayvanlar', q:"Hangi böcek dünyanın en tehlikelisidir?", opts:["Arı","Sivrisinek","Örümcek","Çıyan"], ans:1, reward:25 },
-  { cat:'🦁 Hayvanlar', q:"Okyanusun en büyük canlısı nedir?", opts:["Büyük Beyaz Köpekbalığı","Dev Kalamar","Mavi Balina","Narval"], ans:2, reward:20 },
-  { cat:'🦁 Hayvanlar', q:"Kaç yaşında fil olgunlaşır?", opts:["5","10","15","20"], ans:2, reward:25 },
-  { cat:'🦁 Hayvanlar', q:"Hangi hayvan en uzun yaşar?", opts:["Fil","Kaplumbağa","Papağan","Balina"], ans:1, reward:25 },
-  { cat:'🦁 Hayvanlar', q:"Kaç tane böcek türü keşfedilmiştir?", opts:["100.000","500.000","1 milyon","5 milyon"], ans:2, reward:30 },
-  { cat:'🦁 Hayvanlar', q:"Hangi hayvanın 360° görüş açısı vardır?", opts:["Baykuş","Kameleon","At","Karga"], ans:2, reward:30 },
-  { cat:'🦁 Hayvanlar', q:"Dünyanın en hızlı kara hayvanı hangisidir?", opts:["Aslan","Leopar","Çita","At"], ans:2, reward:20 },
-  { cat:'🦁 Hayvanlar', q:"Hangi hayvan hem karada hem suda yaşayabilir?", opts:["Yılan","Kaplumbağa","Kurbağa","Timsah"], ans:2, reward:20 },
-  { cat:'🦁 Hayvanlar', q:"Hangi kuş uçamaz?", opts:["Pelikan","Penguen","Martı","Atmaca"], ans:1, reward:15 },
-  { cat:'🦁 Hayvanlar', q:"Ahtapotun kaç kolu vardır?", opts:["6","7","8","10"], ans:2, reward:15 },
-  { cat:'🦁 Hayvanlar', q:"Hangi hayvan geceleri aktiftir?", opts:["Kartal","Baykuş","Güvercin","Turna"], ans:1, reward:15 },
-  { cat:'🦁 Hayvanlar', q:"Gergedan boynuzu neden yapılmıştır?", opts:["Kemik","Kıkırdak","Keratin","Dentin"], ans:2, reward:30 },
-  { cat:'🦁 Hayvanlar', q:"Hangi deniz canlısının beyni yoktur?", opts:["Ahtapot","Denizanası","Deniz atı","Yılan balığı"], ans:1, reward:25 },
-
-  // 🚀 UZAY
-  { cat:'🚀 Uzay', q:"Ay'ın Dünya'ya uzaklığı yaklaşık kaçtır?", opts:["38.000 km","384.000 km","3.840.000 km","38.400 km"], ans:1, reward:25 },
-  { cat:'🚀 Uzay', q:"Güneş'in çapı Dünya'nın kaç katıdır?", opts:["10","50","109","500"], ans:2, reward:30 },
-  { cat:'🚀 Uzay', q:"Uzayda ilk yürüyen insan kimdir?", opts:["Neil Armstrong","Buzz Aldrin","Yuri Gagarin","Alan Shepard"], ans:0, reward:25 },
-  { cat:'🚀 Uzay', q:"Samanyolu galaksisinin şekli nedir?", opts:["Eliptik","Spiral","Düzensiz","Yuvarlak"], ans:1, reward:25 },
-  { cat:'🚀 Uzay', q:"Kızıl Gezegen olarak bilinen gezegen hangisidir?", opts:["Jüpiter","Venüs","Mars","Satürn"], ans:2, reward:15 },
-  { cat:'🚀 Uzay', q:"Uzayda ilk giden hayvan nedir?", opts:["Maymun","Köpek","Fare","Kedi"], ans:1, reward:20 },
-  { cat:'🚀 Uzay', q:"Bir ışık yılı ne kadar uzunluğu ifade eder?", opts:["1 yılda gidilen mesafe","Işığın 1 yılda aldığı yol","1 milyar km","1 trilyon km"], ans:1, reward:25 },
-  { cat:'🚀 Uzay', q:"Satürn'ün halkaları neden yapılmıştır?", opts:["Gaz","Buz ve kaya parçaları","Toz","Metal"], ans:1, reward:25 },
-  { cat:'🚀 Uzay', q:"Jüpiter'in en büyük uydusu hangisidir?", opts:["Europa","Io","Ganimede","Callisto"], ans:2, reward:30 },
-  { cat:'🚀 Uzay', q:"Güneş'in yüzey sıcaklığı yaklaşık kaçtır?", opts:["1.000°C","5.500°C","15.000°C","100.000°C"], ans:1, reward:30 },
-  { cat:'🚀 Uzay', q:"Uzayda ses neden duyulmaz?", opts:["Hava çok soğuk","Madde yok, titreşim yok","Işık çok hızlı","Uzay boş değil"], ans:1, reward:25 },
-  { cat:'🚀 Uzay', q:"Hangi gezegen Güneş'e en uzaktır?", opts:["Satürn","Uranüs","Neptün","Plüton"], ans:2, reward:25 },
-  { cat:'🚀 Uzay', q:"ISS (Uzay İstasyonu) kaç ülkenin ortak projesidir?", opts:["5","10","15","20"], ans:2, reward:30 },
-  { cat:'🚀 Uzay', q:"Kara delikten kaçabilen tek şey nedir?", opts:["Işık","Ses","Hiçbir şey","Nötron"], ans:2, reward:25 },
-  { cat:'🚀 Uzay', q:"Mars'ta hangi gaz atmosferde çoğunluktadır?", opts:["Oksijen","Azot","Karbondioksit","Metan"], ans:2, reward:25 },
 ];
 
 // ── ENVANTER ──────────────────────────────────────────────────────────
@@ -550,7 +420,7 @@ let countries=[];
 
 function initGame(){
   document.getElementById('overlay').classList.remove('show');
-  gold=150; inv={klasik:2,atesh:0,nukleer:0,bok:1,sirk:0};
+  gold=150; inv={klasik:2,atesh:0,nukleer:0,sirk:0};
   selected=null; correctCount=0; approval=50; qIndex=0; qAnswered=false;
 
   countries=COUNTRY_DATA.map(d=>({
@@ -721,7 +591,7 @@ function conquer(c){
 }
 
 // ── SHOP ───────────────────────────────────────────────────────────────
-['klasik','atesh','nukleer','bok','sirk'].forEach(key=>{
+['klasik','atesh','nukleer','sirk'].forEach(key=>{
   document.getElementById('sh-'+key).addEventListener('click',()=>buyBomb(key));
 });
 
@@ -791,7 +661,7 @@ function updateStats(){
     approval>=40?'linear-gradient(90deg,#f59e0b,#fcd34d)':'linear-gradient(90deg,#ef4444,#fca5a5)';
 
   // Market güncellemesi
-  ['klasik','atesh','nukleer','bok','sirk'].forEach(key=>{
+  ['klasik','atesh','nukleer','sirk'].forEach(key=>{
     const el=document.getElementById('sh-'+key);
     if(el) el.classList.toggle('cant', gold<BOMBS[key].price);
   });
