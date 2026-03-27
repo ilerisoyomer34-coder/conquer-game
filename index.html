@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>🌍 Dünya Benim!</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#06080f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dünya Benim">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -432,8 +440,8 @@ const BOMBS = {
 
 // ── SORULAR ────────────────────────────────────────────────────────────
 const QUESTIONS = [
-  // 🗳️ HALK ANKETİ
-  { cat:'🗳️ Halk Anketi', q:"Halkın %72'si bu haftaki en büyük isteği nedir?", opts:["Zam olmasın","Trafik çözülsün","İnternet ucuzlasın","Cumartesi de tatil olsun"], ans:3, reward:25 },
+  // 😂 KOMİK BAŞKANLIK
+  { cat:'😂 Komik', q:"Sabah uyanınca başkan olarak ilk ne yaparsın?", opts:["Ülkeyi yönetirim","Tweet atarım","Kahvaltı yaparım","Tekrar uyurum"], ans:3, reward:20 },
   { cat:'🗳️ Halk Anketi', q:"Vatandaşlar senden ne istiyor?", opts:["Daha az vergi","Daha fazla park","Ücretsiz çay","Hepsini birden"], ans:3, reward:20 },
   { cat:'🗳️ Halk Anketi', q:"Seçim kampanyasında hangi söz oy getirir?", opts:["Her şeyi dürüstçe anlatacağım","Elektrik ücretsiz olacak","Trafik çözülecek","Halkımı çok seviyorum"], ans:1, reward:25 },
   { cat:'🗳️ Halk Anketi', q:"Halk en çok hangi konudan şikayet eder?", opts:["Hava durumu","Ekmek fiyatı","Komşunun köpeği","Hepsinden"], ans:3, reward:20 },
@@ -860,6 +868,10 @@ function toast(msg){
 }
 
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
 </script>
 </body>
 </html>
