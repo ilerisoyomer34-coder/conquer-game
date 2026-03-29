@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>🌍 World Domination!</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#06080f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="World Domination">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#06080f;--bg2:#0d1117;--bg3:#161b22;
+  --border:#21262d;--accent:#58a6ff;--accent2:#a78bfa;
+  --gold:#f0b429;--red:#f85149;--green:#3fb950;--text:#c9d1d9;--text2:#8b949e;
+  --ocean:#0a1628;--land:#1c2a1e;--land2:#243828;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;
+  height:100vh;overflow:hidden;user-select:none;-webkit-user-select:none;display:flex;flex-direction:column;}
+
+/* TOP BAR */
+#topbar{
+  background:rgba(6,8,15,0.97);border-bottom:1px solid var(--border);
+  padding:6px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;
+  z-index:100;
+}
+#topbar h1{font-size:14px;font-weight:900;background:linear-gradient(135deg,#f0b429,#f85149,#a78bfa);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;flex-shrink:0;}
+.stat{display:flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:20px;padding:3px 9px;font-size:11px;font-weight:700;}
+#approval-wrap{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;}
+#approval-bar-wrap{width:70px;height:6px;background:rgba(0,0,0,.5);border-radius:3px;overflow:hidden;}
+#approval-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,#3fb950,#56d364);transition:width .4s;}
+
+/* GAME AREA */
+#game-area{flex:1;display:grid;grid-template-columns:1fr 280px;overflow:hidden;}
+@media(max-width:700px){#game-area{grid-template-columns:1fr;}}
+
+/* MAP */
+#map-wrap{position:relative;overflow:hidden;background:var(--ocean);}
+#map-svg{width:100%;height:100%;cursor:default;}
+
+/* Ocean grid lines */
+.grid-line{stroke:rgba(88,166,255,0.06);stroke-width:1;}
+
+/* Country territories */
+.territory{
+  transition:filter .15s,opacity .15s;
+  cursor:pointer;
+}
+.territory:hover{filter:brightness(1.4);}
+.territory.selected-t{filter:brightness(1.6)!important;}
+.territory.conquered-t{filter:brightness(1);}
+
+/* Country labels */
+.t-label{
+  font-size:9px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle;
+  pointer-events:none;text-shadow:0 1px 3px #000;
+}
+.t-flag{font-size:13px;text-anchor:middle;dominant-baseline:middle;pointer-events:none;}
+
+/* Conquest ring */
+.ring{fill:none;stroke:#3fb950;stroke-width:2;opacity:0;pointer-events:none;}
+.ring.visible{opacity:1;animation:pulse-ring 1.5s ease-in-out infinite;}
+@keyframes pulse-ring{0%,100%{stroke-opacity:1;r:attr(r)}50%{stroke-opacity:.3;}}
+
+/* SIDE PANEL */
+#side{
+  background:var(--bg2);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+@media(max-width:700px){#side{max-height:220px;border-left:none;border-top:1px solid var(--border);}}
+
+.panel{padding:10px 12px;border-bottom:1px solid var(--border);}
+.panel h3{font-size:10px;color:var(--text2);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+
+/* Selected country info */
+#sel-flag{font-size:36px;display:block;text-align:center;margin-bottom:4px;}
+#sel-name{font-size:15px;font-weight:900;text-align:center;margin-bottom:1px;}
+#sel-leader{font-size:10px;color:var(--text2);text-align:center;margin-bottom:8px;}
+#sel-leader-wrap{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;}
+#sel-leader-photo{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);flex-shrink:0;background:var(--bg3);}
+#sel-leader-photo.hidden{display:none;}
+#sel-quote{font-size:9px;color:var(--gold);font-style:italic;text-align:center;
+  background:rgba(240,180,41,.07);border-radius:6px;padding:5px 7px;margin-bottom:8px;min-height:28px;}
+.irow{display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px;}
+.ival{font-weight:800;color:var(--accent2);}
+.mbar{background:rgba(0,0,0,.4);border-radius:3px;height:5px;overflow:hidden;margin-bottom:8px;}
+.mbar-fill{height:100%;border-radius:3px;transition:width .4s;}
+
+/* Bomb buttons */
+#bomb-btns{display:flex;flex-direction:column;gap:4px;}
+.bomb-btn{
+  width:100%;padding:6px 9px;border-radius:7px;border:1px solid;
+  color:#fff;font-size:11px;font-weight:700;font-family:inherit;
+  cursor:pointer;transition:all .13s;display:flex;align-items:center;justify-content:space-between;
+}
+.bomb-btn:hover:not(:disabled){filter:brightness(1.2);transform:translateX(2px);}
+.bomb-btn:disabled{opacity:.25;cursor:not-allowed;transform:none;}
+.b-count{background:rgba(0,0,0,.35);border-radius:5px;padding:1px 5px;font-size:9px;}
+
+#btn-love{width:100%;padding:7px;border-radius:7px;background:linear-gradient(135deg,#ec4899,#be185d);
+  border:none;color:#fff;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .13s;margin-top:4px;}
+#btn-love:disabled{opacity:.25;cursor:not-allowed;}
+#action-msg{font-size:9px;color:var(--text2);text-align:center;margin-top:5px;min-height:12px;}
+
+/* Shop */
+.shop-item{
+  display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:7px;padding:5px 8px;margin-bottom:4px;cursor:pointer;transition:all .13s;
+}
+.shop-item:hover:not(.cant){border-color:var(--gold);background:rgba(240,180,41,.06);}
+.shop-item.cant{opacity:.35;cursor:not-allowed;}
+.si-icon{font-size:16px;}
+.si-info{flex:1;}
+.si-name{font-size:11px;font-weight:700;}
+.si-desc{font-size:9px;color:var(--text2);}
+.si-price{font-size:11px;font-weight:800;color:var(--gold);}
+
+/* QUESTION BAR */
+#q-bar{
+  background:var(--bg2);border-top:1px solid var(--border);
+  padding:8px 12px;flex-shrink:0;
+}
+#q-cat{font-size:9px;color:var(--accent2);font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+#q-text{font-size:12px;font-weight:700;line-height:1.4;margin-bottom:7px;}
+#q-opts{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+@media(max-width:500px){#q-opts{grid-template-columns:1fr 1fr;}}
+.opt-btn{
+  background:var(--bg3);border:1px solid var(--border);color:var(--text);
+  padding:6px 10px;border-radius:8px;cursor:pointer;text-align:left;
+  font-size:11px;font-family:inherit;transition:all .13s;display:flex;align-items:center;gap:6px;
+}
+.opt-btn:hover:not(:disabled){background:var(--border);border-color:var(--accent);}
+.opt-btn.correct{background:rgba(63,185,80,.18);border-color:#3fb950;color:#56d364;}
+.opt-btn.wrong{background:rgba(248,81,73,.18);border-color:#f85149;color:#ffa198;}
+.opt-btn:disabled{cursor:not-allowed;}
+.opt-key{background:var(--accent);color:#fff;width:18px;height:18px;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;flex-shrink:0;}
+.opt-btn.correct .opt-key{background:#3fb950;}
+.opt-btn.wrong .opt-key{background:#f85149;}
+#q-result{font-size:11px;font-weight:700;margin-top:6px;min-height:16px;text-align:center;}
+
+/* TOAST */
+#toast{position:fixed;top:55px;left:50%;transform:translateX(-50%) translateY(-15px);
+  background:var(--bg3);border:1px solid var(--border);border-radius:18px;
+  padding:6px 16px;font-size:12px;font-weight:700;
+  opacity:0;transition:all .25s;pointer-events:none;z-index:500;white-space:nowrap;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* OVERLAY */
+#overlay{display:none;position:fixed;inset:0;background:rgba(6,8,15,.96);
+  z-index:600;align-items:center;justify-content:center;flex-direction:column;gap:12px;text-align:center;padding:20px;}
+#overlay.show{display:flex;}
+#ov-emoji{font-size:56px;}
+#ov-title{font-size:28px;font-weight:900;}
+#ov-sub{font-size:13px;color:var(--text2);max-width:340px;line-height:1.7;}
+#btn-restart{background:linear-gradient(135deg,#f0b429,#f85149);border:none;color:#fff;padding:11px 30px;
+  border-radius:24px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:4px;}
+
+/* TITLE */
+#title-screen{position:fixed;inset:0;background:radial-gradient(ellipse at center,#0d102b 0%,#04060e 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:600;padding:20px;text-align:center;}
+#title-screen h1{font-size:32px;font-weight:900;background:linear-gradient(135deg,#f0b429,#f85149,#a78bfa);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2;}
+#title-screen .sub{font-size:13px;color:var(--text2);max-width:320px;line-height:1.7;}
+.rules-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;padding:12px 16px;max-width:320px;font-size:11px;color:rgba(255,255,255,.6);line-height:2;}
+.rules-box strong{color:rgba(255,255,255,.88);}
+#btn-start{background:linear-gradient(135deg,#f0b429,#f85149);border:none;color:#fff;padding:12px 32px;
+  border-radius:26px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;
+  box-shadow:0 0 40px rgba(240,180,41,.35);transition:transform .13s;}
+#btn-start:hover{transform:scale(1.05);}
+
+/* Explosion animation */
+@keyframes explode{
+  0%{opacity:1;r:5;}
+  100%{opacity:0;r:40;}
+}
+.explosion{animation:explode .5s ease-out forwards;fill:none;stroke-width:3;pointer-events:none;}
+
+/* Counter-attack flash */
+@keyframes dmgFlash{0%{background:rgba(248,81,73,.45);}100%{background:rgba(6,8,15,0.97);}}
+#topbar.dmg-flash{animation:dmgFlash .6s ease-out;}
+
+/* Player defense bar */
+#pdef-wrap{display:flex;align-items:center;gap:5px;font-size:11px;}
+#pdef-bar-wrap{width:55px;height:6px;background:rgba(0,0,0,.5);border-radius:3px;overflow:hidden;}
+#pdef-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,#3b82f6,#60a5fa);transition:width .4s;}
+
+/* Conquer choice modal */
+#conquer-modal{display:none;position:fixed;inset:0;background:rgba(6,8,15,.93);
+  z-index:550;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:20px;}
+#conquer-modal.show{display:flex;}
+.cm-flag{font-size:52px;}
+.cm-title{font-size:22px;font-weight:900;color:var(--gold);}
+.cm-desc{font-size:12px;color:var(--text2);max-width:300px;line-height:1.7;margin-bottom:4px;}
+.cm-btns{display:flex;gap:14px;margin-top:4px;}
+.cm-btn{padding:11px 26px;border-radius:22px;border:none;color:#fff;font-size:13px;font-weight:900;font-family:inherit;cursor:pointer;transition:transform .13s;}
+.cm-btn:hover{transform:scale(1.06);}
+.cm-btn-deal{background:linear-gradient(135deg,#3fb950,#16a34a);box-shadow:0 0 20px rgba(63,185,80,.3);}
+.cm-btn-kill{background:linear-gradient(135deg,#f85149,#b91c1c);box-shadow:0 0 20px rgba(248,81,73,.3);}
+
+/* Vassal consultation modal */
+#vassal-modal{display:none;position:fixed;inset:0;background:rgba(6,8,15,.93);
+  z-index:555;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:20px;}
+#vassal-modal.show{display:flex;}
+.vm-header{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;}
+.vm-title{font-size:17px;font-weight:900;color:var(--accent);margin-bottom:2px;}
+.vm-question{font-size:13px;color:var(--text);max-width:320px;line-height:1.7;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:10px 14px;}
+.vm-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px;}
+.vm-btn{padding:8px 16px;border-radius:14px;background:var(--bg3);border:1px solid var(--border);
+  color:var(--text);font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .13s;}
+.vm-btn:hover{border-color:var(--accent);background:rgba(88,166,255,.1);}
+
+/* Vassal panel */
+.vassal-item{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04);}
+.vassal-item:last-child{border-bottom:none;}
+.vi-flag{font-size:18px;}
+.vi-name{font-weight:700;font-size:11px;}
+.vi-role{font-size:9px;color:var(--accent);margin-top:1px;}
+</style>
+</head>
+<body>
+
+<div id="title-screen">
+  <h1>🌍 WORLD DOMINATION!<br><span style="font-size:18px">Presidential Conquest Simulator</span></h1>
+  <p class="sub">Answer questions, earn gold, buy bombs and conquer the world! Who cares what the neighbors think? 😏</p>
+  <div class="rules-box">
+    <strong>How to Play?</strong><br>
+    ❓ Answer a question → 💰 Earn gold<br>
+    🛒 Buy bombs from the shop<br>
+    🗺 Select a country on the map → Drop a bomb<br>
+    ❤️ Higher public love = more effective attacks!<br>
+    🏆 Conquer all 15 countries to win!
+  </div>
+  <button id="btn-start" onclick="startGame()">START CONQUEST 🚀</button>
+</div>
+
+<!-- Top bar -->
+<div id="topbar">
+  <h1>🌍 WORLD DOMINATION!</h1>
+  <div class="stat">💰 <span id="s-gold">0</span></div>
+  <div class="stat">🏴 <span id="s-count">0</span>/15</div>
+  <div class="stat">✅ <span id="s-correct">0</span></div>
+  <div id="approval-wrap">
+    <span style="font-size:10px;color:var(--text2)">Approval:</span>
+    <div id="approval-bar-wrap"><div id="approval-bar" style="width:50%"></div></div>
+    <span id="s-approval" style="font-size:10px;font-weight:800;color:#3fb950">50%</span>
+  </div>
+  <div id="pdef-wrap">
+    <span style="font-size:10px;color:var(--text2)">🛡️</span>
+    <div id="pdef-bar-wrap"><div id="pdef-bar" style="width:100%"></div></div>
+    <span id="s-pdef" style="font-size:10px;font-weight:800;color:#60a5fa">100</span>
+  </div>
+</div>
+
+<!-- Game Area -->
+<div id="game-area">
+
+  <!-- World Map -->
+  <div id="map-wrap">
+    <svg id="map-svg" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet">
+      <!-- Ocean background -->
+      <rect width="900" height="420" fill="#0a1628"/>
+      <!-- Grid lines -->
+      <line x1="0" y1="105" x2="900" y2="105" class="grid-line"/>
+      <line x1="0" y1="210" x2="900" y2="210" class="grid-line"/>
+      <line x1="0" y1="315" x2="900" y2="315" class="grid-line"/>
+      <line x1="225" y1="0" x2="225" y2="420" class="grid-line"/>
+      <line x1="450" y1="0" x2="450" y2="420" class="grid-line"/>
+      <line x1="675" y1="0" x2="675" y2="420" class="grid-line"/>
+      <!-- Equator -->
+      <line x1="0" y1="210" x2="900" y2="210" stroke="rgba(88,166,255,0.12)" stroke-width="1" stroke-dasharray="6,4"/>
+
+      <!-- Country territories will be injected by JS -->
+      <g id="territories"></g>
+    </svg>
+  </div>
+
+  <!-- Side Panel -->
+  <div id="side">
+
+    <!-- Selected Country Info -->
+    <div class="panel" id="info-panel">
+      <h3>🎯 Target Country</h3>
+      <span id="sel-flag">🌐</span>
+      <div id="sel-name" style="color:var(--text2);font-size:15px;font-weight:900;text-align:center;margin-bottom:1px">Select from map</div>
+      <div id="sel-leader-wrap">
+        <img id="sel-leader-photo" class="hidden" src="" alt="" onerror="this.classList.add('hidden')">
+        <div id="sel-leader" style="font-size:10px;color:var(--text2);text-align:center"></div>
+      </div>
+      <div id="sel-quote" style="font-size:9px;color:var(--gold);font-style:italic;text-align:center;background:rgba(240,180,41,.07);border-radius:6px;padding:5px 7px;margin-bottom:8px;min-height:28px;">Select a country 👆</div>
+      <div id="sel-stats"></div>
+      <div id="bomb-btns">
+        <button class="bomb-btn" id="bb-klasik" style="background:linear-gradient(135deg,#374151,#1f2937);border-color:#6b7280" disabled onclick="useBomb('klasik')">
+          💣 Classic Bomb <span class="b-count" id="bc-klasik">0</span>
+        </button>
+        <button class="bomb-btn" id="bb-atesh" style="background:linear-gradient(135deg,#7c2d12,#b45309);border-color:#f97316" disabled onclick="useBomb('atesh')">
+          🔥 Fire Bomb <span class="b-count" id="bc-atesh">0</span>
+        </button>
+        <button class="bomb-btn" id="bb-nukleer" style="background:linear-gradient(135deg,#14532d,#166534);border-color:#22c55e" disabled onclick="useBomb('nukleer')">
+          ☢️ Nuclear <span class="b-count" id="bc-nukleer">0</span>
+        </button>
+        <button class="bomb-btn" id="bb-sirk" style="background:linear-gradient(135deg,#4a044e,#701a75);border-color:#d946ef" disabled onclick="useBomb('sirk')">
+          🎪 Circus Ball <span class="b-count" id="bc-sirk">0</span>
+        </button>
+      </div>
+      <button id="btn-love" disabled onclick="sendLove()">❤️ Gain Public Love (30💰)</button>
+      <div id="action-msg"></div>
+    </div>
+
+    <!-- Shop -->
+    <div class="panel">
+      <h3>🛒 Weapon Market</h3>
+      <div class="shop-item" id="sh-klasik" onclick="buyBomb('klasik')">
+        <span class="si-icon">💣</span>
+        <div class="si-info">
+          <div class="si-name">Classic Bomb</div>
+          <div class="si-desc">15-25 damage</div>
+        </div>
+        <span class="si-price">40💰</span>
+      </div>
+      <div class="shop-item" id="sh-atesh" onclick="buyBomb('atesh')">
+        <span class="si-icon">🔥</span>
+        <div class="si-info">
+          <div class="si-name">Fire Bomb</div>
+          <div class="si-desc">25-45 damage</div>
+        </div>
+        <span class="si-price">70💰</span>
+      </div>
+      <div class="shop-item" id="sh-nukleer" onclick="buyBomb('nukleer')">
+        <span class="si-icon">☢️</span>
+        <div class="si-info">
+          <div class="si-name">Nuclear Bomb</div>
+          <div class="si-desc">60-100 damage!</div>
+        </div>
+        <span class="si-price">150💰</span>
+      </div>
+      <div class="shop-item" id="sh-sirk" onclick="buyBomb('sirk')">
+        <span class="si-icon">🎪</span>
+        <div class="si-info">
+          <div class="si-name">Circus Ball</div>
+          <div class="si-desc">1-80 damage (gamble!)</div>
+        </div>
+        <span class="si-price">35💰</span>
+      </div>
+    </div>
+
+    <!-- Vassal Panel -->
+    <div class="panel" id="vassal-panel" style="display:none">
+      <h3>🤝 Allied Leaders</h3>
+      <div id="vassal-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Question Bar -->
+<div id="q-bar">
+  <div id="q-cat">❓ QUESTION</div>
+  <div id="q-text">Loading...</div>
+  <div id="q-opts"></div>
+  <div id="q-result"></div>
+</div>
+
+<div id="toast"></div>
+
+<!-- Conquer Choice Modal -->
+<div id="conquer-modal">
+  <div class="cm-flag" id="cm-flag"></div>
+  <div style="font-size:11px;color:var(--text2)" id="cm-leader"></div>
+  <div class="cm-title">🏳️ SURRENDERED!</div>
+  <div class="cm-desc" id="cm-desc"></div>
+  <div class="cm-btns">
+    <button class="cm-btn cm-btn-deal" onclick="doConquerDeal()">🤝 Make a Deal<br><span style="font-size:9px;opacity:.8">Make them your ally</span></button>
+    <button class="cm-btn cm-btn-kill" onclick="doConquerKill()">☠️ Eliminate<br><span style="font-size:9px;opacity:.8">Earn extra gold</span></button>
+  </div>
+</div>
+
+<!-- Vassal Consultation Modal -->
+<div id="vassal-modal">
+  <div class="vm-header">🤝 ALLIED CONSULTATION</div>
+  <div style="font-size:32px" id="vm-flag"></div>
+  <div class="vm-title" id="vm-leader"></div>
+  <div class="vm-question" id="vm-question"></div>
+  <div class="vm-btns" id="vm-btns"></div>
+</div>
+
+<div id="overlay">
+  <div id="ov-emoji"></div>
+  <div id="ov-title"></div>
+  <div id="ov-sub"></div>
+  <button id="btn-restart" onclick="initGame()">Play Again ↺</button>
+</div>
+
+<script>
+// ── COUNTRIES (map coordinates SVG 900x420) ──────────────────────────
+const COUNTRY_DATA = [
+  {
+    id:'canada', name:'Canada', flag:'🇨🇦', pop:38, baseD:50, baseLove:80,
+    leader:'PM Mark Carney',
+    quotes:['Sorry eh, but no!','I\'ll never forgive whoever bombed my maple syrup.','Calm down, let\'s have some tea.'],
+    // SVG polygon points (approximate Canada shape)
+    pts:'130,40 250,40 280,60 270,80 240,90 220,110 200,100 160,100 130,80',
+    cx:205, cy:72
+  },
+  {
+    id:'usa', name:'America', flag:'🇺🇸', pop:335, baseD:100, baseLove:30,
+    leader:'President Donald Trump',
+    quotes:['Don\'t touch my freedom fries!','I export democracy to you!','You bombed McDonald\'s?!'],
+    pts:'130,105 265,105 270,135 250,155 230,170 190,175 155,165 130,145',
+    cx:200, cy:138
+  },
+  {
+    id:'mexico', name:'Mexico', flag:'🇲🇽', pop:130, baseD:55, baseLove:60,
+    leader:'President Claudia Sheinbaum',
+    quotes:['I won\'t go to war over tacos!','¡Ay caramba!','I came with mariachi!'],
+    pts:'140,178 200,175 215,185 210,215 185,225 155,220 140,205',
+    cx:178, cy:200
+  },
+  {
+    id:'brazil', name:'Brazil', flag:'🇧🇷', pop:215, baseD:60, baseLove:70,
+    leader:'President Lula da Silva',
+    quotes:['Did you come to stop Carnival?','Let\'s play football!','We defend with capoeira!'],
+    pts:'200,240 270,225 300,240 295,305 270,325 230,320 205,300 195,270',
+    cx:247, cy:275
+  },
+  {
+    id:'uk', name:'England', flag:'🇬🇧', pop:67, baseD:65, baseLove:50,
+    leader:'PM Keir Starmer',
+    quotes:['This is not cricket!','You let my tea go cold, this means war!','Wasn\'t Brexit enough?'],
+    pts:'418,100 435,98 440,115 432,130 418,128',
+    cx:429, cy:113
+  },
+  {
+    id:'france', name:'France', flag:'🇫🇷', pop:68, baseD:65, baseLove:55,
+    leader:'President Emmanuel Macron',
+    quotes:['Mon dieu! I\'ll throw a croissant!','Don\'t touch our wine!','I\'ll never forgive whoever bombed romance.'],
+    pts:'432,130 458,125 468,138 462,158 440,160 430,148',
+    cx:449, cy:142
+  },
+  {
+    id:'germany', name:'Germany', flag:'🇩🇪', pop:84, baseD:75, baseLove:45,
+    leader:'Chancellor Friedrich Merz',
+    quotes:['Don\'t underestimate our efficiency!','We fight on schedule, down to the minute.','Effizienz ist alles!'],
+    pts:'452,108 480,105 492,118 488,135 468,138 458,125',
+    cx:472, cy:120
+  },
+  {
+    id:'russia', name:'Russia', flag:'🇷🇺', pop:145, baseD:95, baseLove:25,
+    leader:'President Vladimir Putin',
+    quotes:['A bomb for me? Ha, I laughed.','Go on vacation to Siberia.','The gas pipeline is open, be careful!'],
+    pts:'470,60 700,55 720,75 710,100 680,110 600,115 520,105 490,90 470,75',
+    cx:590, cy:82
+  },
+  {
+    id:'turkey', name:'Turkey', flag:'🇹🇷', pop:85, baseD:60, baseLove:80,
+    leader:'President Recep T. Erdogan',
+    quotes:['You bomb us and I\'ll buy you a tea!','Our territorial integrity is not on the table!','Hold on, the tea is still brewing...'],
+    pts:'500,148 548,142 562,150 558,168 535,172 505,168',
+    cx:531, cy:157
+  },
+  {
+    id:'egypt', name:'Egypt', flag:'🇪🇬', pop:104, baseD:55, baseLove:55,
+    leader:'President Abdel Fattah el-Sisi',
+    quotes:['3000-year-old pyramids laugh at bombs!','The mummies will be very angry!','Don\'t pollute my Nile!'],
+    pts:'498,175 528,172 535,185 530,210 505,212 495,198',
+    cx:514, cy:193
+  },
+  {
+    id:'safrica', name:'S. Africa', flag:'🇿🇦', pop:60, baseD:45, baseLove:65,
+    leader:'President Cyril Ramaphosa',
+    quotes:['Ubuntu says: share!','I\'ll never forgive whoever bombed my diamonds.','The savanna lions are waking up!'],
+    pts:'490,295 525,288 535,305 530,330 510,342 488,332 480,315',
+    cx:508, cy:314
+  },
+  {
+    id:'india', name:'India', flag:'🇮🇳', pop:1400, baseD:80, baseLove:50,
+    leader:'PM Narendra Modi',
+    quotes:['1.4 billion epic defenders!','Did you come to take our spices?','We defend with yoga!'],
+    pts:'595,168 640,162 655,178 648,215 630,232 610,230 598,210',
+    cx:626, cy:197
+  },
+  {
+    id:'china', name:'China', flag:'🇨🇳', pop:1400, baseD:100, baseLove:20,
+    leader:'General Secretary Xi Jinping',
+    quotes:['We are 1.4 billion, give it a try.','We manufacture and you bomb?','We have cheaper versions of your bomb.'],
+    pts:'640,110 720,105 740,120 735,155 705,162 655,162 632,148 635,125',
+    cx:686, cy:133
+  },
+  {
+    id:'japan', name:'Japan', flag:'🇯🇵', pop:125, baseD:70, baseLove:65,
+    leader:'PM Shigeru Ishiba',
+    quotes:['Don\'t harm my anime characters!','We have technological superiority!','You\'re very cute, but still no.'],
+    pts:'748,130 768,128 772,145 765,162 748,160 742,145',
+    cx:757, cy:145
+  },
+  {
+    id:'australia', name:'Australia', flag:'🇦🇺', pop:26, baseD:45, baseLove:75,
+    leader:'PM Anthony Albanese',
+    quotes:['Mate, are you serious?','I\'ve got kangaroos, watch out!','We fight with cricket bats!'],
+    pts:'690,295 780,285 800,305 795,355 760,368 710,362 688,340',
+    cx:743, cy:328
+  },
+];
+
+// ── BOMB TYPES ────────────────────────────────────────────────────────────
+const BOMBS = {
+  klasik:  { name:'Classic Bomb',  icon:'💣', price:40,  minDmg:15, maxDmg:25, loveHit:5,  msg:'BOOM! Classic but effective.' },
+  atesh:   { name:'Fire Bomb',     icon:'🔥', price:70,  minDmg:25, maxDmg:45, loveHit:10, msg:'FIRE! The fire brigade is on the way!' },
+  nukleer: { name:'Nuclear Bomb',  icon:'☢️', price:150, minDmg:60, maxDmg:100,loveHit:20, msg:'☢️ The UN has been called to an emergency session!' },
+  sirk:    { name:'Circus Ball',   icon:'🎪', price:35,  minDmg:1,  maxDmg:80, loveHit:8,  msg:'🎪 It was a gamble... what came out?' },
+};
+
+// ── QUESTIONS ────────────────────────────────────────────────────────────
+const QUESTIONS = [
+  // 🗳️ PUBLIC POLL
+  { cat:'🗳️ Public Poll', q:"What do citizens want from you most?", opts:["Lower taxes","More parks","Free tea","All of the above"], ans:3, reward:20 },
+  { cat:'🗳️ Public Poll', q:"Which campaign promise wins the most votes?", opts:["I'll be completely honest","Electricity will be free","Traffic will be fixed","I love my people"], ans:1, reward:25 },
+  { cat:'🗳️ Public Poll', q:"What do people complain about most?", opts:["The weather","Bread prices","The neighbor's dog","Everything"], ans:3, reward:20 },
+  { cat:'🗳️ Public Poll', q:"What is your first act as president?", opts:["Raise my own salary","Increase the number of holidays","Solve the traffic problem","Listen to the people"], ans:1, reward:25 },
+  { cat:'🗳️ Public Poll', q:"Why did the people elect you?", opts:["Because I'm handsome","I gave a good speech","My opponent was worse","I still can't figure that out"], ans:2, reward:20 },
+  { cat:'🗳️ Public Poll', q:"When the economy goes bad, what do you do?", opts:["I explain it to the public","I shut down the media","I stay indoors","I blame the opposition"], ans:3, reward:25 },
+  { cat:'🗳️ Public Poll', q:"A rival president is criticizing you, what do you do?", opts:["I respond","I take them to court","I tweet about it","I declare war"], ans:2, reward:20 },
+  { cat:'🗳️ Public Poll', q:"What do you do most in the presidential palace?", opts:["Work","Hold meetings","Drink tea","Watch Netflix"], ans:3, reward:25 },
+  { cat:'🗳️ Public Poll', q:"What do you do if you lose the election?", opts:["I accept the result","I run again","I go on vacation","I don't recognize the results"], ans:3, reward:25 },
+  { cat:'🗳️ Public Poll', q:"What is the best foreign policy method?", opts:["Diplomatic talks","Economic sanctions","Military force","Bomb the neighbor then apologize"], ans:3, reward:30 },
+  { cat:'🗳️ Public Poll', q:"How do you increase the happiness of the people?", opts:["Add more holidays","Cut taxes","Cheapen bread","Promise everything and deliver nothing"], ans:3, reward:25 },
+  { cat:'🗳️ Public Poll', q:"You're about to speak at the UN, what do you say?", opts:["We want peace","Our economy is strong","We love everyone","Thank you, I'll keep it brief"], ans:3, reward:25 },
+  { cat:'🗳️ Public Poll', q:"How do you attract tourists to your country?", opts:["Ad campaign","Remove visas","Lower prices","Give free food"], ans:3, reward:20 },
+  { cat:'🗳️ Public Poll', q:"What is the hardest decision as president?", opts:["Declaring war","Raising taxes","Doing both at the same time","Saying 'no' to the public"], ans:3, reward:25 },
+  { cat:'🗳️ Public Poll', q:"What does 89% of the public want?", opts:["Peace","Freedom","Prosperity","Peace first, then prosperity, there's a queue"], ans:3, reward:25 },
+  { cat:'🗳️ Public Poll', q:"What do you promise the citizens?", opts:["Freedom","Prosperity","Everything will be great","I'll do my best"], ans:2, reward:20 },
+  { cat:'🗳️ Public Poll', q:"What is the biggest problem in your country?", opts:["Unemployment","Inflation","Traffic","Social media addiction"], ans:3, reward:20 },
+  { cat:'🗳️ Public Poll', q:"What is the most popular campaign slogan?", opts:["Radical change","Strong economy","Jobs for everyone","Every promise gets votes"], ans:3, reward:20 },
+  { cat:'🗳️ Public Poll', q:"What does the public NOT expect from you?", opts:["Honesty","Hard work","Ethical behavior","All expected, but won't happen"], ans:3, reward:25 },
+  { cat:'🗳️ Public Poll', q:"What news does the public love most?", opts:["Economic growth","Sports news","Gossip","The president's breakfast"], ans:2, reward:20 },
+  { cat:'🗳️ Public Poll', q:"What is the most important quality of a president?", opts:["Intelligence","Honesty","Charisma","Knowing what the public is thinking"], ans:3, reward:25 },
+  { cat:'🗳️ Public Poll', q:"How do you explain a tax increase?", opts:["As a necessity","For investment","For service quality","I say 'look at the big picture'"], ans:3, reward:25 },
+  { cat:'🗳️ Public Poll', q:"What will your election slogan be?", opts:["Strong nation","Prosperous people","Better tomorrows","I promise but won't keep it"], ans:2, reward:20 },
+  { cat:'🗳️ Public Poll', q:"Why does the public get angry at the president?", opts:["Bad management","Corruption","Breaking promises","All of the above and more"], ans:3, reward:20 },
+  { cat:'🗳️ Public Poll', q:"What is the most effective propaganda method?", opts:["TV ads","Social media","Rallies","Use all of them at the same time"], ans:3, reward:25 },
+  { cat:'🗳️ Public Poll', q:"What is your greatest achievement as president?", opts:["Economy grew","Education improved","Foreign relations strengthened","I didn't lose my seat"], ans:3, reward:25 },
+  { cat:'🗳️ Public Poll', q:"When unemployment rises, what do you do?", opts:["Employment policy","Invest in education","Attract investors","Adjust the statistics"], ans:3, reward:30 },
+  { cat:'🗳️ Public Poll', q:"What should a president do with their salary?", opts:["Invest it","Donate it to the public","Live luxuriously","Reject it and actually do the job"], ans:3, reward:25 },
+
+  // 😂 FUNNY
+  { cat:'😂 Funny', q:"When you wake up in the morning, what's the first thing you do as president?", opts:["Run the country","Check Twitter","Have breakfast","Go back to sleep"], ans:3, reward:20 },
+  { cat:'😂 Funny', q:"Do you want a cage fight?", opts:["Yes, I'll crush my rival","No, I'll solve it diplomatically","I think a ring looks classier","My rival would crush me"], ans:2, reward:25 },
+  { cat:'😂 Funny', q:"Which country is the hardest to conquer?", opts:["America","Russia","China","Your local DMV"], ans:3, reward:25 },
+  { cat:'😂 Funny', q:"How fast does the world spin?", opts:["Very fast","Slowly","I'm the one spinning it","Is it even spinning?"], ans:2, reward:20 },
+  { cat:'😂 Funny', q:"What's the best excuse to start a war?", opts:["Freedom","Democracy","Oil","The neighbor looked at me"], ans:3, reward:30 },
+  { cat:'😂 Funny', q:"How do you defend your country?", opts:["With the army","With barbed wire","I push the neighbor in front","I send tweets"], ans:3, reward:25 },
+  { cat:'😂 Funny', q:"When the UN calls you, what do you do?", opts:["Answer immediately","Show myself as busy","Pick up but don't talk","Block the number"], ans:3, reward:25 },
+  { cat:'😂 Funny', q:"How is world peace achieved?", opts:["By talking","By agreement","After I conquer everyone","By turning off the internet"], ans:2, reward:25 },
+  { cat:'😂 Funny', q:"A bomb arrives from Russia, what do you do?", opts:["Hide it","Retaliate","Return it","Think it's a lottery ticket"], ans:3, reward:30 },
+  { cat:'😂 Funny', q:"A neighboring country is very noisy, what do you do?", opts:["Go talk to them","File a complaint","Conquer them and silence them","Put in earplugs"], ans:2, reward:20 },
+  { cat:'😂 Funny', q:"After conquering a country, what's the first thing you do?", opts:["I impose taxes","I go on vacation","I rename it","I take a photo"], ans:3, reward:20 },
+  { cat:'😂 Funny', q:"If your army runs away, what do you do?", opts:["Take them to court","Run away too","Build a new army","Hold peace negotiations"], ans:1, reward:25 },
+  { cat:'😂 Funny', q:"When your country runs out of money, what do you do?", opts:["Raise taxes","Take a loan","Print money","Borrow from the neighbor"], ans:2, reward:25 },
+  { cat:'😂 Funny', q:"If you built a country on another planet, what would you call it?", opts:["New America","Mars Republic","My Planets","Whatever my name is"], ans:3, reward:20 },
+  { cat:'😂 Funny', q:"Which weapon is the most powerful?", opts:["Nuclear","Chemical","Social media","Bad neighborliness"], ans:2, reward:25 },
+  { cat:'😂 Funny', q:"What do you do at the world leaders summit?", opts:["Talk a lot","Sit quietly","Fall asleep","Take selfies"], ans:3, reward:20 },
+  { cat:'😂 Funny', q:"If the vote count doesn't match in an election, what do you do?", opts:["Recount","Go to court","Don't recognize the results","Fire the vote counters"], ans:3, reward:25 },
+  { cat:'😂 Funny', q:"Before declaring war, what do you do?", opts:["I devise a strategy","I ask my advisors","I drink coffee","I look at the map but understand nothing"], ans:3, reward:20 },
+  { cat:'😂 Funny', q:"Your country is in economic crisis, what do you tell the public?", opts:["Everything is fine","We're holding strong","It's not my fault","Don't skip breakfast"], ans:2, reward:25 },
+  { cat:'😂 Funny', q:"Another country is threatening you, what's your reaction?", opts:["I request dialogue","I make a stern statement","I ignore it quietly","I roast them on social media"], ans:3, reward:20 },
+  { cat:'😂 Funny', q:"You're late to a summit meeting, what do you do?", opts:["I apologize","I say there was traffic","I say my time zone is different","I claim I already started the meeting"], ans:3, reward:25 },
+  { cat:'😂 Funny', q:"The opposition doesn't support you, what do you do?", opts:["I try to convince them","I listen to them","I seek compromise","I pretend they don't exist"], ans:3, reward:20 },
+  { cat:'😂 Funny', q:"How comfortable is the presidential chair?", opts:["Very comfortable","A bit hard","It hurts my back","Comfortable but responsibility is heavy"], ans:3, reward:15 },
+  { cat:'😂 Funny', q:"What is the most important thing in diplomatic meetings?", opts:["Honesty","Trust","Respect","The food menu"], ans:3, reward:20 },
+  { cat:'😂 Funny', q:"How do you introduce your country?", opts:["With our culture","With our economy","With our history","Google it, I learned from there too"], ans:3, reward:20 },
+  { cat:'😂 Funny', q:"What's the hardest part of the presidency?", opts:["Making decisions","Little sleep","Answering to the public","Waking up early"], ans:3, reward:15 },
+  { cat:'😂 Funny', q:"How many years does it take to make your country great?", opts:["5 years","10 years","20 years","There's an election next year, we'll see"], ans:3, reward:25 },
+  { cat:'😂 Funny', q:"How do you achieve world peace?", opts:["Diplomatic talks","Economic cooperation","Cultural exchange","I'll order pizza for everyone"], ans:3, reward:20 },
+
+  // 🌍 GEOGRAPHY
+  { cat:'🌍 Geography', q:"What is the capital of Turkey?", opts:["Istanbul","Ankara","Izmir","Bursa"], ans:1, reward:20 },
+  { cat:'🌍 Geography', q:"Which is the largest ocean in the world?", opts:["Atlantic","Indian","Arctic","Pacific"], ans:3, reward:20 },
+  { cat:'🌍 Geography', q:"What is the capital of Japan?", opts:["Osaka","Kyoto","Tokyo","Hiroshima"], ans:2, reward:20 },
+  { cat:'🌍 Geography', q:"What is the capital of Canada?", opts:["Toronto","Vancouver","Ottawa","Montreal"], ans:2, reward:25 },
+  { cat:'🌍 Geography', q:"What is the official language of Brazil?", opts:["Spanish","Portuguese","French","Brazilian"], ans:1, reward:25 },
+  { cat:'🌍 Geography', q:"Which is the highest mountain in the world?", opts:["K2","Everest","Kangchenjunga","Makalu"], ans:1, reward:20 },
+  { cat:'🌍 Geography', q:"What is the capital of India?", opts:["Mumbai","Kolkata","New Delhi","Chennai"], ans:2, reward:25 },
+  { cat:'🌍 Geography', q:"What is the capital of the United States?", opts:["New York","Los Angeles","Washington D.C.","Chicago"], ans:2, reward:20 },
+  { cat:'🌍 Geography', q:"What is the capital of Russia?", opts:["St. Petersburg","Moscow","Novosibirsk","Kazan"], ans:1, reward:15 },
+  { cat:'🌍 Geography', q:"Which is the longest river in the world?", opts:["Amazon","Nile","Yangtze","Mississippi"], ans:1, reward:25 },
+  { cat:'🌍 Geography', q:"What is the capital of Australia?", opts:["Sydney","Melbourne","Canberra","Brisbane"], ans:2, reward:25 },
+  { cat:'🌍 Geography', q:"Which is the largest desert in the world?", opts:["Sahara","Gobi","Arabian","Antarctica"], ans:3, reward:25 },
+  { cat:'🌍 Geography', q:"Which is the largest ocean in the world?", opts:["Atlantic","Indian","Arctic","Pacific"], ans:3, reward:20 },
+  { cat:'🌍 Geography', q:"Which continent is the Nile river on?", opts:["Asia","Europe","Africa","America"], ans:2, reward:15 },
+  { cat:'🌍 Geography', q:"What is the capital of Japan?", opts:["Osaka","Kyoto","Tokyo","Hiroshima"], ans:2, reward:15 },
+  { cat:'🌍 Geography', q:"Which is the smallest country in the world?", opts:["Monaco","San Marino","Vatican","Liechtenstein"], ans:2, reward:25 },
+  { cat:'🌍 Geography', q:"Which continent does the equator NOT pass through?", opts:["Africa","South America","Asia","Europe"], ans:3, reward:20 },
+  { cat:'🌍 Geography', q:"Which country does the Amazon river pass through?", opts:["Argentina","Colombia","Brazil","Peru"], ans:2, reward:20 },
+  { cat:'🌍 Geography', q:"Which country has the longest border?", opts:["Russia","China","USA","Canada"], ans:0, reward:25 },
+  { cat:'🌍 Geography', q:"In which country is Mount Everest located?", opts:["India","China","Nepal","Tibet"], ans:2, reward:20 },
+  { cat:'🌍 Geography', q:"How many neighboring countries does Turkey have?", opts:["6","7","8","9"], ans:2, reward:20 },
+  { cat:'🌍 Geography', q:"Which continent is the Sahara desert on?", opts:["Asia","Australia","Africa","America"], ans:2, reward:15 },
+  { cat:'🌍 Geography', q:"Which continent lies in both the Northern and Southern hemispheres?", opts:["Asia","Africa","Australia","Antarctica"], ans:1, reward:25 },
+  { cat:'🌍 Geography', q:"In which city is the Bosphorus Bridge?", opts:["Ankara","Izmir","Istanbul","Bursa"], ans:2, reward:15 },
+
+  // 🔬 SCIENCE
+  { cat:'🔬 Science', q:"At what temperature does water boil?", opts:["80°C","90°C","100°C","110°C"], ans:2, reward:15 },
+  { cat:'🔬 Science', q:"Which is the largest planet in our solar system?", opts:["Saturn","Mars","Jupiter","Neptune"], ans:2, reward:20 },
+  { cat:'🔬 Science', q:"Approximately how fast does light travel per second?", opts:["300 km","3,000 km","300,000 km","3 million km"], ans:2, reward:25 },
+  { cat:'🔬 Science', q:"Who does the formula E=mc² belong to?", opts:["Newton","Galileo","Einstein","Tesla"], ans:2, reward:20 },
+  { cat:'🔬 Science', q:"Which gas is most abundant in the atmosphere?", opts:["Oxygen","Carbon dioxide","Nitrogen","Helium"], ans:2, reward:25 },
+  { cat:'🔬 Science', q:"What does DNA stand for?", opts:["Deoxyribonucleic Acid","Dinucleic Acid","Diribonucleic Acid","Diazonic Acid"], ans:0, reward:30 },
+  { cat:'🔬 Science', q:"How many bones are in the human body?", opts:["106","206","306","406"], ans:1, reward:25 },
+  { cat:'🔬 Science', q:"How many planets are in our solar system?", opts:["7","8","9","10"], ans:1, reward:15 },
+
+  // 🏛️ HISTORY
+  { cat:'🏛️ History', q:"In what year was the Ottoman Empire founded?", opts:["1299","1453","1071","1326"], ans:0, reward:25 },
+  { cat:'🏛️ History', q:"In what year was Istanbul conquered?", opts:["1071","1299","1453","1683"], ans:2, reward:20 },
+  { cat:'🏛️ History', q:"In what year was the Republic of Turkey founded?", opts:["1919","1920","1922","1923"], ans:3, reward:20 },
+  { cat:'🏛️ History', q:"In what year did World War I begin?", opts:["1912","1914","1916","1918"], ans:1, reward:20 },
+  { cat:'🏛️ History', q:"In what year did the Berlin Wall fall?", opts:["1987","1988","1989","1990"], ans:2, reward:25 },
+  { cat:'🏛️ History', q:"In what year did Ataturk pass away?", opts:["1935","1936","1937","1938"], ans:3, reward:20 },
+  { cat:'🏛️ History', q:"In what year did the Battle of Gallipoli take place?", opts:["1912","1913","1914","1915"], ans:3, reward:25 },
+  { cat:'🏛️ History', q:"In what year did the French Revolution begin?", opts:["1776","1789","1804","1815"], ans:1, reward:25 },
+  { cat:'🏛️ History', q:"How long did the Ottoman Empire last?", opts:["400","500","600","700"], ans:2, reward:25 },
+  { cat:'🏛️ History', q:"In what year was the American Declaration of Independence published?", opts:["1774","1775","1776","1777"], ans:2, reward:25 },
+  { cat:'🏛️ History', q:"In what year was the Republic of Turkey founded?", opts:["1920","1921","1922","1923"], ans:3, reward:20 },
+  { cat:'🏛️ History', q:"In what year did World War II end?", opts:["1943","1944","1945","1946"], ans:2, reward:20 },
+  { cat:'🏛️ History', q:"The Cold War was between which two countries?", opts:["USA-China","USA-USSR","England-Germany","France-Russia"], ans:1, reward:20 },
+  { cat:'🏛️ History', q:"Where did the Silk Road run between?", opts:["Rome-India","China-Europe","Arabia-China","Egypt-China"], ans:1, reward:25 },
+  { cat:'🏛️ History', q:"In which country was the Magna Carta signed?", opts:["France","Italy","England","Germany"], ans:2, reward:25 },
+  { cat:'🏛️ History', q:"Where was Alexander the Great born?", opts:["Greece","Macedonia","Rome","Persia"], ans:1, reward:25 },
+
+  // ⚽ SPORTS
+  { cat:'⚽ Sports', q:"How often is the FIFA World Cup held?", opts:["Every 2 years","Every 3 years","Every 4 years","Every 5 years"], ans:2, reward:15 },
+  { cat:'⚽ Sports', q:"Which country has won the most FIFA World Cups?", opts:["Germany","Argentina","Brazil","France"], ans:2, reward:20 },
+  { cat:'⚽ Sports', q:"Which country won the 2022 FIFA World Cup?", opts:["France","Brazil","Argentina","England"], ans:2, reward:20 },
+  { cat:'⚽ Sports', q:"Which Formula 1 driver has won the most championships?", opts:["Schumacher","Hamilton","Senna","Vettel"], ans:1, reward:25 },
+  { cat:'⚽ Sports', q:"How often are the Olympics held?", opts:["Every 2 years","Every 3 years","Every 4 years","Every 5 years"], ans:2, reward:15 },
+  { cat:'⚽ Sports', q:"Which sport's league is the NBA?", opts:["American football","Baseball","Basketball","Hockey"], ans:2, reward:15 },
+  { cat:'⚽ Sports', q:"Which sport is the Wimbledon tournament for?", opts:["Golf","Tennis","Squash","Badminton"], ans:1, reward:20 },
+  { cat:'⚽ Sports', q:"What sport is the Tour de France?", opts:["Motorcycle","Cycling","Horse racing","Car"], ans:1, reward:20 },
+  { cat:'⚽ Sports', q:"Which country has won the most Olympic gold medals?", opts:["China","Russia","USA","Germany"], ans:2, reward:25 },
+
+  // 💻 TECHNOLOGY
+  { cat:'💻 Technology', q:"In what year was the first iPhone introduced?", opts:["2005","2006","2007","2008"], ans:2, reward:20 },
+  { cat:'💻 Technology', q:"Which company makes the Windows operating system?", opts:["Apple","Google","Microsoft","IBM"], ans:2, reward:15 },
+  { cat:'💻 Technology', q:"Who developed ChatGPT?", opts:["Google","Microsoft","OpenAI","Meta"], ans:2, reward:20 },
+  { cat:'💻 Technology', q:"Which company developed Android?", opts:["Apple","Samsung","Microsoft","Google"], ans:3, reward:15 },
+  { cat:'💻 Technology', q:"What does HTML stand for?", opts:["High Text Markup Language","HyperText Markup Language","HyperText Modeling Language","High Transfer Markup Language"], ans:1, reward:20 },
+  { cat:'💻 Technology', q:"Which company makes the iPhone?", opts:["Samsung","Google","Apple","Microsoft"], ans:2, reward:10 },
+  { cat:'💻 Technology', q:"Who is considered the father of the internet?", opts:["Bill Gates","Steve Jobs","Tim Berners-Lee","Elon Musk"], ans:2, reward:25 },
+  { cat:'💻 Technology', q:"What is a 'GPU' used for in artificial intelligence?", opts:["Data storage","Parallel computing","Network connection","Power management"], ans:1, reward:25 },
+  { cat:'💻 Technology', q:"Which company bought Instagram?", opts:["Google","Twitter","Facebook/Meta","Microsoft"], ans:2, reward:20 },
+  { cat:'💻 Technology', q:"Who created Bitcoin?", opts:["Elon Musk","Mark Zuckerberg","Satoshi Nakamoto","Vitalik Buterin"], ans:2, reward:25 },
+
+  // 🧮 MATH
+  { cat:'🧮 Math', q:"What is π (pi) approximately equal to?", opts:["2.71","3.14","3.41","3.71"], ans:1, reward:15 },
+  { cat:'🧮 Math', q:"What is √144?", opts:["11","12","13","14"], ans:1, reward:20 },
+  { cat:'🧮 Math', q:"What is 2³?", opts:["5","6","8","9"], ans:2, reward:15 },
+  { cat:'🧮 Math', q:"What is the sum of the interior angles of a triangle?", opts:["90°","180°","270°","360°"], ans:1, reward:15 },
+  { cat:'🧮 Math', q:"How many faces does a cube have?", opts:["4","5","6","8"], ans:2, reward:15 },
+  { cat:'🧮 Math', q:"What number comes after 8 in the Fibonacci sequence?", opts:["11","12","13","14"], ans:2, reward:25 },
+  { cat:'🧮 Math', q:"What is 0! (zero factorial)?", opts:["0","1","Undefined","Infinity"], ans:1, reward:25 },
+  { cat:'🧮 Math', q:"What is the formula for the area of a circle?", opts:["2πr","πr²","πd","2πr²"], ans:1, reward:20 },
+  { cat:'🧮 Math', q:"What is the smallest prime number?", opts:["0","1","2","3"], ans:2, reward:15 },
+  { cat:'🧮 Math', q:"What is 1% of 1000?", opts:["1","10","100","1000"], ans:1, reward:15 },
+  { cat:'🧮 Math', q:"How many sides does a hexagon have?", opts:["5","6","7","8"], ans:1, reward:15 },
+
+  // 🎬 GENERAL KNOWLEDGE
+  { cat:'🎬 General', q:"Who painted the Mona Lisa?", opts:["Michelangelo","Raphael","Da Vinci","Picasso"], ans:2, reward:20 },
+  { cat:'🎬 General', q:"In what year did humans first set foot on the Moon?", opts:["1967","1968","1969","1970"], ans:2, reward:20 },
+  { cat:'🎬 General', q:"What is the most expensive spice in the world?", opts:["Cinnamon","Saffron","Black pepper","Vanilla"], ans:1, reward:25 },
+  { cat:'🎬 General', q:"Which country has won the most Oscars?", opts:["England","France","America","Italy"], ans:2, reward:20 },
+  { cat:'🎬 General', q:"Which is the longest river in the world?", opts:["Amazon","Nile","Mississippi","Yangtze"], ans:1, reward:20 },
+  { cat:'🎬 General', q:"In which country are the Nobel Prizes awarded?", opts:["Denmark","Norway","Finland","Sweden"], ans:3, reward:25 },
+  { cat:'🎬 General', q:"Approximately how fast does light travel in air?", opts:["100,000 km/s","200,000 km/s","300,000 km/s","400,000 km/s"], ans:2, reward:25 },
+  { cat:'🎬 General', q:"How many bones are in the human body?", opts:["186","196","206","216"], ans:2, reward:20 },
+  { cat:'🎬 General', q:"What is the closest distance from Earth to the Moon?", opts:["284,000 km","356,000 km","428,000 km","512,000 km"], ans:1, reward:25 },
+  { cat:'🎬 General', q:"What does DNA stand for?", opts:["Deoxyribonucleic Acid","Deoxyribose Nucleic Acid","Deoxy-ribo Nucleic Acid","Double Nucleic Acid"], ans:0, reward:25 },
+  { cat:'🎬 General', q:"Which planet is closest to the Sun?", opts:["Venus","Mars","Mercury","Earth"], ans:2, reward:20 },
+  { cat:'🎬 General', q:"Who completed the first successful flight?", opts:["Charles Lindbergh","The Wright Brothers","Amelia Earhart","Howard Hughes"], ans:1, reward:20 },
+  { cat:'🎬 General', q:"What is the chemical formula for water?", opts:["CO2","H2O","O2","NaCl"], ans:1, reward:10 },
+  { cat:'🎬 General', q:"Which is the largest desert in the world?", opts:["Sahara","Gobi","Arabian","Antarctica"], ans:3, reward:25 },
+
+  // 🤣 SUPER FUNNY
+  { cat:'🤣 Super Funny', q:"How do you take land from a neighboring country?", opts:["I declare war","Diplomatic pressure","Economic offer","I move the border on Google Maps"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"Inflation in your country hit 500%, what do you do?", opts:["I call the central bank","I hold an emergency meeting","I apply to the IMF","I print price tags in a smaller font"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"Another country expelled your ambassador, what's your reaction?", opts:["I file a protest note","I expel theirs in return","I complain to the UN","Who is the ambassador again?"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"There was a power outage in your country, what do you do?", opts:["I call the energy minister","I turn on the generator","I inform the public","I have a romantic candlelit dinner"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"When is a military parade held?", opts:["On national days","On victory anniversaries","Before elections","Whenever the president is bored"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"The national budget is running a deficit, what do you do?", opts:["I cut spending","I raise taxes","I attract investors","I add a zero — does one zero really change things?"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"You fell asleep at a UN meeting, what do you do?", opts:["I apologize","I say I was tired","I say I didn't notice","I say I was deep in thought"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"You pointed at the wrong country at a press conference, what do you do?", opts:["I correct the map","I apologize","I quietly gloss over it","I conquer that country too"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"You wanted to stand in the front row for the summit photo but couldn't, what do you do?", opts:["I reject the photo","I get in line","I fire the photographer","I Photoshop myself to the front"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"Your country had a toilet paper crisis, what do you do?", opts:["I increase imports","I speed up production","I suggest newspapers","I blame the opposition for this too"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"You proposed a policy that everyone called nonsense, what does the public say?", opts:["They find it logical","They criticize","They debate","They say 'typical for this country'"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"The presidential jet broke down, what do you do?", opts:["I get it repaired","I rent one","I use a commercial flight","I say the economic crisis started on the plane"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"A rival country trolled you on social media, what's your reaction?", opts:["I don't respond","I send a diplomatic note","I shut down social media","I troll them back even better"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"You have a cabinet meeting in the morning but you're exhausted, what do you do?", opts:["I go to the meeting","I postpone the meeting","I send my deputy","I leave the screen on and sleep"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"What's the best tourism slogan for your country?", opts:["Warm weather, warm people","Heart of history","Paradise of nature","We were surprised too, but it's a great country"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"Another country's president spoke longer than you, what do you do?", opts:["I don't mind","I applaud","I get bored","I make my next speech even longer"], ans:3, reward:20 },
+  { cat:'🤣 Super Funny', q:"The country you conquered speaks a different language, what do you do?", opts:["I hire a translator","I go to a language course","I teach them English","Everyone uses hand gestures, we'll manage"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"You forgot the words to the national anthem while singing it, what do you do?", opts:["I stop and wait","I hum","I copy from everyone singing around me","I say I was very moved"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"You're mediating between two neighboring countries but neither is listening, what do you do?", opts:["I apply pressure","I bring in the UN","I give up","I conquer both of them"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"Coffee prices skyrocketed in your country and the public revolted, what do you do?", opts:["I increase coffee imports","I set a price ceiling","I support production","I say 'drink tea', problem solved"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"What should the presidential palace's WiFi password be?", opts:["StrongNation2024","IAmPresident123","TopSecret!","Did you really just ask that"], ans:3, reward:20 },
+  { cat:'🤣 Super Funny', q:"Enemy tanks are at the border and your defense minister is on vacation. What do you do?", opts:["I recall them","I handle it myself","I give orders to the army","I tell them to stop posting vacation photos"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"Your country ranked last in the world rankings, what's your comment?", opts:["We'll work harder","We're developing","This measurement is wrong","We're in a different league altogether"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"You're overwhelmed by presidential pressure, what do you do?", opts:["I go on vacation","I talk to advisors","I exercise","I think: if I made the country smaller, there'd be less work"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"What do you say to definitely win an election campaign?", opts:["I'll fix the economy","I'll make everything free","I'll be honest","Don't let my opponent win, they're just as bad as me"], ans:1, reward:25 },
+  { cat:'🤣 Super Funny', q:"Your country's debt is growing and economists are worried. What's your reaction?", opts:["I reduce the debt","I focus on growth","I talk to the IMF","I replace the economists"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"A journalist asked you a hard question, what do you do?", opts:["I answer honestly","I think carefully and respond","I say 'pass'","Who is this journalist? Who are you people?"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"Which world leader do you imitate the most?", opts:["Churchill","Obama","Ataturk","None — they imitate me"], ans:3, reward:20 },
+  { cat:'🤣 Super Funny', q:"80% of the public is unhappy with you. Your comment?", opts:["I'll work harder","I accept my mistakes","I'll listen to the public","20% are happy, we're doing great"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"A foreign leader visited your country, what do you serve?", opts:["Special meal","Cultural tour","Gift ceremony","Tea and pastries, presidential style"], ans:3, reward:20 },
+  { cat:'🤣 Super Funny', q:"The internet slowed down in your country and people are complaining. What do you do?", opts:["Invest in infrastructure","Change the provider","Start a technical investigation","I'm complaining too, what are we gonna do?"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"The rival country's president is more handsome than you, how do you feel?", opts:["It doesn't matter","Hard work is what counts","Looks don't matter","This is a cause for war"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"Your national football team lost the last match, what's your reaction?", opts:["I take it normally","I console them","I increase the budget","I fire the coach — national success is mandatory"], ans:3, reward:20 },
+  { cat:'🤣 Super Funny', q:"Another country copied you, what's your reaction?", opts:["Diplomatic protest","I go to court","I'm proud","Imitation is the highest form of flattery"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"You don't speak the language at an international summit, what do you do?", opts:["I get a translator","I stay silent","I try sign language","I nod and smile, everyone seems pleased"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"Tax collectors are on strike, what do you do?", opts:["I resolve the strike","I make a deal","I assign someone else","Opportunity knocks — let me take a little vacation"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"How long do meetings last in the presidential chair?", opts:["2 hours","4 hours","6 hours","Meetings never end, they continue during lunch"], ans:3, reward:20 },
+  { cat:'🤣 Super Funny', q:"There was an earthquake in your country, how do you manage the crisis?", opts:["I send disaster teams","I request international aid","I go to the region","First I post 'our thoughts are with you' on social media"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"Your presidential advisor suggested a ridiculous idea, what's your reaction?", opts:["I politely decline","I argue","I ask someone else","I say nothing — maybe it'll work"], ans:3, reward:20 },
+  { cat:'🤣 Super Funny', q:"More and more citizens are leaving your country, what do you do?", opts:["I research the reasons","I improve conditions","I convince them to stay","I lock the door from the inside"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"After conquering all 15 countries, what do you do?", opts:["I seek peace","I rebuild","I bring prosperity to the people","I'm tired, let me take a break"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"What do you name the world after you conquer it?", opts:["New World","My World","Free World","Let's conquer it first, then we'll think of a name"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"Now that the whole world is yours, what's your first act?", opts:["I abolish taxes","I declare peace","I remove borders","I go on vacation — I earned it"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"Instead of war, how else would you conquer a country?", opts:["Diplomacy","Economy","Culture","I send everyone tea and pastries"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"What's the most annoying thing in the presidential palace?", opts:["Long meetings","Bad news","The opposition","Always the same chair — can we redecorate?"], ans:3, reward:20 },
+  { cat:'🤣 Super Funny', q:"Instead of bombing a country, what do you do?", opts:["I negotiate","I apply sanctions","I ask for a mediator","I send them memes they hate"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"How do you want to be remembered in history?", opts:["Great leader","The one who brought peace","The one who fixed the economy","The one who conquered the world but then went on vacation"], ans:3, reward:25 },
+  { cat:'🤣 Super Funny', q:"If you were forced to give up the chair, what would you do?", opts:["I'd retire","I'd become an advisor","I'd write a book","I'd take the chair with me"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"What is the best bomb?", opts:["Nuclear","Chemical","Biological","Grandma's homemade pie — nobody can resist"], ans:3, reward:30 },
+  { cat:'🤣 Super Funny', q:"The neighboring country's president hasn't called you, what do you do?", opts:["I call them","I send an ambassador","I wait","I comment on their posts like 'saw this'"], ans:3, reward:25 },
+];
+
+// ── COLOR PALETTE ──────────────────────────────────────────────────────────
+const NEUTRAL_COLORS = {
+  canada:'#1a3520', usa:'#1e2d3d', mexico:'#2d2010', brazil:'#1a2d10',
+  uk:'#1a2035', france:'#1a2535', germany:'#252015', russia:'#201520',
+  turkey:'#252010', egypt:'#2d2510', safrica:'#1a2520', india:'#2d1a10',
+  china:'#201515', japan:'#151a25', australia:'#1a2010'
+};
+// ── LEADER PHOTOS (Wikimedia Commons) ───────────────────────────────────
+const LEADER_PHOTOS = {
+  canada:    'Mark_Carney_WEF_2010_crop.jpg',
+  usa:       'Donald_Trump_official_portrait.jpg',
+  mexico:    'Claudia_Sheinbaum_Pardo.jpg',
+  brazil:    'Lula_-_foto_oficial_2023.jpg',
+  uk:        'Keir_Starmer_2020.jpg',
+  france:    'Emmanuel_Macron_in_2019.jpg',
+  germany:   'Friedrich_Merz_-_2019_(cropped).jpg',
+  russia:    'Vladimir_Putin_(2023-09-13)_(cropped).jpg',
+  turkey:    'Recep_Tayyip_Erdogan_2017.jpg',
+  egypt:     'Abdel_Fattah_el-Sisi_in_2021.jpg',
+  safrica:   'Cyril_Ramaphosa_2018_(cropped).jpg',
+  india:     'Narendra_Modi_official_portrait.jpg',
+  china:     'Xi_Jinping_in_July_2021_(cropped).jpg',
+  japan:     'Shigeru_Ishiba_20190910.jpg',
+  australia: 'Anthony_Albanese_official_portrait_(cropped).jpg',
+};
+function leaderPhotoUrl(id){
+  const f=LEADER_PHOTOS[id]; if(!f) return '';
+  return 'https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(f)+'?width=80';
+}
+
+const CONQUERED_COLOR = '#0f3320';
+const ALLIED_COLOR = '#0a2d4a';
+const ALLIED_STROKE = '#58a6ff';
+const SELECTED_STROKE = '#f0b429';
+const NEUTRAL_STROKE = '#2a3a2a';
+const CONQUERED_STROKE = '#3fb950';
+
+// ── COUNTER-ATTACK TAUNTS ────────────────────────────────────────────────
+const TAUNTS = {
+  canada: ['Have you seen the hockey stick?! 🏒','I\'m not saying sorry this time!','You spilled my maple syrup — this means war!','Not sorry, FURIOUS!'],
+  usa:    ['YOU\'RE FIRED! 🔥','Make America Revenge Again!','I\'m building a wall against you!','Oh, even I declare war for this!'],
+  mexico: ['¡Esto es la guerra, amigo! 🌮','I\'m sending missiles, not tacos!','¡Maldito! We\'re fighting back!','It\'s soldiers coming, not mariachi!'],
+  brazil: ['Carnival\'s over, now it\'s your turn! 🎭','The Amazon jungle will swallow you!','It\'s bombs, not capoeira!','We\'ll settle this at Maracanã!'],
+  uk:     ['This means WAR, old chap! ☕','You let my tea go cold, this is serious!','God save me, save you cannot!','Big Ben is pointing at you!'],
+  france: ['Mon dieu! MERDE! 🥖','It\'s missiles, not baguettes!','I\'ve aimed from the Eiffel Tower!','I was on strike and you ruined it, I\'m furious!'],
+  germany:['NEIN NEIN NEIN! ⚙️','Retaliation on schedule!','German engineering is against you!','Retaliating per procedure, forms have been filed!'],
+  russia: ['Хватит! Retaliation has begun! 🐻','I\'m sending Siberian cold your way!','I cut the gas, now freeze!','The nuclear button is on the table!'],
+  turkey: ['Stop stop stop! The army is up! 🌙','Tea is over, blood begins!','Operation Lightning has started!','The Turkish army doesn\'t joke!'],
+  egypt:  ['Pharaohs don\'t cry, they strike! 🏺','You woke the mummies, you\'ll regret it!','I\'ll make the Nile run red!','3000 years of anger just exploded!'],
+  safrica:['Ubuntu says: retaliate! 🦁','I\'m unleashing the savanna lions!','Sending bullets instead of diamonds!','Mandela approved, I\'m striking!'],
+  india:  ['1.4 billion ANGRY people! 🐘','Yoga pose: attack mode!','It\'s rockets, not spices!','This isn\'t a Bollywood finale, it\'s real war!'],
+  china:  ['The Great Wall is coming for you! 🐉','My factory has missiles!','A billion-person army just woke up!','TikTok is banned, now we have war!'],
+  japan:  ['BUSHIDO SPIRIT! ⚔️','My anime characters are angry!','Have you seen samurai technology in action?','It\'s not a kaiju, it\'s a real army!'],
+  australia:['Crikey! Kangaroo PUNCH! 🦘','This is coming from the Outback!','I threw a boomerang, it\'s coming back!','The cobra army is ready!'],
+};
+
+// ── ALLIED CONSULTATION SCENARIOS ──────────────────────────────────────
+const VASSAL_CONSULTS = [
+  { q:'Inflation is rising in the economy, what should I do?',
+    opts:[{t:'Raise interest rates',e:{gold:30,ap:2,msg:'Economy stabilized! +30💰 +2 approval'}},
+          {t:'Print more money',e:{gold:-20,ap:-5,msg:'Inflation went up even more! -20💰'}},
+          {t:'Blame the public',e:{gold:0,ap:-3,msg:'The public wasn\'t very convinced...'}},
+          {t:'Go on vacation',e:{gold:-40,ap:-10,msg:'The crisis grew! -40💰'}}]},
+  { q:'A neighboring country is causing tension at the border, your advice?',
+    opts:[{t:'Open a dialogue',e:{gold:20,ap:5,msg:'Tension reduced! +20💰'}},
+          {t:'Mobilize the army',e:{gold:-30,ap:3,msg:'Defense strengthened... but war has started!'},war:true},
+          {t:'Complain to the UN',e:{gold:0,ap:2,msg:'The UN took note, maybe they\'ll do something...'}},
+          {t:'Ignore it',e:{gold:-20,ap:-8,msg:'Tension escalated! -20💰'}}]},
+  { q:'Citizens took to the streets, what should I do, President?',
+    opts:[{t:'Listen to their demands',e:{gold:10,ap:8,msg:'People are happy! +10💰 +8 approval'}},
+          {t:'Make promises',e:{gold:-10,ap:5,msg:'Things calmed down a bit, but it was costly.'}},
+          {t:'Send the police',e:{gold:0,ap:-10,msg:'The situation got even messier!'}},
+          {t:'Declare a holiday',e:{gold:40,ap:10,msg:'Everyone went home! +40💰 +10 approval'}}]},
+  { q:'A major corruption scandal broke out, what should I do?',
+    opts:[{t:'Open an investigation',e:{gold:20,ap:7,msg:'Transparency earned praise! +20💰'}},
+          {t:'Deny everything',e:{gold:0,ap:-5,msg:'Nobody believed it...'}},
+          {t:'Shut down the media',e:{gold:-20,ap:-8,msg:'The world\'s press is at the door!'}},
+          {t:'Reward everyone',e:{gold:-50,ap:3,msg:'That backfired expensively! -50💰'}}]},
+  { q:'The opposition is getting stronger in elections, what do you suggest?',
+    opts:[{t:'Do better work',e:{gold:15,ap:10,msg:'The public noticed the difference! +15💰 +10 approval'}},
+          {t:'Bring them into your coalition',e:{gold:-30,ap:2,msg:'The coalition held, but it was expensive.'}},
+          {t:'Crush them on social media',e:{gold:0,ap:-3,msg:'Political tension increased.'}},
+          {t:'Change the election date',e:{gold:-20,ap:-7,msg:'The constitutional court has intervened!'}}]},
+  { q:'A major earthquake struck! Emergency aid is needed!',
+    opts:[{t:'Mobilize all resources',e:{gold:-40,ap:15,msg:'The public loved you so much! +15 approval'}},
+          {t:'Request international aid',e:{gold:30,ap:8,msg:'Aid has arrived! +30💰'}},
+          {t:'Hold a coordination meeting',e:{gold:0,ap:5,msg:'Slow but proceeding in an orderly fashion.'}},
+          {t:'I\'m on vacation, later',e:{gold:-60,ap:-20,msg:'TOTAL DISASTER! -60💰 -20 approval'}}]},
+  { q:'I want to host a major football tournament in my country, do you approve?',
+    opts:[{t:'Of course, open the budget!',e:{gold:-30,ap:12,msg:'Football excitement! +12 approval'}},
+          {t:'Let it be small scale',e:{gold:-10,ap:5,msg:'Modest but nice outcome.'}},
+          {t:'Too expensive, cancel it',e:{gold:20,ap:-5,msg:'The public was disappointed.'}},
+          {t:'I\'ll only watch it myself',e:{gold:0,ap:-3,msg:'I didn\'t follow that, but ok...'}}]},
+  { q:'Bread prices in my country went up 5 times, what should I do?',
+    opts:[{t:'Set a price ceiling',e:{gold:10,ap:8,msg:'People are a bit relieved! +10💰'}},
+          {t:'Increase imports',e:{gold:-20,ap:5,msg:'The bread came but cost a lot.'}},
+          {t:'Call on the public to diet',e:{gold:0,ap:-12,msg:'The public is very angry...'}},
+          {t:'Let them eat cake',e:{gold:-50,ap:-20,msg:'REVOLT! -50💰 -20 approval'}}]},
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────
+let inv={klasik:0,atesh:0,nukleer:0,sirk:0};
+let gold=0,selected=null,qIndex=0,correctCount=0,qAnswered=false,approval=50;
+let countries=[];
+let playerDefense=100, vassals=[], pendingConquerCountry=null, currentConsult=null, vassalTimer=null, currentVassalConsultant=null;
+
+function initGame(){
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('conquer-modal').classList.remove('show');
+  document.getElementById('vassal-modal').classList.remove('show');
+  gold=150; inv={klasik:2,atesh:0,nukleer:0,sirk:0};
+  selected=null; correctCount=0; approval=50; qIndex=0; qAnswered=false;
+  playerDefense=100; vassals=[]; pendingConquerCountry=null;
+  if(vassalTimer){clearInterval(vassalTimer);vassalTimer=null;}
+
+  countries=COUNTRY_DATA.map(d=>({...d, defense:d.baseD, love:d.baseLove, conquered:false, fate:null}));
+
+  shuffle(QUESTIONS);
+  renderMap(); showQuestion(); updateStats(); selectCountry(null);
+  updatePlayerDefense(); updateVassalPanel();
+  document.getElementById('action-msg').textContent='';
+}
+
+function startGame(){
+  document.getElementById('title-screen').style.display='none';
+  initGame();
+}
+
+// ── MAP RENDER ────────────────────────────────────────────────────────────
+function renderMap(){
+  const g=document.getElementById('territories');
+  g.innerHTML='';
+  countries.forEach(c=>{
+    const grp=document.createElementNS('http://www.w3.org/2000/svg','g');
+    grp.id='grp-'+c.id;
+    grp.style.cursor='pointer';
+    grp.addEventListener('click',()=>selectCountry(c));
+
+    // Territory polygon
+    const poly=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    poly.setAttribute('points',c.pts);
+    poly.setAttribute('fill',NEUTRAL_COLORS[c.id]||'#1a2020');
+    poly.setAttribute('stroke',NEUTRAL_STROKE);
+    poly.setAttribute('stroke-width','1.5');
+    poly.setAttribute('stroke-linejoin','round');
+    poly.id='poly-'+c.id;
+
+    // Flag emoji
+    const flag=document.createElementNS('http://www.w3.org/2000/svg','text');
+    flag.setAttribute('x',c.cx);
+    flag.setAttribute('y',c.cy-6);
+    flag.setAttribute('class','t-flag');
+    flag.textContent=c.flag;
+
+    // Name label
+    const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
+    lbl.setAttribute('x',c.cx);
+    lbl.setAttribute('y',c.cy+9);
+    lbl.setAttribute('class','t-label');
+    lbl.textContent=c.name;
+
+    grp.appendChild(poly);
+    grp.appendChild(flag);
+    grp.appendChild(lbl);
+    g.appendChild(grp);
+  });
+}
+
+function updateTerritoryVisual(c){
+  const poly=document.getElementById('poly-'+c.id);
+  if(!poly) return;
+  if(c.conquered){
+    const fillColor = c.fate==='allied' ? ALLIED_COLOR : CONQUERED_COLOR;
+    const strokeColor = c.fate==='allied' ? ALLIED_STROKE : CONQUERED_STROKE;
+    poly.setAttribute('fill',fillColor);
+    poly.setAttribute('stroke',strokeColor);
+    poly.setAttribute('stroke-width','2');
+  } else if(selected===c){
+    const baseColor=NEUTRAL_COLORS[c.id]||'#1a2020';
+    poly.setAttribute('fill',baseColor);
+    poly.setAttribute('stroke',SELECTED_STROKE);
+    poly.setAttribute('stroke-width','2.5');
+  } else {
+    poly.setAttribute('fill',NEUTRAL_COLORS[c.id]||'#1a2020');
+    poly.setAttribute('stroke',NEUTRAL_STROKE);
+    poly.setAttribute('stroke-width','1.5');
+  }
+}
+
+// Explosion animation on map
+function showExplosion(cx,cy){
+  const svg=document.getElementById('map-svg');
+  const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  circle.setAttribute('cx',cx);
+  circle.setAttribute('cy',cy);
+  circle.setAttribute('r','5');
+  circle.setAttribute('fill','none');
+  circle.setAttribute('stroke','#f0b429');
+  circle.setAttribute('stroke-width','3');
+  circle.setAttribute('class','explosion');
+  svg.appendChild(circle);
+  setTimeout(()=>circle.remove(),600);
+
+  // Second ring
+  const circle2=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  circle2.setAttribute('cx',cx);
+  circle2.setAttribute('cy',cy);
+  circle2.setAttribute('r','5');
+  circle2.setAttribute('fill','none');
+  circle2.setAttribute('stroke','#f85149');
+  circle2.setAttribute('stroke-width','2');
+  circle2.setAttribute('class','explosion');
+  circle2.style.animationDelay='0.1s';
+  svg.appendChild(circle2);
+  setTimeout(()=>circle2.remove(),700);
+}
+
+// ── SELECT ────────────────────────────────────────────────────────────────
+function selectCountry(c){
+  const prev=selected;
+  selected=c;
+
+  if(prev) updateTerritoryVisual(prev);
+  if(c) updateTerritoryVisual(c);
+
+  refreshBombBtns();
+
+  if(!c){
+    document.getElementById('sel-flag').textContent='🌐';
+    document.getElementById('sel-name').textContent='Select from map';
+    document.getElementById('sel-name').style.color='var(--text2)';
+    document.getElementById('sel-leader').textContent='';
+    document.getElementById('sel-leader-photo').classList.add('hidden');
+    document.getElementById('sel-quote').textContent='Select a country 👆';
+    document.getElementById('sel-stats').innerHTML='';
+    document.getElementById('btn-love').disabled=true;
+    return;
+  }
+
+  document.getElementById('sel-flag').textContent=c.flag;
+  document.getElementById('sel-name').textContent=c.name;
+  document.getElementById('sel-name').style.color='var(--text)';
+  document.getElementById('sel-leader').textContent='👤 '+c.leader;
+  const photoEl=document.getElementById('sel-leader-photo');
+  const photoUrl=leaderPhotoUrl(c.id);
+  if(photoUrl){
+    photoEl.src=photoUrl;
+    photoEl.classList.remove('hidden');
+  } else {
+    photoEl.classList.add('hidden');
+  }
+  document.getElementById('sel-quote').textContent='"'+c.quotes[Math.floor(Math.random()*c.quotes.length)]+'"';
+
+  const defPct=Math.round(c.defense/c.baseD*100);
+  const loveColor=c.love>=70?'#f43f5e':c.love>=40?'#f97316':'#9ca3af';
+  document.getElementById('sel-stats').innerHTML=`
+    <div class="irow"><span>👥 Population</span><span class="ival">${c.pop>=1000?(c.pop/1000).toFixed(1)+'B':c.pop+'M'}</span></div>
+    <div class="irow"><span>❤️ Public Love</span><span class="ival" style="color:${loveColor}">${c.love}%</span></div>
+    <div class="mbar"><div class="mbar-fill" style="width:${c.love}%;background:linear-gradient(90deg,#ec4899,#f43f5e)"></div></div>
+    <div class="irow"><span>🛡 Defense</span><span class="ival">${c.defense}/${c.baseD}</span></div>
+    <div class="mbar"><div class="mbar-fill" style="width:${defPct}%;background:linear-gradient(90deg,#3b82f6,#6366f1)"></div></div>
+    ${c.conquered?'<div style="color:#3fb950;font-weight:800;font-size:11px;text-align:center;margin-top:4px">✅ This country is yours!</div>':''}
+  `;
+
+  document.getElementById('btn-love').disabled=c.conquered||gold<30;
+  document.getElementById('action-msg').textContent=
+    c.conquered?'✅ Conquered! Select another country.':
+    Object.values(inv).every(v=>v===0)?'💣 Buy bombs from the shop!':'';
+}
+
+function refreshBombBtns(){
+  const c=selected;
+  Object.keys(BOMBS).forEach(key=>{
+    const btn=document.getElementById('bb-'+key);
+    const span=document.getElementById('bc-'+key);
+    if(btn){ span.textContent=inv[key]; btn.disabled=!c||c.conquered||inv[key]<=0; }
+  });
+}
+
+// ── BOMB ─────────────────────────────────────────────────────────────────
+function useBomb(type){
+  if(!selected||selected.conquered||inv[type]<=0) return;
+  const b=BOMBS[type];
+  inv[type]--;
+
+  let baseDmg=b.minDmg+Math.floor(Math.random()*(b.maxDmg-b.minDmg+1));
+  let loveMult=selected.love>=70?1.3:selected.love>=40?1.0:0.7;
+  let dmg=Math.round(baseDmg*loveMult);
+
+  selected.defense=Math.max(0,selected.defense-dmg);
+  selected.love=Math.max(0,selected.love-b.loveHit);
+
+  showExplosion(selected.cx,selected.cy);
+
+  // Leader taunts back
+  const tl=TAUNTS[selected.id]||selected.quotes;
+  document.getElementById('sel-quote').textContent='"'+tl[Math.floor(Math.random()*tl.length)]+'"';
+
+  const eff=loveMult>1?'🔥 Effective!':loveMult<1?'😤 Resisting!':'';
+  showMsg(`${b.msg} ${eff} ${dmg} damage! Defense: ${selected.defense}/${selected.baseD}`,'#f97316');
+
+  if(selected.defense<=0){
+    showConquerChoice(selected);
+  } else {
+    // 55% chance of counter-attack
+    if(Math.random()<0.55){
+      const cDmg=10+Math.floor(Math.random()*21);
+      const cSel=selected;
+      setTimeout(()=>{
+        gold=Math.max(0,gold-cDmg);
+        playerDefense=Math.max(0,playerDefense-(5+Math.floor(Math.random()*11)));
+        document.getElementById('topbar').classList.add('dmg-flash');
+        setTimeout(()=>document.getElementById('topbar').classList.remove('dmg-flash'),600);
+        showMsg(`💥 ${cSel.name} counter-attacked! -${cDmg}💰 damage!`,'#f85149');
+        toast(`⚔️ ${cSel.leader} retaliated! -${cDmg}💰`);
+        if(playerDefense<=0){
+          playerDefense=40;
+          gold=Math.max(0,gold-50);
+          toast('🚨 Your defense collapsed! Extra -50💰 damage!');
+        }
+        updatePlayerDefense();
+        updateStats();
+      },950);
+    }
+    updateTerritoryVisual(selected); selectCountry(selected);
+  }
+  updateStats(); refreshBombBtns();
+}
+
+// ── LOVE ─────────────────────────────────────────────────────────────────
+function sendLove(){
+  if(!selected||selected.conquered||gold<30) return;
+  gold-=30;
+  const gain=10+Math.floor(Math.random()*16);
+  selected.love=Math.min(100,selected.love+gain);
+  approval=Math.min(100,approval+2);
+  updateTerritoryVisual(selected); selectCountry(selected); updateStats();
+  showMsg(`❤️ Public love +${gain}! Bombs will be more effective.`,'#ec4899');
+  document.getElementById('btn-love').disabled=selected.conquered||gold<30;
+}
+
+// ── CONQUER CHOICE ────────────────────────────────────────────────────────
+function showConquerChoice(c){
+  pendingConquerCountry=c;
+  c.defense=0;
+  updateTerritoryVisual(c);
+  document.getElementById('cm-flag').textContent=c.flag;
+  document.getElementById('cm-leader').textContent='👤 '+c.leader;
+  document.getElementById('cm-desc').textContent=
+    `${c.name} has surrendered! ${c.leader} raised their hands and knelt down. What will you do?`;
+  document.getElementById('conquer-modal').classList.add('show');
+}
+
+function doConquerDeal(){
+  document.getElementById('conquer-modal').classList.remove('show');
+  const c=pendingConquerCountry;
+  finishConquer(c,'allied');
+  vassals.push(c);
+  updateVassalPanel();
+  toast(`🤝 You made a deal with ${c.leader}! Now your ally!`);
+  showMsg(`🤝 ${c.name} became your ally! They will consult you before making decisions.`,'#3fb950');
+  if(vassals.length===1) startVassalTimer();
+}
+
+function doConquerKill(){
+  document.getElementById('conquer-modal').classList.remove('show');
+  const c=pendingConquerCountry;
+  finishConquer(c,'killed');
+  const bonus=Math.floor(c.pop/5);
+  gold+=bonus;
+  updateStats();
+  toast(`☠️ ${c.leader} is gone forever! +${bonus}💰 bonus!`);
+  showMsg(`☠️ ${c.leader} eliminated. +${bonus}💰 loot!`,'#f85149');
+}
+
+function finishConquer(c,fate){
+  c.conquered=true; c.fate=fate; c.defense=0;
+  const income=Math.max(25,Math.floor(c.pop/8));
+  gold+=income;
+  approval=Math.min(100,approval+(fate==='allied'?8:4));
+  updateTerritoryVisual(c);
+
+  const flashColor=fate==='allied'?'#0a2d4a':'#0f4020';
+  const finalColor=fate==='allied'?ALLIED_COLOR:CONQUERED_COLOR;
+  const poly=document.getElementById('poly-'+c.id);
+  if(poly){
+    poly.setAttribute('fill',flashColor);
+    setTimeout(()=>{ if(c.conquered) poly.setAttribute('fill',finalColor); },600);
+  }
+
+  selectCountry(c); updateStats();
+  const fateLabel=fate==='allied'?'🤝 Deal made!':'☠️ Leader eliminated!';
+  showMsg(`🎉 ${c.name} conquered! +${income}💰 ${fateLabel}`,'#3fb950');
+
+  if(countries.filter(x=>x.conquered).length===countries.length){
+    setTimeout(()=>{
+      const allied=countries.filter(x=>x.fate==='allied').length;
+      const killed=countries.filter(x=>x.fate==='killed').length;
+      document.getElementById('ov-emoji').textContent='🌍';
+      document.getElementById('ov-title').textContent='THE WORLD IS YOURS!';
+      document.getElementById('ov-sub').textContent=
+        `Congratulations President! You conquered all 15 countries.\n🤝 ${allied} deals · ☠️ ${killed} eliminated\n${correctCount} correct answers · Approval: ${approval}%`;
+      document.getElementById('overlay').classList.add('show');
+    },800);
+  }
+}
+
+// ── SHOP ─────────────────────────────────────────────────────────────────
+function buyBomb(type){
+  const b=BOMBS[type];
+  if(gold<b.price){ showMsg('💸 Not enough gold!','#f85149'); return; }
+  gold-=b.price; inv[type]++;
+  updateStats(); refreshBombBtns();
+  toast(`${b.icon} ${b.name} purchased!`);
+  if(selected) selectCountry(selected);
+}
+
+// ── QUESTION ──────────────────────────────────────────────────────────────
+function showQuestion(){
+  qAnswered=false;
+  const q=QUESTIONS[qIndex%QUESTIONS.length];
+  document.getElementById('q-cat').textContent='❓ '+q.cat;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('q-result').textContent='';
+
+  const opts=document.getElementById('q-opts');
+  opts.innerHTML='';
+  ['A','B','C','D'].forEach((k,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt-btn';
+    btn.innerHTML=`<span class="opt-key">${k}</span>${q.opts[i]}`;
+    btn.onclick=()=>answer(i);
+    opts.appendChild(btn);
+  });
+}
+
+function answer(idx){
+  if(qAnswered) return;
+  qAnswered=true;
+  const q=QUESTIONS[qIndex%QUESTIONS.length];
+  const btns=document.querySelectorAll('.opt-btn');
+  btns.forEach((b,i)=>{
+    b.disabled=true;
+    if(i===q.ans) b.classList.add('correct');
+    else if(i===idx&&idx!==q.ans) b.classList.add('wrong');
+  });
+  if(idx===q.ans){
+    gold+=q.reward; correctCount++;
+    approval=Math.min(100,approval+1);
+    document.getElementById('q-result').textContent=`✅ Correct! +${q.reward} gold!`;
+    document.getElementById('q-result').style.color='#56d364';
+    toast(`+${q.reward} 💰 Correct answer!`);
+  } else {
+    document.getElementById('q-result').textContent=`❌ Wrong! Correct: ${q.opts[q.ans]}`;
+    document.getElementById('q-result').style.color='#ffa198';
+  }
+  updateStats();
+  if(selected){ document.getElementById('btn-love').disabled=selected.conquered||gold<30; refreshBombBtns(); }
+  qIndex++;
+  if(qIndex>=QUESTIONS.length){qIndex=0;shuffle(QUESTIONS);}
+  setTimeout(showQuestion,1900);
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────
+function updateStats(){
+  document.getElementById('s-gold').textContent=gold;
+  document.getElementById('s-count').textContent=countries.filter(c=>c.conquered).length;
+  document.getElementById('s-correct').textContent=correctCount;
+  document.getElementById('s-approval').textContent=approval+'%';
+  document.getElementById('approval-bar').style.width=approval+'%';
+  document.getElementById('approval-bar').style.background=
+    approval>=70?'linear-gradient(90deg,#3fb950,#56d364)':
+    approval>=40?'linear-gradient(90deg,#f0b429,#fcd34d)':'linear-gradient(90deg,#f85149,#ffa198)';
+
+  ['klasik','atesh','nukleer','sirk'].forEach(key=>{
+    const el=document.getElementById('sh-'+key);
+    if(el) el.classList.toggle('cant',gold<BOMBS[key].price);
+  });
+}
+
+function showMsg(msg,color){
+  const el=document.getElementById('action-msg');
+  el.textContent=msg; el.style.color=color||'var(--text2)';
+}
+
+let toastTimer=null;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+// ── PLAYER DEFENSE ───────────────────────────────────────────────────────
+function updatePlayerDefense(){
+  document.getElementById('s-pdef').textContent=playerDefense;
+  document.getElementById('pdef-bar').style.width=playerDefense+'%';
+  document.getElementById('pdef-bar').style.background=
+    playerDefense>=60?'linear-gradient(90deg,#3b82f6,#60a5fa)':
+    playerDefense>=30?'linear-gradient(90deg,#f0b429,#fcd34d)':'linear-gradient(90deg,#f85149,#ffa198)';
+  // Slowly recover defense
+  if(playerDefense<100){
+    setTimeout(()=>{
+      playerDefense=Math.min(100,playerDefense+1);
+      updatePlayerDefense();
+    },4000);
+  }
+}
+
+// ── VASSAL PANEL ─────────────────────────────────────────────────────────
+function updateVassalPanel(){
+  const panel=document.getElementById('vassal-panel');
+  const list=document.getElementById('vassal-list');
+  if(vassals.length===0){ panel.style.display='none'; return; }
+  panel.style.display='block';
+  list.innerHTML=vassals.map(v=>`
+    <div class="vassal-item">
+      <span class="vi-flag">${v.flag}</span>
+      <div>
+        <div class="vi-name">${v.name}</div>
+        <div class="vi-role">👤 ${v.leader}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── VASSAL CONSULTATION ──────────────────────────────────────────────────
+function startVassalTimer(){
+  if(vassalTimer) return;
+  vassalTimer=setInterval(()=>{
+    if(vassals.length>0 &&
+       !document.getElementById('vassal-modal').classList.contains('show') &&
+       !document.getElementById('conquer-modal').classList.contains('show')){
+      showVassalConsult();
+    }
+  },40000);
+}
+
+function showVassalConsult(){
+  const v=vassals[Math.floor(Math.random()*vassals.length)];
+  const c=VASSAL_CONSULTS[Math.floor(Math.random()*VASSAL_CONSULTS.length)];
+  currentConsult=c;
+  currentVassalConsultant=v;
+  document.getElementById('vm-flag').textContent=v.flag;
+  document.getElementById('vm-leader').textContent=v.leader+' is consulting you!';
+  document.getElementById('vm-question').textContent='"'+c.q+'"';
+  const btns=document.getElementById('vm-btns');
+  btns.innerHTML=c.opts.map((o,i)=>
+    `<button class="vm-btn" onclick="answerVassalConsult(${i})">${o.t}</button>`
+  ).join('');
+  document.getElementById('vassal-modal').classList.add('show');
+}
+
+function answerVassalConsult(idx){
+  document.getElementById('vassal-modal').classList.remove('show');
+  if(!currentConsult) return;
+  const opt=currentConsult.opts[idx];
+  const e=opt.e;
+  gold=Math.max(0,gold+(e.gold||0));
+  approval=Math.min(100,Math.max(0,approval+(e.ap||0)));
+  updateStats();
+  toast(e.msg);
+  if(opt.war && currentVassalConsultant){
+    setTimeout(()=>startVassalWar(currentVassalConsultant),800);
+  }
+}
+
+// ── VASSAL WAR ────────────────────────────────────────────────────────────
+function startVassalWar(attacker){
+  // Attack target: another ally or unconquered country
+  const defenders=[
+    ...vassals.filter(v=>v.id!==attacker.id),
+    ...countries.filter(c=>!c.conquered)
+  ];
+  if(!defenders.length) return;
+  const defender=defenders[Math.floor(Math.random()*defenders.length)];
+
+  toast(`⚔️ ${attacker.flag}${attacker.name} → ${defender.flag}${defender.name} WAR HAS BEGUN!`);
+  showMsg(`⚔️ ${attacker.name} and ${defender.name} are at war...`,'#f97316');
+
+  let round=0;
+  const MAX=8;
+  const battle=setInterval(()=>{
+    if(round>=MAX){
+      clearInterval(battle);
+      const attackerWins=Math.random()<0.55;
+      if(attackerWins){
+        gold+=60; approval=Math.min(100,approval+5); updateStats();
+        toast(`🏆 ${attacker.flag} ${attacker.name} won the war! +60💰`);
+        showMsg(`🏆 ${attacker.name} victorious! +60💰 +5 approval`,'#3fb950');
+        // If an ally lost, 35% chance they switch sides
+        if(defender.fate==='allied'&&Math.random()<0.35){
+          const vi=vassals.findIndex(v=>v.id===defender.id);
+          if(vi!==-1) vassals.splice(vi,1);
+          defender.fate='killed';
+          updateVassalPanel(); updateTerritoryVisual(defender);
+          setTimeout(()=>toast(`😱 ${defender.name} left the alliance!`),600);
+        }
+      } else {
+        gold=Math.max(0,gold-40); approval=Math.max(0,approval-5); updateStats();
+        toast(`💀 ${defender.flag} ${defender.name} won the war! -40💰`);
+        showMsg(`💀 ${defender.name} victorious! -40💰 -5 approval`,'#f85149');
+        // If the attacking ally lost, 25% chance they leave
+        if(Math.random()<0.25){
+          const vi=vassals.findIndex(v=>v.id===attacker.id);
+          if(vi!==-1) vassals.splice(vi,1);
+          attacker.fate='killed';
+          updateVassalPanel(); updateTerritoryVisual(attacker);
+          setTimeout(()=>toast(`😱 ${attacker.name} was defeated and left the alliance!`),600);
+        }
+      }
+      return;
+    }
+    // Alternating explosion animation
+    if(round%2===0){
+      showExplosion(attacker.cx,attacker.cy);
+      showExplosion(defender.cx,defender.cy);
+    } else {
+      showExplosion(defender.cx,defender.cy);
+      showExplosion(attacker.cx,attacker.cy);
+    }
+    showMsg(`💥 Round ${round+1}/${MAX}: ${round%2===0?attacker.name:defender.name} is attacking!`,'#f97316');
+    round++;
+  },600);
+}
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
