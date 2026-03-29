@@ -324,7 +324,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 const COUNTRY_DATA = [
   {
     id:'canada', name:'Kanada', flag:'🇨🇦', pop:38, baseD:50, baseLove:80,
-    leader:'Başbakan Justin Maple',
+    leader:'Başbakan Mark Carney',
     quotes:['Sorry eh, ama hayır!','Akçaağaç şurubumu bombalayanı affetmem.','Sakin ol, çay içelim.'],
     // SVG polygon points (approximate Canada shape)
     pts:'130,40 250,40 280,60 270,80 240,90 220,110 200,100 160,100 130,80',
@@ -332,98 +332,98 @@ const COUNTRY_DATA = [
   },
   {
     id:'usa', name:'Amerika', flag:'🇺🇸', pop:335, baseD:100, baseLove:30,
-    leader:'Başkan Chad McBurger',
+    leader:'Başkan Donald Trump',
     quotes:['Freedom fries\'ı dokunma!','Demokrasi ihraç ederim sana!','McDonald\'s\'ı mı bombaladın?!'],
     pts:'130,105 265,105 270,135 250,155 230,170 190,175 155,165 130,145',
     cx:200, cy:138
   },
   {
     id:'mexico', name:'Meksika', flag:'🇲🇽', pop:130, baseD:55, baseLove:60,
-    leader:'El Presidente Taco Grande',
+    leader:'Başkan Claudia Sheinbaum',
     quotes:['Tacos üzerine savaşmam!','¡Ay caramba!','Mariachi ile geldim!'],
     pts:'140,178 200,175 215,185 210,215 185,225 155,220 140,205',
     cx:178, cy:200
   },
   {
     id:'brazil', name:'Brezilya', flag:'🇧🇷', pop:215, baseD:60, baseLove:70,
-    leader:'Başkan Samba Santos',
+    leader:'Başkan Lula da Silva',
     quotes:['Karnavalı durdurmaya mı geldin?','Futbol oynayalım!','Capoeira ile savunuyoruz!'],
     pts:'200,240 270,225 300,240 295,305 270,325 230,320 205,300 195,270',
     cx:247, cy:275
   },
   {
     id:'uk', name:'İngiltere', flag:'🇬🇧', pop:67, baseD:65, baseLove:50,
-    leader:'Lord Teacup III',
+    leader:'Başbakan Keir Starmer',
     quotes:['This is not cricket!','Çayımı soğuttun, savaş bu!','Brexit yetmedi mi?'],
     pts:'418,100 435,98 440,115 432,130 418,128',
     cx:429, cy:113
   },
   {
     id:'france', name:'Fransa', flag:'🇫🇷', pop:68, baseD:65, baseLove:55,
-    leader:'Başkan Pierre Baguette',
+    leader:'Cumhurbaşkanı Emmanuel Macron',
     quotes:['Mon dieu! Croissant atarım!','Şarabımıza dokunma!','Romantizmi bombalayanı affetmem.'],
     pts:'432,130 458,125 468,138 462,158 440,160 430,148',
     cx:449, cy:142
   },
   {
     id:'germany', name:'Almanya', flag:'🇩🇪', pop:84, baseD:75, baseLove:45,
-    leader:'Kanzler Hans Müller',
+    leader:'Şansölye Friedrich Merz',
     quotes:['Verimliliğimizi küçümseme!','Dakikası dakikasına savaşırız.','Effizienz ist alles!'],
     pts:'452,108 480,105 492,118 488,135 468,138 458,125',
     cx:472, cy:120
   },
   {
     id:'russia', name:'Rusya', flag:'🇷🇺', pop:145, baseD:95, baseLove:25,
-    leader:'Putin-ski Vladimirof',
+    leader:'Cumhurbaşkanı Vladimir Putin',
     quotes:['Bana bomba mı? Güldüm.','Sibirya\'ya tatile gidin.','Gas pipeline açık, dikkat et!'],
     pts:'470,60 700,55 720,75 710,100 680,110 600,115 520,105 490,90 470,75',
     cx:590, cy:82
   },
   {
     id:'turkey', name:'Türkiye', flag:'🇹🇷', pop:85, baseD:60, baseLove:80,
-    leader:'Lider Mehmet Bey',
+    leader:'Cumhurbaşkanı Recep T. Erdoğan',
     quotes:['Bize bomba atarsan çay ısmarlarım!','Toprak bütünlüğümüz masada değil!','Biraz bekle, çay demliyor...'],
     pts:'500,148 548,142 562,150 558,168 535,172 505,168',
     cx:531, cy:157
   },
   {
     id:'egypt', name:'Mısır', flag:'🇪🇬', pop:104, baseD:55, baseLove:55,
-    leader:'Firavun Hamdi II',
+    leader:'Cumhurbaşkanı Abdel Fattah el-Sisi',
     quotes:['3000 yıllık piramit bombaya gülür!','Mumyalar çok sinirli olur!','Nil\'imi kirletme!'],
     pts:'498,175 528,172 535,185 530,210 505,212 495,198',
     cx:514, cy:193
   },
   {
     id:'safrica', name:'G. Afrika', flag:'🇿🇦', pop:60, baseD:45, baseLove:65,
-    leader:'Başkan Ubuntu Dlamini',
+    leader:'Cumhurbaşkanı Cyril Ramaphosa',
     quotes:['Ubuntu diyor ki: paylaş!','Elmaslarımı bombalayanı affetmem.','Savana aslanları uyanıyor!'],
     pts:'490,295 525,288 535,305 530,330 510,342 488,332 480,315',
     cx:508, cy:314
   },
   {
     id:'india', name:'Hindistan', flag:'🇮🇳', pop:1400, baseD:80, baseLove:50,
-    leader:'Maharaja Curry Dev',
+    leader:'Başbakan Narendra Modi',
     quotes:['1.4 milyar destansı karşı koyuş!','Baharatlarımı almaya mı geldin?','Yoga ile savunuyoruz!'],
     pts:'595,168 640,162 655,178 648,215 630,232 610,230 598,210',
     cx:626, cy:197
   },
   {
     id:'china', name:'Çin', flag:'🇨🇳', pop:1400, baseD:100, baseLove:20,
-    leader:'Komiser Xiao Ping-Pong',
+    leader:'Genel Sekreter Xi Jinping',
     quotes:['1.4 milyar insanız, dene bakalım.','Biz üretiyoruz sen bombalıyorsun?','Bombandan ucuzu var bizde.'],
     pts:'640,110 720,105 740,120 735,155 705,162 655,162 632,148 635,125',
     cx:686, cy:133
   },
   {
     id:'japan', name:'Japonya', flag:'🇯🇵', pop:125, baseD:70, baseLove:65,
-    leader:'Başbakan Tanaka Sushi',
+    leader:'Başbakan Shigeru Ishiba',
     quotes:['Anime karakterlerime zarar verme!','Teknoloji üstünlüğümüz var!','Çok şirinsin, yine de hayır.'],
     pts:'748,130 768,128 772,145 765,162 748,160 742,145',
     cx:757, cy:145
   },
   {
     id:'australia', name:'Avustralya', flag:'🇦🇺', pop:26, baseD:45, baseLove:75,
-    leader:'Steve Kangaroo PM',
+    leader:'Başbakan Anthony Albanese',
     quotes:['Mate, cidden mi?','Kangurularım var, dikkat et!','Kriket sopasıyla savaşırız!'],
     pts:'690,295 780,285 800,305 795,355 760,368 710,362 688,340',
     cx:743, cy:328
