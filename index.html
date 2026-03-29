@@ -83,6 +83,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 #sel-flag{font-size:36px;display:block;text-align:center;margin-bottom:4px;}
 #sel-name{font-size:15px;font-weight:900;text-align:center;margin-bottom:1px;}
 #sel-leader{font-size:10px;color:var(--text2);text-align:center;margin-bottom:8px;}
+#sel-leader-wrap{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;}
+#sel-leader-photo{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);flex-shrink:0;background:var(--bg3);}
+#sel-leader-photo.hidden{display:none;}
 #sel-quote{font-size:9px;color:var(--gold);font-style:italic;text-align:center;
   background:rgba(240,180,41,.07);border-radius:6px;padding:5px 7px;margin-bottom:8px;min-height:28px;}
 .irow{display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px;}
@@ -289,7 +292,10 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
       <h3>🎯 Hedef Ülke</h3>
       <span id="sel-flag">🌐</span>
       <div id="sel-name" style="color:var(--text2);font-size:15px;font-weight:900;text-align:center;margin-bottom:1px">Haritadan seç</div>
-      <div id="sel-leader" style="font-size:10px;color:var(--text2);text-align:center;margin-bottom:8px"></div>
+      <div id="sel-leader-wrap">
+        <img id="sel-leader-photo" class="hidden" src="" alt="" onerror="this.classList.add('hidden')">
+        <div id="sel-leader" style="font-size:10px;color:var(--text2);text-align:center"></div>
+      </div>
       <div id="sel-quote" style="font-size:9px;color:var(--gold);font-style:italic;text-align:center;background:rgba(240,180,41,.07);border-radius:6px;padding:5px 7px;margin-bottom:8px;min-height:28px;">Bir ülke seç 👆</div>
       <div id="sel-stats"></div>
       <div id="bomb-btns">
@@ -759,6 +765,29 @@ const NEUTRAL_COLORS = {
   turkey:'#252010', egypt:'#2d2510', safrica:'#1a2520', india:'#2d1a10',
   china:'#201515', japan:'#151a25', australia:'#1a2010'
 };
+// ── LİDER FOTOĞRAFLARI (Wikimedia Commons) ───────────────────────────────
+const LEADER_PHOTOS = {
+  canada:    'Mark_Carney_WEF_2010_crop.jpg',
+  usa:       'Donald_Trump_official_portrait.jpg',
+  mexico:    'Claudia_Sheinbaum_Pardo.jpg',
+  brazil:    'Lula_-_foto_oficial_2023.jpg',
+  uk:        'Keir_Starmer_2020.jpg',
+  france:    'Emmanuel_Macron_in_2019.jpg',
+  germany:   'Friedrich_Merz_-_2019_(cropped).jpg',
+  russia:    'Vladimir_Putin_(2023-09-13)_(cropped).jpg',
+  turkey:    'Recep_Tayyip_Erdogan_2017.jpg',
+  egypt:     'Abdel_Fattah_el-Sisi_in_2021.jpg',
+  safrica:   'Cyril_Ramaphosa_2018_(cropped).jpg',
+  india:     'Narendra_Modi_official_portrait.jpg',
+  china:     'Xi_Jinping_in_July_2021_(cropped).jpg',
+  japan:     'Shigeru_Ishiba_20190910.jpg',
+  australia: 'Anthony_Albanese_official_portrait_(cropped).jpg',
+};
+function leaderPhotoUrl(id){
+  const f=LEADER_PHOTOS[id]; if(!f) return '';
+  return 'https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(f)+'?width=80';
+}
+
 const CONQUERED_COLOR = '#0f3320';
 const ALLIED_COLOR = '#0a2d4a';
 const ALLIED_STROKE = '#58a6ff';
@@ -961,6 +990,7 @@ function selectCountry(c){
     document.getElementById('sel-name').textContent='Haritadan seç';
     document.getElementById('sel-name').style.color='var(--text2)';
     document.getElementById('sel-leader').textContent='';
+    document.getElementById('sel-leader-photo').classList.add('hidden');
     document.getElementById('sel-quote').textContent='Bir ülke seç 👆';
     document.getElementById('sel-stats').innerHTML='';
     document.getElementById('btn-love').disabled=true;
@@ -971,6 +1001,14 @@ function selectCountry(c){
   document.getElementById('sel-name').textContent=c.name;
   document.getElementById('sel-name').style.color='var(--text)';
   document.getElementById('sel-leader').textContent='👤 '+c.leader;
+  const photoEl=document.getElementById('sel-leader-photo');
+  const photoUrl=leaderPhotoUrl(c.id);
+  if(photoUrl){
+    photoEl.src=photoUrl;
+    photoEl.classList.remove('hidden');
+  } else {
+    photoEl.classList.add('hidden');
+  }
   document.getElementById('sel-quote').textContent='"'+c.quotes[Math.floor(Math.random()*c.quotes.length)]+'"';
 
   const defPct=Math.round(c.defense/c.baseD*100);
