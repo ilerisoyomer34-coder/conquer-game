@@ -1,8 +1,10 @@
-const CACHE = 'dunya-benim-v8';
+const CACHE = 'dunya-benim-v9';
 const ASSETS = [
   './',
   './index.html',
-  './manifest.json'
+  './index-en.html',
+  './manifest.json',
+  './manifest-en.json'
 ];
 
 self.addEventListener('install', e => {
