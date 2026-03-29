@@ -180,6 +180,48 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   100%{opacity:0;r:40;}
 }
 .explosion{animation:explode .5s ease-out forwards;fill:none;stroke-width:3;pointer-events:none;}
+
+/* Counter-attack flash */
+@keyframes dmgFlash{0%{background:rgba(248,81,73,.45);}100%{background:rgba(6,8,15,0.97);}}
+#topbar.dmg-flash{animation:dmgFlash .6s ease-out;}
+
+/* Player defense bar */
+#pdef-wrap{display:flex;align-items:center;gap:5px;font-size:11px;}
+#pdef-bar-wrap{width:55px;height:6px;background:rgba(0,0,0,.5);border-radius:3px;overflow:hidden;}
+#pdef-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,#3b82f6,#60a5fa);transition:width .4s;}
+
+/* Conquer choice modal */
+#conquer-modal{display:none;position:fixed;inset:0;background:rgba(6,8,15,.93);
+  z-index:550;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:20px;}
+#conquer-modal.show{display:flex;}
+.cm-flag{font-size:52px;}
+.cm-title{font-size:22px;font-weight:900;color:var(--gold);}
+.cm-desc{font-size:12px;color:var(--text2);max-width:300px;line-height:1.7;margin-bottom:4px;}
+.cm-btns{display:flex;gap:14px;margin-top:4px;}
+.cm-btn{padding:11px 26px;border-radius:22px;border:none;color:#fff;font-size:13px;font-weight:900;font-family:inherit;cursor:pointer;transition:transform .13s;}
+.cm-btn:hover{transform:scale(1.06);}
+.cm-btn-deal{background:linear-gradient(135deg,#3fb950,#16a34a);box-shadow:0 0 20px rgba(63,185,80,.3);}
+.cm-btn-kill{background:linear-gradient(135deg,#f85149,#b91c1c);box-shadow:0 0 20px rgba(248,81,73,.3);}
+
+/* Vassal consultation modal */
+#vassal-modal{display:none;position:fixed;inset:0;background:rgba(6,8,15,.93);
+  z-index:555;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:20px;}
+#vassal-modal.show{display:flex;}
+.vm-header{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;}
+.vm-title{font-size:17px;font-weight:900;color:var(--accent);margin-bottom:2px;}
+.vm-question{font-size:13px;color:var(--text);max-width:320px;line-height:1.7;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:10px 14px;}
+.vm-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px;}
+.vm-btn{padding:8px 16px;border-radius:14px;background:var(--bg3);border:1px solid var(--border);
+  color:var(--text);font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .13s;}
+.vm-btn:hover{border-color:var(--accent);background:rgba(88,166,255,.1);}
+
+/* Vassal panel */
+.vassal-item{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04);}
+.vassal-item:last-child{border-bottom:none;}
+.vi-flag{font-size:18px;}
+.vi-name{font-weight:700;font-size:11px;}
+.vi-role{font-size:9px;color:var(--accent);margin-top:1px;}
 </style>
 </head>
 <body>
@@ -208,6 +250,11 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <span style="font-size:10px;color:var(--text2)">Onay:</span>
     <div id="approval-bar-wrap"><div id="approval-bar" style="width:50%"></div></div>
     <span id="s-approval" style="font-size:10px;font-weight:800;color:#3fb950">50%</span>
+  </div>
+  <div id="pdef-wrap">
+    <span style="font-size:10px;color:var(--text2)">🛡️</span>
+    <div id="pdef-bar-wrap"><div id="pdef-bar" style="width:100%"></div></div>
+    <span id="s-pdef" style="font-size:10px;font-weight:800;color:#60a5fa">100</span>
   </div>
 </div>
 
@@ -300,6 +347,12 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
       </div>
     </div>
 
+    <!-- Vassal Panel -->
+    <div class="panel" id="vassal-panel" style="display:none">
+      <h3>🤝 Müttefik Başkanlar</h3>
+      <div id="vassal-list"></div>
+    </div>
+
   </div>
 </div>
 
@@ -312,6 +365,28 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 </div>
 
 <div id="toast"></div>
+
+<!-- Conquer Choice Modal -->
+<div id="conquer-modal">
+  <div class="cm-flag" id="cm-flag"></div>
+  <div style="font-size:11px;color:var(--text2)" id="cm-leader"></div>
+  <div class="cm-title">🏳️ TESLİM OLDU!</div>
+  <div class="cm-desc" id="cm-desc"></div>
+  <div class="cm-btns">
+    <button class="cm-btn cm-btn-deal" onclick="doConquerDeal()">🤝 Anlaş<br><span style="font-size:9px;opacity:.8">Lider müttefikin olsun</span></button>
+    <button class="cm-btn cm-btn-kill" onclick="doConquerKill()">☠️ Öldür<br><span style="font-size:9px;opacity:.8">Ekstra altın kazan</span></button>
+  </div>
+</div>
+
+<!-- Vassal Consultation Modal -->
+<div id="vassal-modal">
+  <div class="vm-header">🤝 MÜTTEFİK DANIŞMASI</div>
+  <div style="font-size:32px" id="vm-flag"></div>
+  <div class="vm-title" id="vm-leader"></div>
+  <div class="vm-question" id="vm-question"></div>
+  <div class="vm-btns" id="vm-btns"></div>
+</div>
+
 <div id="overlay">
   <div id="ov-emoji"></div>
   <div id="ov-title"></div>
@@ -685,24 +760,95 @@ const NEUTRAL_COLORS = {
   china:'#201515', japan:'#151a25', australia:'#1a2010'
 };
 const CONQUERED_COLOR = '#0f3320';
+const ALLIED_COLOR = '#0a2d4a';
+const ALLIED_STROKE = '#58a6ff';
 const SELECTED_STROKE = '#f0b429';
 const NEUTRAL_STROKE = '#2a3a2a';
 const CONQUERED_STROKE = '#3fb950';
+
+// ── KARŞI SALDIRI KÜFÜRLERI ────────────────────────────────────────────────
+const TAUNTS = {
+  canada: ['Sopayı gördün mü hiç?! 🏒','Özür dilemeyeceğim bu sefer!','Akçaağaç şurubumu döktürdün, savaş bu!','Sorry değil, FURIOUS!'],
+  usa:    ['YOU\'RE FIRED! 🔥','Make America Revenge Again!','Duvar örüyorum sana karşı!','Aah bu kadarına da savaş açarım!'],
+  mexico: ['¡Esto es la guerra, amigo! 🌮','Taco değil füze yolluyorum!','¡Maldito! Karşılık veriyoruz!','Mariachi değil asker geliyor!'],
+  brazil: ['Karnaval bitti, sıra sende! 🎭','Amazon ormanı seni yutar!','Capoeira değil bomba!','Maracaná\'da hesaplaşacağız!'],
+  uk:     ['This means WAR, old chap! ☕','Çayımı soğuttun, bu ciddi!','God save me, save you cannot!','Big Ben seni gösteriyor!'],
+  france: ['Mon dieu! MERDE! 🥖','Baget değil füze!','Eiffel Kulesi\'nden nişan aldım!','Grev yapıyordum bozdun, kızgınım!'],
+  germany:['NEIN NEIN NEIN! ⚙️','Dakikası dakikasına misilleme!','Alman mühendisliği sana karşı!','Prosedür gereği saldırıyorum, formlar dolduruldu!'],
+  russia: ['Хватит! Misilleme başladı! 🐻','Sibirya soğuğunu gönderiyorum!','Gazı kestim, üşü bakalım!','Nükleer düğme masada!'],
+  turkey: ['Dur dur dur! Mehmetçik kalktı! 🌙','Çay bitti, kan başlar!','Yıldırım harekâtı başladı!','Türk ordusu şaka yapmaz!'],
+  egypt:  ['Firavunlar ağlamaz, vurur! 🏺','Mumyaları uyandırdın, pişman olursun!','Nil\'i kan rengi yapacağım!','3000 yıllık öfke patladı!'],
+  safrica:['Ubuntu diyor ki: karşılık ver! 🦁','Savana aslanlarını salıyorum!','Elmas yerine kurşun gönderiyorum!','Mandela izin verdi, vuruyorum!'],
+  india:  ['1.4 milyar ÖFKELI! 🐘','Yoga pozu: saldırı modu!','Baharat değil roket!','Bollywood finali değil bu, gerçek savaş!'],
+  china:  ['Büyük Duvar sana geliyor! 🐉','Fabrikamda füze var!','Milyar kişilik ordu uyandı!','TikTok kapandı, şimdi savaş var!'],
+  japan:  ['BUSHIDO RUHU! ⚔️','Anime karakterlerim kızdı!','Samuray teknolojisi hızını gördün mü?','Kaiju değil gerçek ordu!'],
+  australia:['Crikey! Kangaroo PUNCH! 🦘','Outback\'tan geliyor bu!','Bumerang attım, geri dönüyor!','Kobra ordusu hazır!'],
+};
+
+// ── MÜTTEFİK DANIŞMA SENARYOLARI ──────────────────────────────────────────
+const VASSAL_CONSULTS = [
+  { q:'Ekonomide enflasyon artıyor, ne yapayım?',
+    opts:[{t:'Faiz artır',e:{gold:30,ap:2,msg:'Ekonomi stabilize! +30💰 +2 onay'}},
+          {t:'Para bas',e:{gold:-20,ap:-5,msg:'Enflasyon daha arttı! -20💰'}},
+          {t:'Halkı suçla',e:{gold:0,ap:-3,msg:'Halk pek ikna olmadı...'}},
+          {t:'Tatile git',e:{gold:-40,ap:-10,msg:'Kriz büyüdü! -40💰'}}]},
+  { q:'Komşu ülke sınırda gerilim çıkarıyor, tavsiyeniz?',
+    opts:[{t:'Diyalog kur',e:{gold:20,ap:5,msg:'Gerilim azaldı! +20💰'}},
+          {t:'Orduyu hazırla',e:{gold:-30,ap:3,msg:'Savunma güçlendi ama pahalıya patladı.'}},
+          {t:'BM\'ye şikayet',e:{gold:0,ap:2,msg:'BM not aldı, belki yapar bir şey...'}},
+          {t:'Görmezden gel',e:{gold:-20,ap:-8,msg:'Gerilim tırmandı! -20💰'}}]},
+  { q:'Vatandaşlar sokağa indi, ne yapayım Başkan?',
+    opts:[{t:'Talepleri dinle',e:{gold:10,ap:8,msg:'Halk memnun! +10💰 +8 onay'}},
+          {t:'Vaat ver',e:{gold:-10,ap:5,msg:'Biraz sakinleşti, maliyetli tabii.'}},
+          {t:'Polis gönder',e:{gold:0,ap:-10,msg:'Durum daha da karıştı!'}},
+          {t:'Tatil ilan et',e:{gold:40,ap:10,msg:'Herkes eve gitti! +40💰 +10 onay'}}]},
+  { q:'Büyük bir yolsuzluk skandalı çıktı, ne yapmalıyım?',
+    opts:[{t:'Soruşturma aç',e:{gold:20,ap:7,msg:'Şeffaflık takdir topladı! +20💰'}},
+          {t:'Her şeyi inkâr et',e:{gold:0,ap:-5,msg:'Kimse inanmadı...'}},
+          {t:'Medyayı kapat',e:{gold:-20,ap:-8,msg:'Dünya basını kapıda!'}},
+          {t:'Herkesi ödüllendir',e:{gold:-50,ap:3,msg:'Çok pahalıya patladı! -50💰'}}]},
+  { q:'Muhalefet seçimlerde güçleniyor, ne önerirsiniz?',
+    opts:[{t:'Daha iyi icraat yap',e:{gold:15,ap:10,msg:'Halk farkı gördü! +15💰 +10 onay'}},
+          {t:'Onları da al bünyene',e:{gold:-30,ap:2,msg:'Koalisyon durdu ama pahalı.'}},
+          {t:'Sosyal medyada ezel',e:{gold:0,ap:-3,msg:'Siyasi gerginlik arttı.'}},
+          {t:'Seçim tarihini değiştir',e:{gold:-20,ap:-7,msg:'Anayasa mahkemesi devrede!'}}]},
+  { q:'Büyük bir deprem oldu! Acil yardım gerekiyor!',
+    opts:[{t:'Tüm kaynakları seferber et',e:{gold:-40,ap:15,msg:'Halk seni çok sevdi! +15 onay'}},
+          {t:'Uluslararası yardım iste',e:{gold:30,ap:8,msg:'Yardımlar geldi! +30💰'}},
+          {t:'Koordinasyon toplantısı yap',e:{gold:0,ap:5,msg:'Yavaş ama düzenli ilerliyor.'}},
+          {t:'Tatildeyim, sonra',e:{gold:-60,ap:-20,msg:'TAM FELAKET! -60💰 -20 onay'}}]},
+  { q:'Ülkemde büyük futbol turnuvası düzenlemek istiyorum, onaylıyor musunuz?',
+    opts:[{t:'Tabii, bütçeyi aç!',e:{gold:-30,ap:12,msg:'Futbol coşkusu! +12 onay'}},
+          {t:'Küçük ölçekli olsun',e:{gold:-10,ap:5,msg:'Mütevazı ama güzel oldu.'}},
+          {t:'Çok pahalı, vazgeç',e:{gold:20,ap:-5,msg:'Halk hayal kırıklığı yaşadı.'}},
+          {t:'Sadece ben izlerim',e:{gold:0,ap:-3,msg:'Anlamadım ama tamam...'}}]},
+  { q:'Ülkemde ekmek fiyatları 5 katına çıktı, ne yapmalıyım?',
+    opts:[{t:'Fiyat tavanı koy',e:{gold:10,ap:8,msg:'Halk biraz rahatladı! +10💰'}},
+          {t:'Ithalat artır',e:{gold:-20,ap:5,msg:'Ekmek geldi ama pahalıya patladı.'}},
+          {t:'Halkı diyete çağır',e:{gold:0,ap:-12,msg:'Halk çok sinirli...'}},
+          {t:'Pasta yesinler de',e:{gold:-50,ap:-20,msg:'İSYAN! -50💰 -20 onay'}}]},
+];
 
 // ── STATE ────────────────────────────────────────────────────────────────
 let inv={klasik:0,atesh:0,nukleer:0,sirk:0};
 let gold=0,selected=null,qIndex=0,correctCount=0,qAnswered=false,approval=50;
 let countries=[];
+let playerDefense=100, vassals=[], pendingConquerCountry=null, currentConsult=null, vassalTimer=null;
 
 function initGame(){
   document.getElementById('overlay').classList.remove('show');
+  document.getElementById('conquer-modal').classList.remove('show');
+  document.getElementById('vassal-modal').classList.remove('show');
   gold=150; inv={klasik:2,atesh:0,nukleer:0,sirk:0};
   selected=null; correctCount=0; approval=50; qIndex=0; qAnswered=false;
+  playerDefense=100; vassals=[]; pendingConquerCountry=null;
+  if(vassalTimer){clearInterval(vassalTimer);vassalTimer=null;}
 
-  countries=COUNTRY_DATA.map(d=>({...d, defense:d.baseD, love:d.baseLove, conquered:false}));
+  countries=COUNTRY_DATA.map(d=>({...d, defense:d.baseD, love:d.baseLove, conquered:false, fate:null}));
 
   shuffle(QUESTIONS);
   renderMap(); showQuestion(); updateStats(); selectCountry(null);
+  updatePlayerDefense(); updateVassalPanel();
   document.getElementById('action-msg').textContent='';
 }
 
@@ -755,9 +901,10 @@ function updateTerritoryVisual(c){
   const poly=document.getElementById('poly-'+c.id);
   if(!poly) return;
   if(c.conquered){
-    const pct=1; // fully conquered
-    poly.setAttribute('fill',CONQUERED_COLOR);
-    poly.setAttribute('stroke',CONQUERED_STROKE);
+    const fillColor = c.fate==='allied' ? ALLIED_COLOR : CONQUERED_COLOR;
+    const strokeColor = c.fate==='allied' ? ALLIED_STROKE : CONQUERED_STROKE;
+    poly.setAttribute('fill',fillColor);
+    poly.setAttribute('stroke',strokeColor);
     poly.setAttribute('stroke-width','2');
   } else if(selected===c){
     const baseColor=NEUTRAL_COLORS[c.id]||'#1a2020';
@@ -867,13 +1014,38 @@ function useBomb(type){
 
   showExplosion(selected.cx,selected.cy);
 
-  document.getElementById('sel-quote').textContent='"'+selected.quotes[Math.floor(Math.random()*selected.quotes.length)]+'"';
+  // Lider küfür eder
+  const tl=TAUNTS[selected.id]||selected.quotes;
+  document.getElementById('sel-quote').textContent='"'+tl[Math.floor(Math.random()*tl.length)]+'"';
 
   const eff=loveMult>1?'🔥 Etkili!':loveMult<1?'😤 Direniyor!':'';
   showMsg(`${b.msg} ${eff} ${dmg} hasar! Savunma: ${selected.defense}/${selected.baseD}`,'#f97316');
 
-  if(selected.defense<=0) conquer(selected);
-  else { updateTerritoryVisual(selected); selectCountry(selected); }
+  if(selected.defense<=0){
+    showConquerChoice(selected);
+  } else {
+    // %55 ihtimalle karşı saldırı
+    if(Math.random()<0.55){
+      const cDmg=10+Math.floor(Math.random()*21);
+      const cSel=selected;
+      setTimeout(()=>{
+        gold=Math.max(0,gold-cDmg);
+        playerDefense=Math.max(0,playerDefense-(5+Math.floor(Math.random()*11)));
+        document.getElementById('topbar').classList.add('dmg-flash');
+        setTimeout(()=>document.getElementById('topbar').classList.remove('dmg-flash'),600);
+        showMsg(`💥 ${cSel.name} karşı saldırdı! -${cDmg}💰 hasar!`,'#f85149');
+        toast(`⚔️ ${cSel.leader} misilleme yaptı! -${cDmg}💰`);
+        if(playerDefense<=0){
+          playerDefense=40;
+          gold=Math.max(0,gold-50);
+          toast('🚨 Savunman çöktü! Ek -50💰 hasar!');
+        }
+        updatePlayerDefense();
+        updateStats();
+      },950);
+    }
+    updateTerritoryVisual(selected); selectCountry(selected);
+  }
   updateStats(); refreshBombBtns();
 }
 
@@ -889,30 +1061,67 @@ function sendLove(){
   document.getElementById('btn-love').disabled=selected.conquered||gold<30;
 }
 
-// ── CONQUER ───────────────────────────────────────────────────────────────
-function conquer(c){
-  c.conquered=true; c.defense=0;
+// ── CONQUER CHOICE ────────────────────────────────────────────────────────
+function showConquerChoice(c){
+  pendingConquerCountry=c;
+  c.defense=0;
+  updateTerritoryVisual(c);
+  document.getElementById('cm-flag').textContent=c.flag;
+  document.getElementById('cm-leader').textContent='👤 '+c.leader;
+  document.getElementById('cm-desc').textContent=
+    `${c.name} teslim oldu! ${c.leader} ellerini havaya kaldırdı ve yerde diz çöktü. Ne yapacaksın?`;
+  document.getElementById('conquer-modal').classList.add('show');
+}
+
+function doConquerDeal(){
+  document.getElementById('conquer-modal').classList.remove('show');
+  const c=pendingConquerCountry;
+  finishConquer(c,'allied');
+  vassals.push(c);
+  updateVassalPanel();
+  toast(`🤝 ${c.leader} ile anlaştın! Artık müttefikin!`);
+  showMsg(`🤝 ${c.name} müttefikin oldu! Karar almadan sana danışacak.`,'#3fb950');
+  if(vassals.length===1) startVassalTimer();
+}
+
+function doConquerKill(){
+  document.getElementById('conquer-modal').classList.remove('show');
+  const c=pendingConquerCountry;
+  finishConquer(c,'killed');
+  const bonus=Math.floor(c.pop/5);
+  gold+=bonus;
+  updateStats();
+  toast(`☠️ ${c.leader} tarihe karıştı! +${bonus}💰 ekstra!`);
+  showMsg(`☠️ ${c.leader} öldürüldü. +${bonus}💰 ganimet!`,'#f85149');
+}
+
+function finishConquer(c,fate){
+  c.conquered=true; c.fate=fate; c.defense=0;
   const income=Math.max(25,Math.floor(c.pop/8));
   gold+=income;
-  approval=Math.min(100,approval+5);
+  approval=Math.min(100,approval+(fate==='allied'?8:4));
   updateTerritoryVisual(c);
 
-  // Flash green
+  const flashColor=fate==='allied'?'#0a2d4a':'#0f4020';
+  const finalColor=fate==='allied'?ALLIED_COLOR:CONQUERED_COLOR;
   const poly=document.getElementById('poly-'+c.id);
   if(poly){
-    poly.setAttribute('fill','#0f4020');
-    setTimeout(()=>{ if(c.conquered) poly.setAttribute('fill',CONQUERED_COLOR); },600);
+    poly.setAttribute('fill',flashColor);
+    setTimeout(()=>{ if(c.conquered) poly.setAttribute('fill',finalColor); },600);
   }
 
   selectCountry(c); updateStats();
-  showMsg(`🎉 ${c.name} fethedildi! +${income} altın! Lider kaçtı!`,'#3fb950');
-  toast(`🏳 ${c.name} artık senindir! 🎉`);
+  const fateLabel=fate==='allied'?'🤝 Anlaşma yapıldı!':'☠️ Lider öldürüldü!';
+  showMsg(`🎉 ${c.name} fethedildi! +${income}💰 ${fateLabel}`,'#3fb950');
 
   if(countries.filter(x=>x.conquered).length===countries.length){
     setTimeout(()=>{
+      const allied=countries.filter(x=>x.fate==='allied').length;
+      const killed=countries.filter(x=>x.fate==='killed').length;
       document.getElementById('ov-emoji').textContent='🌍';
       document.getElementById('ov-title').textContent='DÜNYA SENİN!';
-      document.getElementById('ov-sub').textContent=`Tebrikler Başkan! Tüm 15 ülkeyi fethettiniz.\n${correctCount} soruyu doğru cevapladınız. Onay oranınız: %${approval}`;
+      document.getElementById('ov-sub').textContent=
+        `Tebrikler Başkan! Tüm 15 ülkeyi fethettiniz.\n🤝 ${allied} anlaşma · ☠️ ${killed} öldürüldü\n${correctCount} soru doğru · Onay: %${approval}`;
       document.getElementById('overlay').classList.add('show');
     },800);
   }
@@ -1001,6 +1210,75 @@ function toast(msg){
   el.textContent=msg; el.classList.add('show');
   if(toastTimer) clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+// ── PLAYER DEFENSE ───────────────────────────────────────────────────────
+function updatePlayerDefense(){
+  document.getElementById('s-pdef').textContent=playerDefense;
+  document.getElementById('pdef-bar').style.width=playerDefense+'%';
+  document.getElementById('pdef-bar').style.background=
+    playerDefense>=60?'linear-gradient(90deg,#3b82f6,#60a5fa)':
+    playerDefense>=30?'linear-gradient(90deg,#f0b429,#fcd34d)':'linear-gradient(90deg,#f85149,#ffa198)';
+  // Yavaş yavaş savunma toparla
+  if(playerDefense<100){
+    setTimeout(()=>{
+      playerDefense=Math.min(100,playerDefense+1);
+      updatePlayerDefense();
+    },4000);
+  }
+}
+
+// ── VASSAL PANEL ─────────────────────────────────────────────────────────
+function updateVassalPanel(){
+  const panel=document.getElementById('vassal-panel');
+  const list=document.getElementById('vassal-list');
+  if(vassals.length===0){ panel.style.display='none'; return; }
+  panel.style.display='block';
+  list.innerHTML=vassals.map(v=>`
+    <div class="vassal-item">
+      <span class="vi-flag">${v.flag}</span>
+      <div>
+        <div class="vi-name">${v.name}</div>
+        <div class="vi-role">👤 ${v.leader}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── VASSAL CONSULTATION ──────────────────────────────────────────────────
+function startVassalTimer(){
+  if(vassalTimer) return;
+  vassalTimer=setInterval(()=>{
+    if(vassals.length>0 &&
+       !document.getElementById('vassal-modal').classList.contains('show') &&
+       !document.getElementById('conquer-modal').classList.contains('show')){
+      showVassalConsult();
+    }
+  },40000);
+}
+
+function showVassalConsult(){
+  const v=vassals[Math.floor(Math.random()*vassals.length)];
+  const c=VASSAL_CONSULTS[Math.floor(Math.random()*VASSAL_CONSULTS.length)];
+  currentConsult=c;
+  document.getElementById('vm-flag').textContent=v.flag;
+  document.getElementById('vm-leader').textContent=v.leader+' sana danışıyor!';
+  document.getElementById('vm-question').textContent='"'+c.q+'"';
+  const btns=document.getElementById('vm-btns');
+  btns.innerHTML=c.opts.map((o,i)=>
+    `<button class="vm-btn" onclick="answerVassalConsult(${i})">${o.t}</button>`
+  ).join('');
+  document.getElementById('vassal-modal').classList.add('show');
+}
+
+function answerVassalConsult(idx){
+  document.getElementById('vassal-modal').classList.remove('show');
+  if(!currentConsult) return;
+  const e=currentConsult.opts[idx].e;
+  gold=Math.max(0,gold+(e.gold||0));
+  approval=Math.min(100,Math.max(0,approval+(e.ap||0)));
+  updateStats();
+  toast(e.msg);
 }
 
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
