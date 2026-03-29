@@ -747,27 +747,31 @@ const NEUTRAL_COLORS = {
   turkey:'#252010', egypt:'#2d2510', safrica:'#1a2520', india:'#2d1a10',
   china:'#201515', japan:'#151a25', australia:'#1a2010'
 };
-// ── LEADER PHOTOS (Wikimedia Commons) ───────────────────────────────────
-const LEADER_PHOTOS = {
-  canada:    'Mark_Carney_WEF_2010_crop.jpg',
-  usa:       'Donald_Trump_official_portrait.jpg',
-  mexico:    'Claudia_Sheinbaum_Pardo.jpg',
-  brazil:    'Lula_-_foto_oficial_2023.jpg',
-  uk:        'Keir_Starmer_2020.jpg',
-  france:    'Emmanuel_Macron_in_2019.jpg',
-  germany:   'Friedrich_Merz_-_2019_(cropped).jpg',
-  russia:    'Vladimir_Putin_(2023-09-13)_(cropped).jpg',
-  turkey:    'Recep_Tayyip_Erdogan_2017.jpg',
-  egypt:     'Abdel_Fattah_el-Sisi_in_2021.jpg',
-  safrica:   'Cyril_Ramaphosa_2018_(cropped).jpg',
-  india:     'Narendra_Modi_official_portrait.jpg',
-  china:     'Xi_Jinping_in_July_2021_(cropped).jpg',
-  japan:     'Shigeru_Ishiba_20190910.jpg',
-  australia: 'Anthony_Albanese_official_portrait_(cropped).jpg',
+// ── LEADER PHOTOS (Wikipedia REST API) ──────────────────────────────────
+const LEADER_WIKI = {
+  canada:    'Mark_Carney',
+  usa:       'Donald_Trump',
+  mexico:    'Claudia_Sheinbaum',
+  brazil:    'Luiz_In%C3%A1cio_Lula_da_Silva',
+  uk:        'Keir_Starmer',
+  france:    'Emmanuel_Macron',
+  germany:   'Friedrich_Merz',
+  russia:    'Vladimir_Putin',
+  turkey:    'Recep_Tayyip_Erdo%C4%9Fan',
+  egypt:     'Abdel_Fattah_el-Sisi',
+  safrica:   'Cyril_Ramaphosa',
+  india:     'Narendra_Modi',
+  china:     'Xi_Jinping',
+  japan:     'Shigeru_Ishiba',
+  australia: 'Anthony_Albanese',
 };
-function leaderPhotoUrl(id){
-  const f=LEADER_PHOTOS[id]; if(!f) return '';
-  return 'https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(f)+'?width=80';
+async function loadLeaderPhoto(id){
+  const article=LEADER_WIKI[id]; if(!article) return null;
+  try{
+    const r=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+article);
+    const d=await r.json();
+    return d.thumbnail?.source||null;
+  }catch(e){return null;}
 }
 
 const CONQUERED_COLOR = '#0f3320';
@@ -984,13 +988,10 @@ function selectCountry(c){
   document.getElementById('sel-name').style.color='var(--text)';
   document.getElementById('sel-leader').textContent='👤 '+c.leader;
   const photoEl=document.getElementById('sel-leader-photo');
-  const photoUrl=leaderPhotoUrl(c.id);
-  if(photoUrl){
-    photoEl.src=photoUrl;
-    photoEl.classList.remove('hidden');
-  } else {
-    photoEl.classList.add('hidden');
-  }
+  photoEl.classList.add('hidden');
+  loadLeaderPhoto(c.id).then(url=>{
+    if(url){ photoEl.src=url; photoEl.classList.remove('hidden'); }
+  });
   document.getElementById('sel-quote').textContent='"'+c.quotes[Math.floor(Math.random()*c.quotes.length)]+'"';
 
   const defPct=Math.round(c.defense/c.baseD*100);

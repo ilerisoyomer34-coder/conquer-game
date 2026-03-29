@@ -1,4 +1,4 @@
-const CACHE = 'dunya-benim-v7';
+const CACHE = 'dunya-benim-v8';
 const ASSETS = [
   './',
   './index.html',
