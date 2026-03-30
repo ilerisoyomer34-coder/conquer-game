@@ -421,7 +421,7 @@ const COUNTRY_DATA = [
   {
     id:'mexico', name:'Meksika', flag:'🇲🇽', pop:130, baseD:55, baseLove:60,
     leader:'Başkan Claudia Sheinbaum',
-    quotes:['Tacos üzerine savaşmam!','¡Ay caramba!','Mariachi ile geldim!'],
+    quotes:['Tacos üzerine savaşmam!','Vay canına, gerçekten mi?!','Mariachi ile geldim!'],
     pts:'140,178 200,175 215,185 210,215 185,225 155,220 140,205',
     cx:178, cy:200
   },
@@ -435,21 +435,21 @@ const COUNTRY_DATA = [
   {
     id:'uk', name:'İngiltere', flag:'🇬🇧', pop:67, baseD:65, baseLove:50,
     leader:'Başbakan Keir Starmer',
-    quotes:['This is not cricket!','Çayımı soğuttun, savaş bu!','Brexit yetmedi mi?'],
+    quotes:['Bu hiç centilmence değil!','Çayımı soğuttun, savaş bu!','Brexit yetmedi mi?'],
     pts:'418,100 435,98 440,115 432,130 418,128',
     cx:429, cy:113
   },
   {
     id:'france', name:'Fransa', flag:'🇫🇷', pop:68, baseD:65, baseLove:55,
     leader:'Cumhurbaşkanı Emmanuel Macron',
-    quotes:['Mon dieu! Croissant atarım!','Şarabımıza dokunma!','Romantizmi bombalayanı affetmem.'],
+    quotes:['Tanrım! Croissant atarım!','Şarabımıza dokunma!','Romantizmi bombalayanı affetmem.'],
     pts:'432,130 458,125 468,138 462,158 440,160 430,148',
     cx:449, cy:142
   },
   {
     id:'germany', name:'Almanya', flag:'🇩🇪', pop:84, baseD:75, baseLove:45,
     leader:'Şansölye Friedrich Merz',
-    quotes:['Verimliliğimizi küçümseme!','Dakikası dakikasına savaşırız.','Effizienz ist alles!'],
+    quotes:['Verimliliğimizi küçümseme!','Dakikası dakikasına savaşırız.','Verimlilik her şeydir!'],
     pts:'452,108 480,105 492,118 488,135 468,138 458,125',
     cx:472, cy:120
   },
@@ -505,7 +505,7 @@ const COUNTRY_DATA = [
   {
     id:'australia', name:'Avustralya', flag:'🇦🇺', pop:26, baseD:45, baseLove:75,
     leader:'Başbakan Anthony Albanese',
-    quotes:['Mate, cidden mi?','Kangurularım var, dikkat et!','Kriket sopasıyla savaşırız!'],
+    quotes:['Kardeşim, cidden mi?','Kangurularım var, dikkat et!','Kriket sopasıyla savaşırız!'],
     pts:'690,295 780,285 800,305 795,355 760,368 710,362 688,340',
     cx:743, cy:328
   },
@@ -783,7 +783,13 @@ const LEADER_WIKI = {
   japan:     'Shigeru_Ishiba',
   australia: 'Anthony_Albanese',
 };
+const LEADER_PHOTO_DIRECT={
+  china:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Xi_Jinping_meets_Keir_Starmer_Jan_2026_%28cropped%29.jpg/330px-Xi_Jinping_meets_Keir_Starmer_Jan_2026_%28cropped%29.jpg',
+  japan:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Ishiba_Shigeru_20241001_%28cropped%29.jpg/330px-Ishiba_Shigeru_20241001_%28cropped%29.jpg',
+  safrica:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/21.11.2025_%E2%80%93_Presidente_da_Rep%C3%BAblica_da_%C3%81frica_do_Sul%2C_Cyril_Ramaphosa_%2854938010569%29_%28cropped%29.jpg/330px-21.11.2025_%E2%80%93_Presidente_da_Rep%C3%BAblica_da_%C3%81frica_do_Sul%2C_Cyril_Ramaphosa_%2854938010569%29_%28cropped%29.jpg',
+};
 async function loadLeaderPhoto(id){
+  if(LEADER_PHOTO_DIRECT[id]) return LEADER_PHOTO_DIRECT[id];
   const article=LEADER_WIKI[id]; if(!article) return null;
   try{
     const r=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+article);
@@ -1007,8 +1013,18 @@ function selectCountry(c){
   document.getElementById('sel-leader').textContent='👤 '+c.leader;
   const photoEl=document.getElementById('sel-leader-photo');
   photoEl.classList.add('hidden');
-  loadLeaderPhoto(c.id).then(url=>{
-    if(url){ photoEl.src=url; photoEl.classList.remove('hidden'); }
+  loadLeaderPhoto(c.id).then(async url=>{
+    if(!url) return;
+    try{
+      const r=await fetch(url);
+      if(!r.ok) throw new Error();
+      const blob=await r.blob();
+      photoEl.src=URL.createObjectURL(blob);
+      photoEl.classList.remove('hidden');
+    }catch(e){
+      photoEl.src=url;
+      photoEl.classList.remove('hidden');
+    }
   });
   document.getElementById('sel-quote').textContent='"'+c.quotes[Math.floor(Math.random()*c.quotes.length)]+'"';
 
