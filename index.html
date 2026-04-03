@@ -225,6 +225,94 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .vi-flag{font-size:18px;}
 .vi-name{font-weight:700;font-size:11px;}
 .vi-role{font-size:9px;color:var(--accent);margin-top:1px;}
+
+/* ═══════════════════════════════════════════════════
+   MOBİL TAB NAVİGASYON (≤700px)
+   ═══════════════════════════════════════════════════ */
+#tab-nav{display:none;}
+
+@media(max-width:700px){
+  body{height:100dvh;}
+
+  /* Daha kompakt topbar */
+  #topbar{padding:5px 8px;gap:5px;}
+  #topbar h1{font-size:12px;}
+  .stat{padding:2px 7px;font-size:10px;}
+  #approval-bar-wrap{width:48px;}
+  #pdef-bar-wrap{width:38px;}
+
+  /* Grid → Flex: tab tabanlı görünüm */
+  #game-area{
+    display:flex!important;
+    flex-direction:column;
+    grid-template-columns:unset!important;
+    overflow:hidden;
+  }
+
+  /* Harita: varsayılan gizli, tab-active sınıfıyla göster */
+  #map-wrap{display:none!important;}
+  #map-wrap.tab-active{display:block!important;flex:1;}
+
+  /* Yan panel: varsayılan gizli, tab-active sınıfıyla göster */
+  #side{
+    display:none!important;
+    max-height:none!important;
+    border-left:none!important;
+    border-top:none!important;
+    flex:1;
+    overflow-y:auto;
+  }
+  #side.tab-active{display:flex!important;}
+
+  /* Hedef sekmesi: market ve vassal panelini gizle */
+  #side.info-mode #shop-panel{display:none;}
+  #side.info-mode #vassal-panel{display:none;}
+  /* Market sekmesi: bilgi panelini gizle */
+  #side.market-mode #info-panel{display:none;}
+
+  /* Büyük dokunma hedefleri */
+  .bomb-btn{padding:12px 14px;font-size:13px;border-radius:10px;min-height:48px;}
+  .b-count{font-size:11px;padding:2px 8px;}
+  #btn-love{padding:13px;font-size:13px;border-radius:10px;min-height:48px;}
+  .shop-item{padding:13px 14px;border-radius:10px;}
+  .si-name{font-size:14px;}
+  .si-desc{font-size:11px;}
+  .si-price{font-size:14px;}
+  .opt-btn{padding:11px 10px;font-size:13px;border-radius:10px;min-height:48px;}
+  .opt-key{width:22px;height:22px;font-size:10px;}
+  #action-msg{font-size:11px;}
+
+  /* Soru çubuğu düzeltmeleri */
+  #q-bar{padding:7px 10px;}
+  #q-text{font-size:12px;margin-bottom:5px;}
+
+  /* Tab navigasyon çubuğu */
+  #tab-nav{
+    display:flex;
+    background:var(--bg2);
+    border-top:2px solid var(--border);
+    flex-shrink:0;
+  }
+  .tab-btn{
+    flex:1;padding:8px 4px 7px;
+    background:none;border:none;border-top:3px solid transparent;
+    color:var(--text2);font-size:9px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;
+    font-family:inherit;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    margin-top:-2px;transition:all .15s;-webkit-tap-highlight-color:transparent;
+  }
+  .tab-btn.active{color:var(--accent);border-top-color:var(--accent);}
+  .tab-icon{font-size:22px;line-height:1;}
+
+  /* Seçili ülke bilgisi: daha büyük */
+  #sel-flag{font-size:44px;}
+  #sel-name{font-size:17px;}
+  #sel-leader{font-size:11px;}
+  #sel-quote{font-size:10px;padding:7px 9px;}
+  .irow{font-size:12px;}
+  .panel{padding:12px 14px;}
+  .panel h3{font-size:11px;}
+}
 </style>
 </head>
 <body>
@@ -317,7 +405,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     </div>
 
     <!-- Shop -->
-    <div class="panel">
+    <div class="panel" id="shop-panel">
       <h3>🛒 Silah Marketi</h3>
       <div class="shop-item" id="sh-klasik" onclick="buyBomb('klasik')">
         <span class="si-icon">💣</span>
@@ -368,6 +456,19 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   <div id="q-text">Yükleniyor...</div>
   <div id="q-opts"></div>
   <div id="q-result"></div>
+</div>
+
+<!-- Mobil Tab Navigasyon -->
+<div id="tab-nav">
+  <button class="tab-btn active" id="tab-map" onclick="switchTab('map')">
+    <span class="tab-icon">🗺</span>HARİTA
+  </button>
+  <button class="tab-btn" id="tab-info" onclick="switchTab('info')">
+    <span class="tab-icon">🎯</span>HEDEF
+  </button>
+  <button class="tab-btn" id="tab-shop" onclick="switchTab('shop')">
+    <span class="tab-icon">🛒</span>MARKET
+  </button>
 </div>
 
 <div id="toast"></div>
@@ -868,6 +969,30 @@ const VASSAL_CONSULTS = [
           {t:'Pasta yesinler de',e:{gold:-50,ap:-20,msg:'İSYAN! -50💰 -20 onay'}}]},
 ];
 
+// ── MOBİL TAB ────────────────────────────────────────────────────────────
+let activeTab='map';
+function switchTab(tab){
+  activeTab=tab;
+  ['map','info','shop'].forEach(t=>{
+    const btn=document.getElementById('tab-'+t);
+    if(btn) btn.classList.toggle('active',t===tab);
+  });
+  const mapWrap=document.getElementById('map-wrap');
+  const side=document.getElementById('side');
+  if(tab==='map'){
+    mapWrap.classList.add('tab-active');
+    side.classList.remove('tab-active','info-mode','market-mode');
+  } else if(tab==='info'){
+    mapWrap.classList.remove('tab-active');
+    side.classList.remove('market-mode');
+    side.classList.add('tab-active','info-mode');
+  } else {
+    mapWrap.classList.remove('tab-active');
+    side.classList.remove('info-mode');
+    side.classList.add('tab-active','market-mode');
+  }
+}
+
 // ── STATE ────────────────────────────────────────────────────────────────
 let inv={klasik:0,atesh:0,nukleer:0,sirk:0};
 let gold=0,selected=null,qIndex=0,correctCount=0,qAnswered=false,approval=50;
@@ -889,6 +1014,7 @@ function initGame(){
   renderMap(); showQuestion(); updateStats(); selectCountry(null);
   updatePlayerDefense(); updateVassalPanel();
   document.getElementById('action-msg').textContent='';
+  switchTab('map');
 }
 
 function startGame(){
@@ -992,6 +1118,9 @@ function selectCountry(c){
 
   if(prev) updateTerritoryVisual(prev);
   if(c) updateTerritoryVisual(c);
+
+  // Mobilde ülke seçince otomatik Hedef sekmesine geç
+  if(c && window.innerWidth<=700 && activeTab==='map') switchTab('info');
 
   refreshBombBtns();
 
